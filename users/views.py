@@ -596,8 +596,6 @@ def home(request):
             discount_price__gt=0,
             sale_price__isnull=False,
             discount_price__lt=F("sale_price"),
-            variants__is_active=True,
-            variants__quantity__gt=0,
         )
         .select_related(
             "category",
