@@ -12,31 +12,11 @@ from .models import Product, ProductVariant,ProductImage,ProductVariantImage
 @login_required
 def products(request):
 
-    # =========================================================
-    # AVAILABLE VARIANT
-    # =========================================================
-
     available_variant = ProductVariant.objects.filter(
-        product=OuterRef("pk"),
-        is_active=True,
-        quantity__gt=0,
+    product=OuterRef("pk"),
+    is_active=True,
+    quantity__gt=0,
     )
-
-
-    # =========================================================
-    # PRODUCT QUERY
-    #
-    # IMPORTANT:
-    # We no longer depend on Product.main_image.
-    #
-    # The main image is taken from ProductImage where:
-    # image_type = "main"
-    # =========================================================
-
-    main_images = ProductImage.objects.filter(
-        image_type="main"
-    )
-
 
     product_list = (
         Product.objects
@@ -53,21 +33,33 @@ def products(request):
         )
         .select_related(
             "category",
+            "main_image",
         )
         .prefetch_related(
-            Prefetch(
-                "images",
-                queryset=main_images,
-                to_attr="main_product_images",
-            ),
+            "images",
             "variants__images",
         )
     )
+    search_query = request.GET.get(
+        "search",
+        "",
+    ).strip()
 
+    if search_query:
 
-    # =========================================================
-    # CATEGORIES
-    # =========================================================
+        product_list = product_list.filter(
+            Q(name__icontains=search_query)
+            |
+            Q(description__icontains=search_query)
+            |
+            Q(product_code__icontains=search_query)
+            |
+            Q(color__icontains=search_query)
+            |
+            Q(size__icontains=search_query)
+            |
+            Q(category__name__icontains=search_query)
+        )
 
     categories = (
         Category.objects
@@ -76,28 +68,16 @@ def products(request):
         )
         .order_by("name")
     )
-
-
-    # =========================================================
-    # CATEGORY FILTER
-    # =========================================================
-
     selected_category = request.GET.get(
         "category",
         "",
     ).strip()
-
 
     if selected_category:
 
         product_list = product_list.filter(
             category_id=selected_category,
         )
-
-
-    # =========================================================
-    # MIN PRICE
-    # =========================================================
 
     min_price = request.GET.get(
         "min_price",
@@ -124,11 +104,6 @@ def products(request):
 
             pass
 
-
-    # =========================================================
-    # MAX PRICE
-    # =========================================================
-
     max_price = request.GET.get(
         "max_price",
         "",
@@ -154,19 +129,6 @@ def products(request):
 
             pass
 
-
-    # =========================================================
-    # STOCK FILTER
-    #
-    # BASE PRODUCT:
-    # quantity > 0
-    #
-    # OR
-    #
-    # ACTIVE VARIANT:
-    # quantity > 0
-    # =========================================================
-
     selected_stock = request.GET.get(
         "stock",
         "",
@@ -185,12 +147,6 @@ def products(request):
         product_list = product_list.filter(
             has_stock=False,
         )
-
-
-    # =========================================================
-    # SORT
-    # =========================================================
-
     selected_sort = request.GET.get(
         "sort",
         "newest",
@@ -233,11 +189,6 @@ def products(request):
             "-id",
         )
 
-
-    # =========================================================
-    # PAGINATION
-    # =========================================================
-
     paginator = Paginator(
         product_list,
         6,
@@ -252,12 +203,6 @@ def products(request):
     products_page = paginator.get_page(
         page_number,
     )
-
-
-    # =========================================================
-    # CONTEXT
-    # =========================================================
-
     context = {
 
         "products": products_page,
@@ -274,6 +219,8 @@ def products(request):
 
         "selected_sort": selected_sort,
 
+        "search_query": search_query,
+
     }
 
 
@@ -287,88 +234,35 @@ def products(request):
 @login_required
 def products_details(request, name):
 
-    # =========================================================
-    # PRODUCT
-    # =========================================================
-
-    try:
-
-        product = (
-            Product.objects
-            .filter(
-                name=name,
-                is_active=True,
-                is_deleted=False,
-            )
-            .select_related(
-                "category",
-                "main_image",
-            )
-            .prefetch_related(
-                Prefetch(
-                    "images",
-                    queryset=ProductImage.objects.filter(
-                        image_type="main"
-                    ).order_by(
-                        "position",
-                        "id",
-                    ),
-                    to_attr="main_product_images",
-                ),
-                Prefetch(
-                    "images",
-                    queryset=ProductImage.objects.all().order_by(
-                        "position",
-                        "id",
-                    ),
-                ),
-                Prefetch(
-                    "variants__images",
-                    queryset=ProductVariantImage.objects.all().order_by(
-                        "position",
-                        "id",
-                    ),
-                ),
-            )
-            .get()
+    product = (
+        Product.objects
+        .filter(
+            name=name,
+            is_active=True,
+            is_deleted=False,
         )
-
-    except Product.DoesNotExist:
-
-        return render(
-            request,
-            "products_details.html",
-            {
-                "product": None,
-                "message": "Product not found.",
-            }
+        .select_related(
+            "category",
+            "main_image",
         )
-
-    # =========================================================
-    # IMPORTANT:
-    # USE THE PRODUCT'S MAIN IMAGE FIELD IF AVAILABLE.
-    #
-    # IF main_image IS NULL BUT A ProductImage WITH
-    # image_type='main' EXISTS, USE THAT IMAGE.
-    #
-    # This fixes the situation where the image was uploaded
-    # correctly but Product.main_image was not assigned.
-    # =========================================================
-
-    if (
-        not product.main_image
-        and getattr(product, "main_product_images", None)
-    ):
-
-        if product.main_product_images:
-
-            product.main_image = (
-                product.main_product_images[0]
-            )
-
-    # =========================================================
-    # ACTIVE VARIANTS
-    # =========================================================
+        .prefetch_related(
+            Prefetch(
+                "images",
+                queryset=ProductImage.objects.all().order_by(
+                    "position",
+                    "id",
+                ),
+            ),
+            Prefetch(
+                "variants__images",
+                queryset=ProductVariantImage.objects.all().order_by(
+                    "position",
+                    "id",
+                ),
+            ),
+        )
+        .get()
+    )
 
     variants = (
         product.variants
@@ -386,10 +280,6 @@ def products_details(request, name):
         )
     )
 
-    # =========================================================
-    # RELATED PRODUCTS
-    # =========================================================
-
     related_products = (
         Product.objects
         .filter(
@@ -405,52 +295,10 @@ def products_details(request, name):
             "main_image",
         )
         .prefetch_related(
-            Prefetch(
-                "images",
-                queryset=ProductImage.objects.filter(
-                    image_type="main"
-                ).order_by(
-                    "position",
-                    "id",
-                ),
-                to_attr="main_product_images",
-            ),
-            Prefetch(
-                "images",
-                queryset=ProductImage.objects.all().order_by(
-                    "position",
-                    "id",
-                ),
-            ),
+            "images",
         )
         .distinct()[:8]
     )
-
-    # =========================================================
-    # FIX RELATED PRODUCT MAIN IMAGES
-    # =========================================================
-
-    for related_product in related_products:
-
-        if (
-            not related_product.main_image
-            and getattr(
-                related_product,
-                "main_product_images",
-                None,
-            )
-        ):
-
-            if related_product.main_product_images:
-
-                related_product.main_image = (
-                    related_product.main_product_images[0]
-                )
-
-    # =========================================================
-    # CONTEXT
-    # =========================================================
-
     return render(
         request,
         "products_details.html",

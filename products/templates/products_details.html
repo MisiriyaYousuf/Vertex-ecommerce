@@ -1473,19 +1473,18 @@
 
 {% endif %}
 
-
 {% for image in product.images.all %}
 
-{% if not product.main_image or image.id != product.main_image.id %}
+    {% if not product.main_image or image.id != product.main_image.id %}
 
-<img
-    src="{{ image.image.url }}"
-    alt="{{ product.name }}"
-    class="product-thumb"
-    onclick="changeProductImage(this)"
->
+        <img
+            src="{{ image.image.url }}"
+            alt="{{ product.name }}"
+            class="product-thumb"
+            onclick="changeProductImage(this)"
+        >
 
-{% endif %}
+    {% endif %}
 
 {% endfor %}
 
