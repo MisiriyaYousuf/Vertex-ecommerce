@@ -1,0 +1,847 @@
+{% extends "user_base.html" %}
+{% load static %}
+
+{% block title %}Add Address - Vertex{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* ========================================
+   ADD ADDRESS PAGE
+======================================== */
+
+.add-address-section {
+    background: transparent !important;
+    min-height: 85vh;
+    padding: 50px 0;
+}
+
+.add-address-wrapper {
+    max-width: 900px;
+    margin: auto;
+}
+
+
+/* ========================================
+   PAGE HEADER
+======================================== */
+
+.address-page-header {
+    margin-bottom: 25px;
+}
+
+.address-page-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.address-page-header p {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 14px;
+}
+
+
+/* ========================================
+   ADDRESS FORM CARD
+======================================== */
+
+.address-form-card {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 46, 91, 0.72),
+            rgba(45, 27, 61, 0.62)
+        ) !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 16px;
+
+    padding: 30px;
+
+    box-shadow:
+        0 12px 35px rgba(20, 12, 30, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+
+/* ========================================
+   CARD HEADER
+======================================== */
+
+.form-card-header {
+    padding-bottom: 18px;
+    margin-bottom: 25px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.form-card-header h4 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    color: #ffffff;
+}
+
+.form-card-header p {
+    margin: 5px 0 0;
+
+    font-size: 13px;
+
+    color: rgba(255, 255, 255, 0.62);
+}
+
+
+/* ========================================
+   FORM GRID
+======================================== */
+
+.address-form-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* ========================================
+   LABELS
+======================================== */
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: rgba(255, 255, 255, 0.90);
+}
+
+
+/* ========================================
+   INPUTS
+======================================== */
+
+.form-group input,
+.form-group select {
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: all 0.25s ease;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+/* INPUT FOCUS */
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: rgba(255, 255, 255, 0.40);
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    color: #ffffff;
+
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+
+/* PLACEHOLDER */
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+
+/* SELECT OPTIONS */
+
+.form-group select option {
+    background: #2d1b3d;
+    color: #ffffff;
+}
+
+
+/* ========================================
+   ADDRESS TYPE
+======================================== */
+
+.address-type-options {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 10px;
+}
+
+.radio-option {
+    position: relative;
+
+    cursor: pointer;
+}
+
+.radio-option input {
+    position: absolute;
+
+    opacity: 0;
+}
+
+.radio-option span {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 8px;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    font-size: 13px;
+    font-weight: 500;
+
+    color: rgba(255, 255, 255, 0.75);
+
+    transition: all 0.25s ease;
+}
+
+.radio-option:hover span {
+    background:
+        rgba(255, 255, 255, 0.11);
+
+    border-color: rgba(255, 255, 255, 0.30);
+
+    color: #ffffff;
+}
+
+.radio-option input:checked + span {
+    background:
+        rgba(255, 255, 255, 0.16);
+
+    border-color:
+        rgba(255, 255, 255, 0.38);
+
+    color: #ffffff;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+
+/* ========================================
+   DEFAULT ADDRESS
+======================================== */
+
+.default-address {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 25px;
+
+    padding: 16px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.14);
+
+    border-radius: 10px;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.default-address input {
+    width: 17px;
+    height: 17px;
+
+    accent-color: #ffffff;
+
+    cursor: pointer;
+}
+
+.default-address label {
+    margin: 0;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    color: rgba(255, 255, 255, 0.82);
+
+    cursor: pointer;
+}
+
+
+/* ========================================
+   FIELD ERRORS
+======================================== */
+
+.field-error {
+    margin-top: 6px;
+
+    color: #ffffff;
+
+    font-size: 12px;
+}
+
+.field-error ul {
+    margin: 0;
+
+    padding-left: 0;
+
+    list-style: none;
+}
+
+
+/* ========================================
+   FORM ACTIONS
+======================================== */
+
+.form-actions {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 25px;
+
+    padding-top: 20px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.12);
+}
+
+
+/* ========================================
+   ADD BUTTON
+======================================== */
+
+.add-address-btn {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 11px 22px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.20);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.13);
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.add-address-btn:hover {
+    background:
+        rgba(255, 255, 255, 0.22);
+
+    border-color:
+        rgba(255, 255, 255, 0.34);
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(20, 12, 30, 0.20);
+}
+
+
+/* ========================================
+   CANCEL BUTTON
+======================================== */
+
+.cancel-btn {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 20px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: all 0.25s ease;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.cancel-btn:hover {
+    background:
+        rgba(255, 255, 255, 0.15);
+
+    border-color:
+        rgba(255, 255, 255, 0.28);
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media(max-width: 768px) {
+
+    .add-address-section {
+        padding: 30px 15px;
+    }
+
+    .address-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: auto;
+    }
+
+    .address-type-options {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+
+@media(max-width: 600px) {
+
+    .address-page-header h2 {
+        font-size: 23px;
+    }
+
+    .address-form-card {
+        padding: 20px;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+
+        align-items: stretch;
+    }
+
+    .add-address-btn,
+    .cancel-btn {
+        width: 100%;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<section class="add-address-section">
+
+    <div class="container add-address-wrapper">
+
+
+        <!-- ========================================
+             PAGE HEADER
+        ========================================= -->
+
+        <div class="address-page-header">
+
+            <h2>Add New Address</h2>
+
+            <p>
+                Enter your address details for delivery and billing.
+            </p>
+
+        </div>
+
+
+        <!-- ========================================
+             ADDRESS FORM CARD
+        ========================================= -->
+
+        <div class="address-form-card">
+
+
+            <!-- CARD HEADER -->
+
+            <div class="form-card-header">
+
+                <h4>Address Details</h4>
+
+                <p>
+                    Please provide accurate information for smooth delivery.
+                </p>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+
+                <div class="address-form-grid">
+
+
+                    <!-- COUNTRY -->
+
+                    <div class="form-group">
+
+                        <label for="country">
+                            Country / Region
+                        </label>
+
+                        {{ form.country }}
+
+                        {% if form.country.errors %}
+                            <div class="field-error">
+                                {{ form.country.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- PINCODE -->
+
+                    <div class="form-group">
+
+                        <label for="pincode">
+                            Pincode
+                        </label>
+
+                        {{ form.pincode }}
+
+                        {% if form.pincode.errors %}
+                            <div class="field-error">
+                                {{ form.pincode.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- ADDRESS TYPE -->
+
+                    <div class="form-group full-width">
+                        <div class="address-type-options">
+
+                        <label class="radio-option">
+
+                            <input
+                                type="radio"
+                                name="address_type"
+                                value="Home"
+                                required
+                                {% if form.address_type.value == "Home" %}checked{% endif %}
+                            >
+
+                            <span>
+                                <i class="fas fa-home me-1"></i>
+                                Home
+                            </span>
+
+                        </label>
+
+
+                        <label class="radio-option">
+
+                            <input
+                                type="radio"
+                                name="address_type"
+                                value="Office"
+                                {% if form.address_type.value == "Office" %}checked{% endif %}
+                            >
+
+                            <span>
+                                <i class="fas fa-building me-1"></i>
+                                Office
+                            </span>
+
+                        </label>
+
+
+                        <label class="radio-option">
+
+                            <input
+                                type="radio"
+                                name="address_type"
+                                value="Apartment"
+                                {% if form.address_type.value == "Apartment" %}checked{% endif %}
+                            >
+
+                            <span>
+                                <i class="fas fa-city me-1"></i>
+                                Apartment
+                            </span>
+
+                        </label>
+
+
+                        <label class="radio-option">
+
+                            <input
+                                type="radio"
+                                name="address_type"
+                                value="Others"
+                                {% if form.address_type.value == "Others" %}checked{% endif %}
+                            >
+
+                            <span>
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                Others
+                            </span>
+
+                        </label>
+
+                    </div>
+                    </div>
+                    {% if form.address_type.errors %}
+                        <div class="field-error">
+                            {{ form.address_type.errors.0 }}
+                        </div>
+                    {% endif %}
+
+
+                    <!-- BUILDING -->
+
+                    <div class="form-group full-width">
+
+                        <label for="building">
+
+                            Flat, House no., Building, Company, Apartment
+
+                        </label>
+
+                        {{ form.building }}
+
+                        {% if form.building.errors %}
+                            <div class="field-error">
+                                {{ form.building.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- AREA -->
+
+                    <div class="form-group full-width">
+
+                        <label for="area">
+
+                            Area, Street, Sector, Village
+
+                        </label>
+
+                       {{ form.area }}
+
+                        {% if form.area.errors %}
+                            <div class="field-error">
+                                {{ form.area.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- LANDMARK -->
+
+                    <div class="form-group full-width">
+
+                        <label for="landmark">
+                            Landmark
+                        </label>
+
+                        {{ form.landmark }}
+
+                        {% if form.landmark.errors %}
+                            <div class="field-error">
+                                {{ form.landmark.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- CITY -->
+
+                    <div class="form-group">
+
+                        <label for="city">
+                            Town / City
+                        </label>
+
+                        {{ form.city }}
+
+                        {% if form.city.errors %}
+                            <div class="field-error">
+                                {{ form.city.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+
+                    <!-- STATE -->
+
+                    <div class="form-group">
+
+                        <label for="state">
+                            State
+                        </label>
+
+                        {{ form.state }}
+
+                            {% if form.state.errors %}
+                                <div class="field-error">
+                                    {{ form.state.errors.0 }}
+                                </div>
+                            {% endif %}
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- DEFAULT ADDRESS -->
+
+                {% if not has_default_address %}
+
+                    <div class="default-address">
+
+                        {{ form.is_default }}
+
+                        <label for="{{ form.is_default.id_for_label }}">
+                            Make this my default address
+                        </label>
+
+                        {% if form.is_default.errors %}
+                            <div class="field-error">
+                                {{ form.is_default.errors.0 }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- FORM ACTIONS -->
+
+                <div class="form-actions">
+
+                    <a
+                        href="{% url 'users:address' %}"
+                        class="cancel-btn"
+                    >
+
+                        Cancel
+
+                    </a>
+
+
+                    <button
+                        type="submit"
+                        class="add-address-btn"
+                    >
+
+                        <i class="fas fa-plus"></i>
+
+                        Add Address
+
+                    </button>
+
+                </div>
+
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

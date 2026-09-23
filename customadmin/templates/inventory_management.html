@@ -1,0 +1,1953 @@
+{% extends "admin_base.html" %}
+
+{% block content %}
+
+<div class="inventory-page">
+<!-- =====================================================
+     PAGE HEADER
+====================================================== -->
+
+<div class="inventory-header">
+
+    <div>
+        <div class="inventory-eyebrow">
+            INVENTORY MANAGEMENT
+        </div>
+
+        <h2>
+            Product Inventory
+        </h2>
+
+        <p>
+            Manage base products, variants, pricing and stock levels.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SUMMARY CARDS
+====================================================== -->
+
+<div class="inventory-stats">
+
+    <div class="inventory-stat">
+
+        <div class="stat-icon">
+            <i class="fas fa-box"></i>
+        </div>
+
+        <div class="stat-content">
+
+            <span class="stat-label">
+                Total Products
+            </span>
+
+            <strong class="stat-value">
+                {{ total_products }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="inventory-stat">
+
+        <div class="stat-icon">
+            <i class="fas fa-cubes"></i>
+        </div>
+
+        <div class="stat-content">
+
+            <span class="stat-label">
+                Available Stock
+            </span>
+
+            <strong class="stat-value">
+                {{ available_stock }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="inventory-stat">
+
+        <div class="stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <div class="stat-content">
+
+            <span class="stat-label">
+                Low Stock
+            </span>
+
+            <strong class="stat-value">
+                {{ low_stock }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="inventory-stat">
+
+        <div class="stat-icon">
+            <i class="fas fa-box-open"></i>
+        </div>
+
+        <div class="stat-content">
+
+            <span class="stat-label">
+                Out of Stock
+            </span>
+
+            <strong class="stat-value">
+                {{ out_of_stock }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FILTERS
+====================================================== -->
+
+<div class="inventory-filter-card">
+
+    <form method="get">
+
+        <div class="filter-grid">
+
+            <!-- SEARCH -->
+
+            <div class="filter-field">
+
+                <label>
+                    Search
+                </label>
+
+                <div class="search-input-wrapper">
+
+                    <i class="fas fa-search"></i>
+
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ search }}"
+                        placeholder="Search product, category, code, color or size"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- STOCK -->
+
+            <div class="filter-field">
+
+                <label>
+                    Stock
+                </label>
+
+                <select name="stock">
+
+                    <option value=""
+                        {% if not stock_filter %}selected{% endif %}
+                    >
+                        All Stock
+                    </option>
+
+                    <option value="available"
+                        {% if stock_filter == "available" %}selected{% endif %}
+                    >
+                        Available
+                    </option>
+
+                    <option value="low"
+                        {% if stock_filter == "low" %}selected{% endif %}
+                    >
+                        Low Stock
+                    </option>
+
+                    <option value="out"
+                        {% if stock_filter == "out" %}selected{% endif %}
+                    >
+                        Out of Stock
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- SORT -->
+
+            <div class="filter-field">
+
+                <label>
+                    Sort By
+                </label>
+
+                <select name="sort">
+
+                    <option value="name"
+                        {% if selected_sort == "name" %}selected{% endif %}
+                    >
+                        Product Name
+                    </option>
+
+                    <option value="stock_low"
+                        {% if selected_sort == "stock_low" %}selected{% endif %}
+                    >
+                        Stock: Low to High
+                    </option>
+
+                    <option value="stock_high"
+                        {% if selected_sort == "stock_high" %}selected{% endif %}
+                    >
+                        Stock: High to Low
+                    </option>
+
+                    <option value="newest"
+                        {% if selected_sort == "newest" %}selected{% endif %}
+                    >
+                        Newest
+                    </option>
+
+                    <option value="updated"
+                        {% if selected_sort == "updated" %}selected{% endif %}
+                    >
+                        Recently Updated
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="filter-actions">
+
+                <button
+                    type="submit"
+                    class="inventory-search-btn"
+                >
+                    <i class="fas fa-search"></i>
+                    Apply
+                </button>
+
+                <a
+                    href="{% url 'customadmin:inventory_management' %}"
+                    class="inventory-clear-btn"
+                >
+                    Clear
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =====================================================
+     INVENTORY CARD
+====================================================== -->
+
+<div class="inventory-card">
+
+    <div class="inventory-card-header">
+
+        <div>
+
+            <h3>
+                Products
+            </h3>
+
+            <span>
+
+                {% if filtered_product_count == total_products %}
+
+                    {{ total_products }}
+                    product{{ total_products|pluralize }}
+
+                {% else %}
+
+                    {{ filtered_product_count }}
+                    of
+                    {{ total_products }}
+                    products
+
+                {% endif %}
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         INVENTORY LIST
+    ================================================== -->
+
+    <div class="inventory-list">
+
+
+        {% for product in products %}
+
+            <!-- =================================================
+                 BASE PRODUCT
+            ================================================== -->
+
+            <div class="inventory-row base-product-row">
+
+                <!-- PRODUCT -->
+
+                <div class="inventory-product">
+
+                    <div class="product-image-wrapper">
+
+                        {% if product.main_image %}
+
+                            <img
+                                src="{{ product.main_image.image.url }}"
+                                class="product-image"
+                                alt="{{ product.name }}"
+                            >
+
+                        {% else %}
+
+                            {% with first_image=product.images.first %}
+
+                                {% if first_image %}
+
+                                    <img
+                                        src="{{ first_image.image.url }}"
+                                        class="product-image"
+                                        alt="{{ product.name }}"
+                                    >
+
+                                {% else %}
+
+                                    <div class="product-placeholder">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+
+                                {% endif %}
+
+                            {% endwith %}
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="product-details">
+
+                        <div class="product-name">
+                            {{ product.name }}
+                        </div>
+
+                        <div class="product-meta">
+
+                            Product {{ product.id }}
+
+                            <span class="base-product-label">
+                                BASE PRODUCT
+                            </span>
+
+                        </div>
+
+
+                        <div class="variant-code">
+
+                            <span class="inventory-label">
+                                Code
+                            </span>
+
+                            {% if product.product_code %}
+
+                                <span class="product-code">
+                                    {{ product.product_code }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="muted-text">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <div class="inventory-section price-section">
+
+                    <div class="inventory-label">
+                        Price
+                    </div>
+
+                    {% if product.discount_price %}
+
+                        <div class="discount-price">
+                            ₹{{ product.discount_price }}
+                        </div>
+
+                        <div class="original-price">
+                            ₹{{ product.sale_price }}
+                        </div>
+
+                    {% else %}
+
+                        <div class="discount-price">
+                            ₹{{ product.sale_price }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- VARIANT -->
+
+                <div class="inventory-section variant-section">
+
+                    <div class="inventory-label">
+                        Variant
+                    </div>
+
+                    <div class="variant-info">
+
+                        {% if product.color %}
+
+                            <span class="variant-badge">
+
+                                <i class="fas fa-palette"></i>
+
+                                {{ product.color }}
+
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if product.size %}
+
+                            <span class="variant-badge">
+
+                                <i class="fas fa-ruler"></i>
+
+                                {{ product.size }}
+
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if not product.color and not product.size %}
+
+                            <span class="muted-text">
+                                Default
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- STOCK -->
+
+                <div class="inventory-section stock-section">
+
+                    <div class="inventory-label">
+                        Stock
+                    </div>
+
+                    <div class="stock-value">
+                        {{ product.quantity }}
+                    </div>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="inventory-section status-section">
+
+                    <div class="inventory-label">
+                        Status
+                    </div>
+
+                    <div class="status-group">
+
+                        {% if product.quantity == 0 %}
+
+                            <span class="stock-badge stock-out">
+
+                                <span class="stock-dot"></span>
+
+                                Out of Stock
+
+                            </span>
+
+                        {% elif product.quantity <= 5 %}
+
+                            <span class="stock-badge stock-low">
+
+                                <span class="stock-dot"></span>
+
+                                Low Stock
+
+                            </span>
+
+                        {% else %}
+
+                            <span class="stock-badge stock-available">
+
+                                <span class="stock-dot"></span>
+
+                                Available
+
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 VARIANTS
+            ================================================== -->
+
+            {% for variant in product.inventory_variants %}
+
+                <div class="inventory-row variant-product-row">
+
+                    <!-- =================================================
+                         VARIANT PRODUCT IMAGE
+                    ================================================== -->
+
+                    <div class="inventory-product">
+
+                        <div class="product-image-wrapper variant-image-wrapper">
+
+                            {% with variant_main_image=variant.images.first %}
+
+                                {% if variant_main_image %}
+
+                                    <img
+                                        src="{{ variant_main_image.image.url }}"
+                                        class="product-image"
+                                        alt="{{ product.name }} - {{ variant }}"
+                                    >
+
+                                {% else %}
+
+                                    <!--
+                                        If the variant has no image,
+                                        use the BASE product image as
+                                        a fallback.
+                                    -->
+
+                                    {% if product.main_image %}
+
+                                        <img
+                                            src="{{ product.main_image.image.url }}"
+                                            class="product-image variant-fallback-image"
+                                            alt="{{ product.name }}"
+                                        >
+
+                                    {% else %}
+
+                                        <div class="product-placeholder">
+                                            <i class="fas fa-image"></i>
+                                        </div>
+
+                                    {% endif %}
+
+                                {% endif %}
+
+                            {% endwith %}
+
+                        </div>
+
+
+                        <div class="product-details">
+
+                            <div class="product-name">
+                                {{ product.name }}
+                            </div>
+
+                            <div class="product-meta">
+
+                                Variant {{ variant.id }}
+
+                                <span class="variant-product-label">
+                                    VARIANT
+                                </span>
+
+                            </div>
+
+
+                            <div class="variant-code">
+
+                                <span class="inventory-label">
+                                    Code
+                                </span>
+
+                                {% if variant.product_code %}
+
+                                    <span class="product-code">
+                                        {{ variant.product_code }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="muted-text">
+                                        —
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         VARIANT PRICE
+                    ================================================== -->
+
+                    <div class="inventory-section price-section">
+
+                        <div class="inventory-label">
+                            Price
+                        </div>
+
+                        {% if variant.discount_price %}
+
+                            <div class="discount-price">
+                                ₹{{ variant.discount_price }}
+                            </div>
+
+                            <div class="original-price">
+                                ₹{{ variant.sale_price }}
+                            </div>
+
+                        {% else %}
+
+                            <div class="discount-price">
+                                ₹{{ variant.sale_price }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- =================================================
+                         VARIANT ATTRIBUTES
+                    ================================================== -->
+
+                    <div class="inventory-section variant-section">
+
+                        <div class="inventory-label">
+                            Variant
+                        </div>
+
+                        <div class="variant-info">
+
+                            {% if variant.color %}
+
+                                <span class="variant-badge">
+
+                                    <i class="fas fa-palette"></i>
+
+                                    {{ variant.color }}
+
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if variant.size %}
+
+                                <span class="variant-badge">
+
+                                    <i class="fas fa-ruler"></i>
+
+                                    {{ variant.size }}
+
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if not variant.color and not variant.size %}
+
+                                <span class="muted-text">
+                                    Default
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         VARIANT STOCK
+                    ================================================== -->
+
+                    <div class="inventory-section stock-section">
+
+                        <div class="inventory-label">
+                            Stock
+                        </div>
+
+                        <div class="stock-value">
+                            {{ variant.quantity }}
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         VARIANT STATUS
+                    ================================================== -->
+
+                    <div class="inventory-section status-section">
+
+                        <div class="inventory-label">
+                            Status
+                        </div>
+
+                        <div class="status-group">
+
+                            {% if variant.quantity == 0 %}
+
+                                <span class="stock-badge stock-out">
+
+                                    <span class="stock-dot"></span>
+
+                                    Out of Stock
+
+                                </span>
+
+                            {% elif variant.quantity <= 5 %}
+
+                                <span class="stock-badge stock-low">
+
+                                    <span class="stock-dot"></span>
+
+                                    Low Stock
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="stock-badge stock-available">
+
+                                    <span class="stock-dot"></span>
+
+                                    Available
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% empty %}
+
+            <div class="inventory-empty">
+
+                <div class="empty-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+
+                <h4>
+                    No products found
+                </h4>
+
+                <p>
+                    Try changing your search or filter options.
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- =================================================
+         PAGINATION
+    ================================================== -->
+
+    {% if products.has_other_pages %}
+
+        <div class="inventory-pagination">
+
+            <div class="pagination-info">
+
+                Page
+
+                <strong>
+                    {{ products.number }}
+                </strong>
+
+                of
+
+                <strong>
+                    {{ products.paginator.num_pages }}
+                </strong>
+
+            </div>
+
+
+            <div class="pagination-buttons">
+
+                {% if products.has_previous %}
+
+                    <a
+                        href="?page={{ products.previous_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}"
+                        class="pagination-btn"
+                    >
+
+                        <i class="fas fa-chevron-left"></i>
+
+                        Previous
+
+                    </a>
+
+                {% else %}
+
+                    <span class="pagination-btn disabled">
+
+                        <i class="fas fa-chevron-left"></i>
+
+                        Previous
+
+                    </span>
+
+                {% endif %}
+
+
+                <span class="pagination-current">
+                    {{ products.number }}
+                </span>
+
+
+                {% if products.has_next %}
+
+                    <a
+                        href="?page={{ products.next_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}{% if stock_filter %}&stock={{ stock_filter }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}"
+                        class="pagination-btn"
+                    >
+
+                        Next
+
+                        <i class="fas fa-chevron-right"></i>
+
+                    </a>
+
+                {% else %}
+
+                    <span class="pagination-btn disabled">
+
+                        Next
+
+                        <i class="fas fa-chevron-right"></i>
+
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+</div>
+
+<!-- =========================================================
+     INVENTORY PAGE STYLES
+========================================================= -->
+
+<style>
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.inventory-page {
+    padding: 30px;
+    background: #f7f9fb;
+    min-height: calc(100vh - 70px);
+    color: #263238;
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 22px;
+}
+
+.inventory-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #315170;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.inventory-header h2 {
+    margin: 0;
+    font-size: 25px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #263238;
+}
+
+.inventory-header p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: #7a8791;
+}
+
+
+/* =========================================================
+   SUMMARY CARDS
+========================================================= */
+
+.inventory-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.inventory-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+    border: 1px solid #e7ebef;
+    border-radius: 13px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(35, 47, 56, 0.035);
+}
+
+.stat-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef3f7;
+    color: #315170;
+    font-size: 14px;
+}
+
+.stat-content {
+    min-width: 0;
+}
+
+.stat-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    color: #89949d;
+    margin-bottom: 3px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 23px;
+    line-height: 1.1;
+    color: #263238;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FILTER CARD
+========================================================= */
+
+.inventory-filter-card {
+    background: #ffffff;
+    border: 1px solid #e7ebef;
+    border-radius: 13px;
+    padding: 15px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(35, 47, 56, 0.035);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(250px, 1.7fr)
+        minmax(150px, .8fr)
+        minmax(170px, .9fr)
+        auto;
+
+    gap: 12px;
+    align-items: end;
+}
+
+.filter-field label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: #707d86;
+    margin-bottom: 6px;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9aa5ad;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.filter-field input,
+.filter-field select {
+    width: 100%;
+    height: 42px;
+    box-sizing: border-box;
+    border: 1px solid #dce2e8;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #34414a;
+    font-size: 12px;
+    outline: none;
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.filter-field input {
+    padding: 0 12px 0 34px;
+}
+
+.filter-field select {
+    padding: 0 11px;
+}
+
+.filter-field input:focus,
+.filter-field select:focus {
+    border-color: #9eabb5;
+    box-shadow: 0 0 0 3px rgba(49, 81, 112, 0.07);
+}
+
+.filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.inventory-search-btn,
+.inventory-clear-btn {
+    height: 42px;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.inventory-search-btn {
+    border: 1px solid #315170;
+    background: #315170;
+    color: #ffffff;
+}
+
+.inventory-search-btn:hover {
+    background: #27435e;
+    border-color: #27435e;
+}
+
+.inventory-clear-btn {
+    border: 1px solid #dce2e8;
+    background: #ffffff;
+    color: #59666f;
+}
+
+.inventory-clear-btn:hover {
+    background: #f6f8fa;
+}
+
+
+/* =========================================================
+   INVENTORY CARD
+========================================================= */
+
+.inventory-card {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e7ebef;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(35, 47, 56, 0.035);
+}
+
+.inventory-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.inventory-card-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #263238;
+}
+
+.inventory-card-header span {
+    display: block;
+    margin-top: 3px;
+    font-size: 11px;
+    color: #8a969e;
+}
+
+
+/* =========================================================
+   INVENTORY LIST
+========================================================= */
+
+.inventory-list {
+    width: 100%;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   INVENTORY ROW
+========================================================= */
+
+.inventory-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(220px, 2.1fr)
+        minmax(90px, .75fr)
+        minmax(150px, 1.1fr)
+        minmax(90px, .7fr)
+        minmax(145px, 1fr);
+
+    gap: 16px;
+
+    padding: 15px 18px;
+
+    border-bottom: 1px solid #edf0f3;
+
+    align-items: center;
+
+    min-width: 0;
+
+    transition:
+        background .15s ease;
+}
+
+.inventory-row:last-child {
+    border-bottom: none;
+}
+
+.inventory-row:hover {
+    background: #fcfdfe;
+}
+
+
+/* =========================================================
+   BASE PRODUCT ROW
+========================================================= */
+
+.base-product-row {
+    background: #ffffff;
+}
+
+.base-product-row:hover {
+    background: #fbfcfd;
+}
+
+
+/* =========================================================
+   VARIANT ROW
+========================================================= */
+
+.variant-product-row {
+    background: #fafbfc;
+
+    /*
+       Slight visual indentation to make it clear
+       that this belongs to the base product.
+    */
+    border-left: 3px solid #e5e9ed;
+}
+
+.variant-product-row:hover {
+    background: #f7f9fa;
+}
+
+
+/* =========================================================
+   PRODUCT
+========================================================= */
+
+.inventory-product {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.product-image-wrapper {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+
+    border: 1px solid #e5e9ed;
+    border-radius: 9px;
+
+    background: #f8fafb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+.variant-image-wrapper {
+    margin-left: 8px;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.variant-fallback-image {
+    opacity: .65;
+}
+
+.product-placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #b2bcc3;
+    font-size: 17px;
+}
+
+.product-details {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.product-name {
+    max-width: 220px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 12px;
+    font-weight: 700;
+    color: #2e3a42;
+
+    margin-bottom: 3px;
+}
+
+.product-meta {
+    font-size: 10px;
+    color: #97a1a8;
+
+    margin-bottom: 5px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   BASE / VARIANT LABEL
+========================================================= */
+
+.base-product-label,
+.variant-product-label {
+    display: inline-flex;
+    align-items: center;
+
+    margin-left: 5px;
+
+    padding: 2px 5px;
+
+    border-radius: 4px;
+
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: .4px;
+}
+
+.base-product-label {
+    background: #eef3f7;
+    border: 1px solid #dce5eb;
+    color: #315170;
+}
+
+.variant-product-label {
+    background: #f3f1f7;
+    border: 1px solid #e4dfeb;
+    color: #72528d;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.inventory-section {
+    min-width: 0;
+}
+
+.inventory-label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    letter-spacing: .7px;
+    text-transform: uppercase;
+
+    color: #929da5;
+}
+
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.price-section {
+    white-space: nowrap;
+}
+
+.discount-price {
+    font-size: 12px;
+    font-weight: 700;
+    color: #263238;
+}
+
+.original-price {
+    margin-top: 2px;
+
+    font-size: 10px;
+    color: #9aa3aa;
+
+    text-decoration: line-through;
+}
+
+
+/* =========================================================
+   VARIANT
+========================================================= */
+
+.variant-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    max-width: 190px;
+}
+
+.variant-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    padding: 4px 7px;
+
+    border-radius: 5px;
+
+    background: #f5f7f8;
+    border: 1px solid #e4e8eb;
+
+    color: #59666f;
+
+    font-size: 9px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.variant-badge i {
+    font-size: 8px;
+    color: #8d99a1;
+}
+
+
+/* =========================================================
+   PRODUCT CODE
+========================================================= */
+
+.variant-code {
+    margin-top: 8px;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    flex-wrap: wrap;
+}
+
+.variant-code .inventory-label {
+    margin: 0;
+}
+
+.product-code {
+    display: inline-block;
+
+    max-width: 150px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    padding: 3px 6px;
+
+    border-radius: 4px;
+
+    background: #f7f8fa;
+    border: 1px solid #e5e8eb;
+
+    color: #59666f;
+
+    font-family: monospace;
+    font-size: 9px;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   STOCK
+========================================================= */
+
+.stock-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.stock-value {
+    font-size: 18px;
+    line-height: 1;
+
+    font-weight: 700;
+
+    color: #263238;
+
+    margin-bottom: 6px;
+}
+
+
+/* =========================================================
+   STOCK BADGES
+========================================================= */
+
+.stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 4px 7px;
+
+    border-radius: 5px;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.stock-dot {
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    display: inline-block;
+}
+
+.stock-available {
+    background: #eef6f1;
+    border: 1px solid #dcece2;
+    color: #47725a;
+}
+
+.stock-available .stock-dot {
+    background: #5f9273;
+}
+
+.stock-low {
+    background: #fff7e9;
+    border: 1px solid #f2e5c8;
+    color: #8a6a35;
+}
+
+.stock-low .stock-dot {
+    background: #b28b42;
+}
+
+.stock-out {
+    background: #faf0f0;
+    border: 1px solid #efdede;
+    color: #936161;
+}
+
+.stock-out .stock-dot {
+    background: #ad6f6f;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+
+/* =========================================================
+   MUTED
+========================================================= */
+
+.muted-text {
+    color: #a0a9af;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.inventory-empty {
+    text-align: center;
+    padding: 55px 20px;
+}
+
+.empty-icon {
+    width: 48px;
+    height: 48px;
+
+    margin: 0 auto 12px;
+
+    border-radius: 12px;
+
+    background: #f1f4f6;
+    color: #9aa5ad;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+.inventory-empty h4 {
+    margin: 0;
+
+    font-size: 14px;
+    color: #4d5961;
+}
+
+.inventory-empty p {
+    margin: 5px 0 0;
+
+    font-size: 11px;
+    color: #929ca3;
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.inventory-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 13px 16px;
+
+    border-top: 1px solid #edf0f3;
+}
+
+.pagination-info {
+    font-size: 11px;
+    color: #89949c;
+}
+
+.pagination-info strong {
+    color: #4e5a62;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination-btn,
+.pagination-current {
+    min-width: 32px;
+    height: 30px;
+
+    padding: 0 9px;
+
+    box-sizing: border-box;
+
+    border-radius: 6px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+.pagination-btn {
+    background: #ffffff;
+    border: 1px solid #dfe4e8;
+    color: #59666f;
+}
+
+.pagination-btn:hover {
+    background: #f6f8fa;
+}
+
+.pagination-btn.disabled {
+    color: #b6bec4;
+    background: #fafbfc;
+    cursor: not-allowed;
+}
+
+.pagination-current {
+    background: #315170;
+    border: 1px solid #315170;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1250px) {
+
+    .inventory-row {
+        grid-template-columns:
+            minmax(200px, 1.8fr)
+            minmax(85px, .7fr)
+            minmax(140px, 1fr)
+            minmax(85px, .7fr)
+            minmax(130px, .9fr);
+
+        gap: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   MEDIUM SCREEN
+========================================================= */
+
+@media (max-width: 1050px) {
+
+    .inventory-row {
+
+        grid-template-columns:
+            minmax(210px, 1.7fr)
+            minmax(100px, .8fr)
+            minmax(150px, 1.1fr);
+
+        gap: 14px;
+    }
+
+    .stock-section {
+        grid-column: 2;
+    }
+
+    .status-section {
+        grid-column: 3;
+
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .price-section {
+        grid-column: 1;
+    }
+
+    .variant-section {
+        grid-column: 3;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL TABLET
+========================================================= */
+
+@media (max-width: 850px) {
+
+    .inventory-page {
+        padding: 22px;
+    }
+
+    .inventory-row {
+
+        grid-template-columns:
+            minmax(200px, 1.5fr)
+            minmax(100px, .8fr);
+
+        gap: 14px;
+    }
+
+    .inventory-product {
+        grid-column: 1 / -1;
+    }
+
+    .price-section {
+        grid-column: 1;
+    }
+
+    .variant-section {
+        grid-column: 2;
+    }
+
+    .stock-section {
+        grid-column: 1;
+    }
+
+    .status-section {
+        grid-column: 2;
+
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .inventory-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter-actions {
+        justify-content: flex-start;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+    .inventory-page {
+        padding: 18px;
+    }
+
+    .inventory-header h2 {
+        font-size: 21px;
+    }
+
+    .inventory-header p {
+        font-size: 12px;
+    }
+
+    .inventory-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .inventory-row {
+
+        grid-template-columns: 1fr;
+
+        gap: 14px;
+
+        padding: 16px;
+    }
+
+    .inventory-product,
+    .price-section,
+    .variant-section,
+    .stock-section,
+    .status-section {
+        grid-column: 1;
+    }
+
+    .variant-image-wrapper {
+        margin-left: 0;
+    }
+
+    .status-section {
+
+        padding-top: 10px;
+
+        border-top: 1px solid #f0f2f4;
+    }
+
+    .inventory-pagination {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 10px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 400px) {
+
+    .inventory-page {
+        padding: 12px;
+    }
+
+    .inventory-card-header {
+        padding: 13px;
+    }
+
+    .inventory-row {
+        padding: 14px;
+    }
+
+    .product-image-wrapper {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+    }
+
+    .product-name {
+        max-width: 180px;
+    }
+
+    .filter-actions {
+        width: 100%;
+    }
+
+    .inventory-search-btn,
+    .inventory-clear-btn {
+        flex: 1;
+    }
+
+}
+
+</style>
+
+{% endblock %}

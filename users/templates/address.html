@@ -1,0 +1,1155 @@
+{% extends 'user_base.html' %}
+{% load static %}
+
+{% block title %}
+    My Address - Vertex
+{% endblock %}
+
+
+{% block extra_css %}
+
+<style>
+
+/* ========================================
+   ADDRESS PAGE
+======================================== */
+
+.profile-page {
+    background: transparent !important;
+
+    min-height: 85vh;
+
+    padding: 50px 0;
+}
+
+.profile-wrapper {
+    max-width: 1100px;
+
+    margin: auto;
+}
+
+
+/* ========================================
+   PAGE HEADER
+======================================== */
+
+.profile-page-header {
+    margin-bottom: 25px;
+}
+
+.profile-page-header h2 {
+    margin: 0;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    color: #ffffff;
+}
+
+.profile-page-header p {
+    margin-top: 6px;
+
+    color:
+        rgba(255, 255, 255, 0.68);
+
+    font-size: 14px;
+}
+
+
+/* ========================================
+   MAIN LAYOUT
+======================================== */
+
+.profile-layout {
+    display: grid;
+
+    grid-template-columns: 280px 1fr;
+
+    gap: 25px;
+}
+
+
+/* ========================================
+   SIDEBAR
+======================================== */
+
+.profile-sidebar {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 46, 91, 0.72),
+            rgba(45, 27, 61, 0.62)
+        );
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 16px;
+
+    padding: 30px 20px;
+
+    box-shadow:
+        0 12px 35px rgba(20, 12, 30, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    height: fit-content;
+}
+
+
+/* ========================================
+   PROFILE AVATAR
+======================================== */
+
+.profile-avatar-wrapper {
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+.avatar-container {
+    position: relative;
+
+    width: 100px;
+    height: 100px;
+
+    margin: 0 auto;
+}
+
+.profile-image {
+    width: 100px;
+    height: 100px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+
+    border:
+        4px solid rgba(255, 255, 255, 0.85);
+
+    box-shadow:
+        0 5px 20px rgba(20, 12, 30, 0.30);
+}
+
+.default-profile {
+    width: 100px;
+    height: 100px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.18);
+
+    color:
+        rgba(255, 255, 255, 0.80);
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin: auto;
+
+    font-size: 42px;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+/* ========================================
+   PROFILE NAME
+======================================== */
+
+.profile-sidebar h3 {
+    text-align: center;
+
+    margin: 15px 0 5px;
+
+    font-size: 19px;
+
+    color: #ffffff;
+}
+
+.profile-email {
+    text-align: center;
+
+    font-size: 13px;
+
+    color:
+        rgba(255, 255, 255, 0.60);
+
+    word-break: break-word;
+}
+
+
+/* ========================================
+   SIDEBAR MENU
+======================================== */
+
+.profile-menu {
+    margin-top: 30px;
+}
+
+.profile-menu a {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px 15px;
+
+    margin-bottom: 6px;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    color:
+        rgba(255, 255, 255, 0.72);
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    transition: all 0.25s ease;
+}
+
+.profile-menu a:hover {
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    color: #ffffff;
+}
+
+.profile-menu a.active {
+    background:
+        rgba(255, 255, 255, 0.15);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.20);
+
+    color: #ffffff;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.profile-menu i {
+    width: 18px;
+
+    text-align: center;
+}
+
+
+/* ========================================
+   RIGHT CONTENT
+======================================== */
+
+.profile-content {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+/* ========================================
+   SAVED ADDRESS SECTION
+======================================== */
+
+.address-section {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 46, 91, 0.72),
+            rgba(45, 27, 61, 0.62)
+        );
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 16px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 12px 35px rgba(20, 12, 30, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+
+/* ========================================
+   CARD HEADER
+======================================== */
+
+.card-header {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 25px;
+
+    padding-bottom: 18px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.12);
+}
+
+.card-header h4 {
+    margin: 0;
+
+    font-size: 18px;
+
+    color: #ffffff;
+}
+
+.card-header p {
+    margin: 5px 0 0;
+
+    font-size: 13px;
+
+    color:
+        rgba(255, 255, 255, 0.60);
+}
+
+
+/* ========================================
+   ADDRESS GRID
+======================================== */
+
+.address-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 18px;
+}
+
+
+/* ========================================
+   ADDRESS CARD
+======================================== */
+
+.address-card {
+    border:
+        1px solid rgba(255, 255, 255, 0.14);
+
+    border-radius: 12px;
+
+    padding: 18px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 270px;
+
+    transition: all 0.25s ease;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.address-card:hover {
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    border-color:
+        rgba(255, 255, 255, 0.24);
+
+    box-shadow:
+        0 10px 25px rgba(20, 12, 30, 0.20);
+
+    transform: translateY(-2px);
+}
+
+
+/* ========================================
+   ADDRESS CARD HEADER
+======================================== */
+
+.address-card-header {
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+
+/* ========================================
+   ADDRESS TYPE
+======================================== */
+
+.address-type {
+    display: inline-block;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    color: #ffffff;
+
+    padding: 5px 10px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+
+/* ========================================
+   DEFAULT BADGE
+======================================== */
+
+.default-badge {
+    display: inline-block;
+
+    margin-left: 5px;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    color: #ffffff;
+
+    padding: 5px 9px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+/* ========================================
+   ADDRESS ACTIONS
+======================================== */
+
+.address-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+.edit-address-btn,
+.delete-address-btn {
+    border: none;
+
+    background: transparent;
+
+    padding: 4px 2px;
+
+    font-size: 10px;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition: all 0.2s ease;
+}
+
+
+/* EDIT */
+
+.edit-address-btn {
+    color:
+        rgba(255, 255, 255, 0.80);
+}
+
+.edit-address-btn:hover {
+    color: #ffffff;
+
+    text-decoration: none;
+}
+
+
+/* DELETE */
+
+.delete-address-btn {
+    color:
+        rgba(255, 255, 255, 0.80);
+}
+
+.delete-address-btn:hover {
+    color: #ff6b81;
+
+    text-decoration: none;
+}
+
+
+/* ========================================
+   ADDRESS DETAILS
+======================================== */
+
+.address-details {
+    font-size: 13px;
+
+    color:
+        rgba(255, 255, 255, 0.70);
+
+    line-height: 1.6;
+}
+
+.address-details strong {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 14px;
+
+    color: #ffffff;
+}
+
+.address-details p {
+    margin: 2px 0;
+}
+
+
+/* ========================================
+   ADD ADDRESS CARD
+======================================== */
+
+.add-address-card {
+    min-height: 270px;
+
+    border:
+        1px dashed rgba(255, 255, 255, 0.24);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.04);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 20px;
+
+    text-decoration: none;
+
+    transition: all 0.25s ease;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.add-address-card:hover {
+    border-color:
+        rgba(255, 255, 255, 0.42);
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    transform: translateY(-2px);
+
+    text-decoration: none;
+}
+
+
+/* ========================================
+   ADD ADDRESS ICON
+======================================== */
+
+.add-address-icon {
+    width: 55px;
+    height: 55px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255, 255, 255, 0.13);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.20);
+
+    color: #ffffff;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+
+    margin-bottom: 15px;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.add-address-card:hover .add-address-icon {
+    background:
+        rgba(255, 255, 255, 0.20);
+
+    border-color:
+        rgba(255, 255, 255, 0.32);
+}
+
+
+/* ========================================
+   ADD ADDRESS TEXT
+======================================== */
+
+.add-address-card h5 {
+    color: #ffffff;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    margin-bottom: 5px;
+}
+
+.add-address-card p {
+    color:
+        rgba(255, 255, 255, 0.58);
+
+    font-size: 12px;
+
+    margin: 0;
+}
+
+
+/* ========================================
+   NO ADDRESS
+======================================== */
+
+.no-address {
+    grid-column: 1 / -1;
+
+    padding: 40px 20px;
+
+    text-align: center;
+
+    border:
+        1px dashed rgba(255, 255, 255, 0.20);
+
+    border-radius: 12px;
+
+    color:
+        rgba(255, 255, 255, 0.60);
+
+    background:
+        rgba(255, 255, 255, 0.04);
+}
+
+.no-address p {
+    margin-bottom: 15px;
+}
+
+.no-address a {
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-weight: 600;
+}
+
+.no-address a:hover {
+    text-decoration: underline;
+}
+
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media(max-width: 1100px) {
+
+    .address-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media(max-width: 850px) {
+
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-sidebar {
+        padding: 25px;
+    }
+
+    .profile-menu {
+        display: flex;
+
+        gap: 8px;
+
+        overflow-x: auto;
+    }
+
+    .profile-menu a {
+        white-space: nowrap;
+
+        margin-bottom: 0;
+    }
+
+}
+
+
+@media(max-width: 600px) {
+
+    .profile-page {
+        padding: 30px 15px;
+    }
+
+    .profile-page-header h2 {
+        font-size: 23px;
+    }
+
+    .address-section {
+        padding: 20px;
+    }
+
+    .address-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .address-card-header {
+        flex-direction: column;
+    }
+
+    .address-actions {
+        margin-top: 5px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<section class="profile-page">
+
+    <div class="container profile-wrapper">
+
+
+        <!-- =========================
+             PAGE HEADER
+        ========================== -->
+
+        <div class="profile-page-header">
+
+            <h2>My Address</h2>
+
+            <p>
+                Manage your saved addresses and delivery locations.
+            </p>
+
+        </div>
+
+
+        <div class="profile-layout">
+
+
+            <!-- =========================
+                 LEFT SIDEBAR
+            ========================== -->
+
+            <aside class="profile-sidebar">
+
+
+                <!-- PROFILE -->
+
+                <div class="profile-avatar-wrapper">
+
+                    <div class="avatar-container">
+
+                        {% if user.profile.profile_image %}
+
+                            <img
+                                src="{{ user.profile.profile_image.url }}"
+                                class="profile-image"
+                                alt="Profile Image"
+                            >
+
+                        {% else %}
+
+                            <div class="default-profile">
+
+                                <i class="fas fa-user"></i>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <h3>
+
+                        {{ user.first_name }}
+                        {{ user.last_name }}
+
+                    </h3>
+
+
+                    <div class="profile-email">
+
+                        {{ user.email }}
+
+                    </div>
+
+                </div>
+
+
+                <!-- PROFILE MENU -->
+
+                <nav class="profile-menu">
+
+
+                    <!-- PERSONAL INFORMATION -->
+
+                    <a
+                        href="{% url 'users:user_profile' %}"
+                    >
+
+                        <i class="fas fa-user"></i>
+
+                        <span>
+                            Personal Information
+                        </span>
+
+                    </a>
+
+
+                    <!-- ORDERS -->
+
+                    <a
+                        href="{% url 'orders:order_list' %}"
+                    >
+
+                        <i class="fas fa-shopping-bag"></i>
+
+                        <span>
+                            My Orders
+                        </span>
+
+                    </a>
+
+
+                    <!-- ADDRESS -->
+
+                    <a
+                        href="{% url 'users:address' %}"
+                        class="active"
+                    >
+
+                        <i class="fas fa-map-marker-alt"></i>
+
+                        <span>
+                            My Address
+                        </span>
+
+                    </a>
+
+
+                    <!-- SECURITY -->
+
+        
+
+
+                    <a
+                        href="{% url 'users:change_password' %}"
+                    >
+
+                        <i class="fas fa-lock"></i>
+
+                        <span>Password & Security</span>
+
+                    </a>
+
+
+                </nav>
+
+            </aside>
+
+
+            <!-- =========================
+                 RIGHT CONTENT
+            ========================== -->
+
+            <main class="profile-content">
+
+
+                <!-- =========================
+                     SAVED ADDRESS SECTION
+                ========================== -->
+
+                <div class="address-section">
+
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h4>
+                                Saved Addresses
+                            </h4>
+
+                            <p>
+                                Manage your delivery addresses
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ADDRESS GRID -->
+
+                    <div class="address-grid">
+
+
+                        <!-- =========================
+                             SAVED ADDRESSES
+                        ========================== -->
+
+                        {% for address in addresses %}
+
+
+                            <div class="address-card">
+
+
+                                <!-- CARD HEADER -->
+
+                                <div class="address-card-header">
+
+
+                            
+                                    <!-- EDIT / DELETE -->
+
+                                    <div class="address-actions">
+
+
+                                        <form
+                                            action="{% url 'users:select_edit_address' %}"
+                                            method="POST"
+                                        >
+                                            {% csrf_token %}
+
+                                            <input
+                                                type="hidden"
+                                                name="address_id"
+                                                value="{{ address.id }}"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                class="edit-address-btn"
+                                            >
+                                                <i class="fas fa-pen"></i>
+                                                Edit
+                                            </button>
+                                        </form>
+
+                                            
+                                        <form
+                                            action="{% url 'users:delete_address' %}"
+                                            method="POST"
+                                        >
+                                            {% csrf_token %}
+
+                                            <input
+                                                type="hidden"
+                                                name="address_id"
+                                                value="{{ address.id }}"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                class="delete-address-btn"
+                                                onclick="return confirm('Are you sure you want to delete this address?');"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- ADDRESS DETAILS -->
+
+                                <div class="address-details">
+
+
+                                    <strong>
+
+                                        {{ request.user.get_full_name }}
+
+                                    </strong>
+
+
+                                    <p>
+
+                                        {{ address.building }}
+
+                                    </p>
+
+
+                                    <p>
+
+                                        {{ address.area }}
+
+                                    </p>
+
+
+                                    {% if address.landmark %}
+
+                                        <p>
+
+                                            {{ address.landmark }}
+
+                                        </p>
+
+                                    {% endif %}
+
+
+                                    <p>
+
+                                        {{ address.city }},
+                                        {{ address.state }}
+
+                                        - {{ address.pincode }}
+
+                                    </p>
+
+
+                                    <p>
+
+                                        {{ address.country }}
+
+                                    </p>
+
+
+                                </div>
+                                    <br>
+                                    <div>
+
+                                        <span class="address-type">
+
+                                            {{ address.address_type }}
+
+                                        </span>
+
+
+                                        {% if address.is_default %}
+
+                                            <span class="default-badge">
+
+                                                Default
+
+                                            </span>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                            </div>
+
+
+                        {% endfor %}
+
+
+                        <!-- =========================
+                             ADD NEW ADDRESS
+                        ========================== -->
+
+                        <a
+                            href="{% url 'users:add_address' %}"
+                            class="add-address-card"
+                        >
+
+
+                            <div class="add-address-icon">
+
+                                <i class="fas fa-plus"></i>
+
+                            </div>
+
+
+                            <h5>
+
+                                Add New Address
+
+                            </h5>
+
+
+                            <p>
+
+                                Add another delivery address
+
+                            </p>
+
+
+                        </a>
+
+
+                    </div>
+
+                </div>
+
+
+            </main>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

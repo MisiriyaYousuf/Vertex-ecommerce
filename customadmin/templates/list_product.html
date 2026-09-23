@@ -1,0 +1,1413 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Product Management{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   PRODUCT MANAGEMENT PAGE
+========================================================= */
+
+.product-page {
+    padding: 25px 30px 35px;
+}
+
+.product-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    gap: 20px;
+}
+
+.product-page-header .header-content h2 {
+    margin: 0 0 4px;
+    font-size: 25px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.product-page-header .header-content p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.add-product-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 15px;
+    border-radius: 7px;
+    background: #212529;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.add-product-btn:hover {
+    background: #000;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.product-search-wrapper {
+    margin-bottom: 22px;
+}
+
+.product-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.product-search-input-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.product-search-input-wrapper i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #9aa4ad;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.product-search-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 15px 0 38px;
+    border: 1px solid #dce2e8;
+    border-radius: 7px;
+    background: #fff;
+    color: #344454;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-search-input::placeholder {
+    color: #9aa4ad;
+}
+
+.product-search-input:focus {
+    border-color: #212529;
+    box-shadow: 0 0 0 3px rgba(33, 37, 41, 0.08);
+}
+
+.product-search-btn {
+    height: 42px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 7px;
+    background: #212529;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.product-search-btn:hover {
+    background: #000;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.product-clear-btn {
+    height: 42px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid #dce2e8;
+    border-radius: 7px;
+    background: #fff;
+    color: #66727d;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.product-clear-btn:hover {
+    border-color: #212529;
+    background: #f7f9fb;
+    color: #212529;
+    text-decoration: none;
+}
+
+/* =========================================================
+   PRODUCT GRID
+========================================================= */
+
+.product-grid {
+    margin-bottom: 0;
+}
+
+.product-column {
+    display: flex;
+}
+
+.product-card {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* =========================================================
+   PRODUCT IMAGE
+========================================================= */
+
+.product-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 175px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 10px;
+    display: block;
+    transition: transform 0.25s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.03);
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 13px;
+}
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.featured-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 4px 7px;
+    border-radius: 5px;
+    background: #ffc107;
+    color: #212529;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 7px;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.status-active {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.stock-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    padding: 4px 7px;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.stock-in {
+    background: #e2f5ea;
+    color: #146c43;
+}
+
+.stock-low {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.stock-out {
+    background: #f8d7da;
+    color: #842029;
+}
+
+/* =========================================================
+   CARD BODY
+========================================================= */
+
+.product-card-body {
+    padding: 13px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.product-category {
+    margin-bottom: 4px;
+    color: #6c757d;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.product-name {
+    margin: 0 0 7px;
+    color: #212529;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    min-height: 39px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.product-price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.product-price {
+    color: #212529;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.product-original-price {
+    color: #9aa4ad;
+    font-size: 12px;
+    text-decoration: line-through;
+}
+
+.discount-label {
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   PRODUCT META
+========================================================= */
+
+.product-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.product-meta-item {
+    min-width: 0;
+    padding: 7px 8px;
+    border: 1px solid #edf0f2;
+    border-radius: 6px;
+    background: #fafbfc;
+}
+
+.product-meta-label {
+    display: block;
+    margin-bottom: 2px;
+    color: #9aa4ad;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.product-meta-value {
+    display: block;
+    color: #344454;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.product-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.product-action-form {
+    flex: 1;
+    margin: 0;
+}
+
+.product-action-form .action-btn {
+    width: 100%;
+    cursor: pointer;
+}
+
+.product-action-form button,
+.edit-product-btn,
+.delete-product-btn {
+    border: none;
+    outline: none;
+    height: 38px;
+    min-width: 38px;
+    padding: 0 12px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.product-action-form button i,
+.edit-product-btn i,
+.delete-product-btn i {
+    font-size: 13px;
+}
+
+.view-btn,
+.edit-product-btn {
+    background: #394f66;
+    color: #ffffff;
+    border: 1px solid #394f66 !important;
+}
+
+.view-btn:hover,
+.edit-product-btn:hover {
+    background: #2c3e50;
+    color: #ffffff;
+    border-color: #2c3e50 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(44, 62, 80, 0.20);
+}
+
+.delete-product-form {
+    display: inline-flex;
+    align-items: center;
+}
+
+.delete-product-btn {
+    background: #fff0f0;
+    color: #dc2626;
+    border: 1px solid #ffd6d6;
+}
+
+.delete-product-btn:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.18);
+}
+
+.product-action-form button:active,
+.edit-product-btn:active,
+.delete-product-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.product-action-form button:focus-visible,
+.edit-product-btn:focus-visible,
+.delete-product-btn:focus-visible {
+    box-shadow: 0 0 0 3px rgba(57, 79, 102, 0.25);
+}
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 28px;
+    margin-bottom: 8px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+}
+
+.pagination .page-item {
+    margin: 0;
+}
+
+.pagination .page-link {
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 7px;
+    background: #fff;
+    color: #2c3e50;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    background: #2c3e50;
+    border-color: #2c3e50;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.pagination .page-item.active .page-link {
+    background: #2c3e50;
+    border-color: #2c3e50;
+    color: #fff;
+}
+
+.pagination-info {
+    text-align: center;
+    margin-top: 8px;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state {
+    padding: 55px 20px;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+}
+
+.category-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 6px;
+    color: #315170;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.empty-state i {
+    margin-bottom: 12px;
+    color: #adb5bd;
+    font-size: 40px;
+}
+
+.empty-state h4 {
+    margin-bottom: 7px;
+    color: #343a40;
+    font-weight: 700;
+}
+
+.empty-state p {
+    margin-bottom: 18px;
+    color: #6c757d;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 992px) {
+
+    .product-page {
+        padding: 22px 20px 30px;
+    }
+
+    .product-image-wrapper {
+        height: 165px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .product-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .add-product-btn {
+        width: 100%;
+    }
+
+    .product-image-wrapper {
+        height: 180px;
+    }
+
+    .product-search-form {
+        flex-direction: column;
+    }
+
+    .product-search-input-wrapper,
+    .product-search-btn,
+    .product-clear-btn {
+        width: 100%;
+    }
+
+    .product-actions {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .product-action-form button,
+    .edit-product-btn,
+    .delete-product-btn {
+        height: 36px;
+        min-width: 36px;
+        padding: 0 10px;
+        font-size: 12px;
+    }
+
+    .product-action-form button i,
+    .edit-product-btn i,
+    .delete-product-btn i {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .product-page {
+        padding: 18px 12px 25px;
+    }
+
+    .product-page-header .header-content h2 {
+        font-size: 21px;
+    }
+
+    .product-image-wrapper {
+        height: 180px;
+    }
+
+    .product-card-body {
+        padding: 12px;
+    }
+
+    .product-name {
+        font-size: 14px;
+    }
+
+    .product-price {
+        font-size: 16px;
+    }
+
+    .pagination-wrapper {
+        margin-top: 22px;
+    }
+
+    .pagination {
+        gap: 3px;
+    }
+
+    .pagination .page-link {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 8px;
+        font-size: 12px;
+    }
+}
+
+</style>
+
+
+<div class="product-page">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="product-page-header">
+
+        <div class="header-content">
+
+            <div class="category-eyebrow">
+                <i class="fas fa-layer-group"></i>
+                PRODUCT MANAGEMENT
+            </div>
+
+            <h2>
+                Manage products
+            </h2>
+
+            <p>
+                Manage all watch products from one place.
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'customadmin:add_product' %}"
+            class="add-product-btn"
+        >
+            <i class="fas fa-plus"></i>
+            Add Product
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <div class="product-search-wrapper">
+
+        <form
+            method="GET"
+            action="{% url 'customadmin:list_product' %}"
+            class="product-search-form"
+        >
+
+            <div class="product-search-input-wrapper">
+
+                <i class="fas fa-search"></i>
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    class="product-search-input"
+                    placeholder="Search by product name or category..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="product-search-btn"
+            >
+                <i class="fas fa-search me-1"></i>
+                Search
+            </button>
+
+            <a
+                href="{% url 'customadmin:list_product' %}"
+                class="product-clear-btn"
+            >
+                <i class="fas fa-times"></i>
+                Clear
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         PRODUCTS
+    ====================================================== -->
+
+    {% if products %}
+
+        <div class="row g-3 product-grid">
+
+            {% for product in products %}
+
+                <div class="col-12 col-md-6 col-lg-4 product-column">
+
+                    <div class="product-card">
+
+
+                        <!-- =================================================
+                             PRODUCT IMAGE
+                        ================================================== -->
+
+                        <div class="product-image-wrapper">
+
+                            {% for product_image in product.images.all %}
+
+                                {% if product_image.image_type == "main" %}
+
+                                    <img
+                                        src="{{ product_image.image.url }}"
+                                        alt="{{ product.name }}"
+                                        class="product-image"
+                                    >
+
+                                {% endif %}
+
+                            {% empty %}
+
+                                <div class="no-image">
+                                    <i class="fas fa-image me-2"></i>
+                                    No Image
+                                </div>
+
+                            {% endfor %}
+
+                            <!-- STOCK BADGE -->
+
+                            {% if product.quantity <= 0 %}
+
+                                <span class="stock-badge stock-out">
+                                    Out of Stock
+                                </span>
+
+                            {% elif product.quantity <= 5 %}
+
+                                <span class="stock-badge stock-low">
+                                    Low Stock
+                                </span>
+
+                            {% else %}
+
+                                <span class="stock-badge stock-in">
+                                    In Stock
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- =================================================
+                             CARD BODY
+                        ================================================== -->
+
+                        <div class="product-card-body">
+
+
+                            <!-- CATEGORY -->
+
+                            <div class="product-category">
+
+                                {% if product.category %}
+
+                                    {{ product.category.name }}
+
+                                {% else %}
+
+                                    Uncategorized
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- PRODUCT NAME -->
+
+                            <h3 class="product-name">
+
+                                {{ product.name }}
+
+                            </h3>
+
+
+                            <!-- PRICE -->
+
+                            <div class="product-price-row">
+
+                                {% if product.discount_price %}
+
+                                    <span class="product-price">
+                                        ₹{{ product.discount_price }}
+                                    </span>
+
+                                    <span class="product-original-price">
+                                        ₹{{ product.sale_price }}
+                                    </span>
+
+                                    {% if product.sale_price > product.discount_price %}
+
+                                        <span class="discount-label">
+                                            OFFER
+                                        </span>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <span class="product-price">
+                                        ₹{{ product.sale_price }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                    
+                            <!-- =================================================
+                                 ACTION BUTTONS
+                            ================================================== -->
+
+                            <div class="product-actions">
+
+
+                                <!-- VIEW -->
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'customadmin:view_product' %}"
+                                    class="product-action-form"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <input
+                                        type="hidden"
+                                        name="product_id"
+                                        value="{{ product.id }}"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="action-btn view-btn"
+                                        title="View Product"
+                                    >
+
+                                        <i class="fas fa-eye"></i>
+
+                                        View
+
+                                    </button>
+
+                                </form>
+
+
+                                <!-- EDIT -->
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'customadmin:edit_product' %}"
+                                    style="display: inline;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <input
+                                        type="hidden"
+                                        name="product_id"
+                                        value="{{ product.id }}"
+                                    >
+
+                                    <input
+                                        type="hidden"
+                                        name="action"
+                                        value="edit"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="edit-product-btn"
+                                        title="Edit Product"
+                                    >
+
+                                        <i class="fas fa-edit"></i>
+
+                                        Edit
+
+                                    </button>
+
+                                </form>
+
+
+                                <!-- DELETE -->
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'customadmin:delete_product' %}"
+                                    class="delete-product-form"
+                                    style="margin: 0;"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="button"
+                                        class="delete-btn delete-product-btn"
+                                        title="Delete Product"
+                                        data-product-id="{{ product.id }}"
+                                    >
+
+                                        <i class="fas fa-trash"></i>
+
+                                    </button>
+
+                                </form>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- =====================================================
+             PAGINATION
+        ====================================================== -->
+
+        {% if products.paginator.num_pages > 1 %}
+
+            <div class="pagination-wrapper">
+
+                <nav aria-label="Product pagination">
+
+                    <ul class="pagination">
+
+
+                        <!-- PREVIOUS -->
+
+                        {% if products.has_previous %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="?search={{ search|urlencode }}&page={{ products.previous_page_number }}"
+                                    aria-label="Previous"
+                                >
+                                    ←
+                                </a>
+
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="?search={{ search|urlencode }}&page={{ products.paginator.num_pages }}"
+                                    aria-label="Previous"
+                                >
+                                    ←
+                                </a>
+
+                            </li>
+
+                        {% endif %}
+
+
+                        <!-- PAGE NUMBERS -->
+
+                        {% for page_number in products.paginator.page_range %}
+
+                            {% if products.number == page_number %}
+
+                                <li
+                                    class="page-item active"
+                                    aria-current="page"
+                                >
+
+                                    <span class="page-link">
+
+                                        {{ page_number }}
+
+                                    </span>
+
+                                </li>
+
+                            {% else %}
+
+                                <li class="page-item">
+
+                                    <a
+                                        class="page-link"
+                                        href="?search={{ search|urlencode }}&page={{ page_number }}"
+                                    >
+
+                                        {{ page_number }}
+
+                                    </a>
+
+                                </li>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+
+                        <!-- NEXT -->
+
+                        {% if products.has_next %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="?search={{ search|urlencode }}&page={{ products.next_page_number }}"
+                                    aria-label="Next"
+                                >
+                                    →
+                                </a>
+
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="?search={{ search|urlencode }}&page=1"
+                                    aria-label="Next"
+                                >
+                                    →
+                                </a>
+
+                            </li>
+
+                        {% endif %}
+
+                    </ul>
+
+                </nav>
+
+            </div>
+
+
+            <!-- PAGINATION INFO -->
+
+            <div class="pagination-info">
+
+                Showing
+
+                <strong>{{ products.start_index }}</strong>
+
+                -
+
+                <strong>{{ products.end_index }}</strong>
+
+                of
+
+                <strong>{{ products.paginator.count }}</strong>
+
+                products
+
+            </div>
+
+        {% endif %}
+
+
+    {% else %}
+
+
+        <!-- =====================================================
+             EMPTY STATE
+        ====================================================== -->
+
+        <div class="empty-state">
+
+            <i class="fas fa-box-open"></i>
+
+            <h4>
+                No Products Found
+            </h4>
+
+            <p>
+
+                {% if search %}
+
+                    No products found matching "{{ search }}".
+
+                {% else %}
+
+                    There are currently no products available.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     DELETE PRODUCT AJAX
+========================================================= -->
+
+<script>
+
+document.addEventListener("click", function (event) {
+
+    const deleteButton =
+        event.target.closest(".delete-product-btn");
+
+
+    if (!deleteButton) {
+        return;
+    }
+
+
+    const productId =
+        deleteButton.dataset.productId;
+
+
+    if (!productId) {
+
+        alert(
+            "Unable to delete product: Product ID is missing."
+        );
+
+        return;
+    }
+
+
+    const confirmed = confirm(
+        "Are you sure you want to delete this product?"
+    );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const form =
+        deleteButton.closest(".delete-product-form");
+
+
+    if (!form) {
+
+        alert(
+            "Unable to delete product: Delete form not found."
+        );
+
+        return;
+    }
+
+
+    deleteButton.disabled = true;
+
+
+    const originalButtonHTML =
+        deleteButton.innerHTML;
+
+
+    deleteButton.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i>';
+
+
+    const csrfInput =
+        form.querySelector(
+            'input[name="csrfmiddlewaretoken"]'
+        );
+
+
+    if (!csrfInput) {
+
+        deleteButton.disabled = false;
+
+        deleteButton.innerHTML =
+            originalButtonHTML;
+
+        alert(
+            "Unable to delete product: CSRF token is missing."
+        );
+
+        return;
+    }
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "product_id",
+        productId
+    );
+
+
+    formData.append(
+        "csrfmiddlewaretoken",
+        csrfInput.value
+    );
+
+
+    fetch(
+        form.action,
+        {
+            method: "POST",
+
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            },
+
+            body: formData
+        }
+    )
+
+    .then(async response => {
+
+        let data;
+
+
+        try {
+
+            data =
+                await response.json();
+
+        }
+        catch (error) {
+
+            throw new Error(
+                "Invalid response received from server."
+            );
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                `Unable to delete product. Server error (${response.status}).`
+            );
+
+        }
+
+
+        return data;
+
+    })
+
+    .then(data => {
+
+        if (!data.success) {
+
+            throw new Error(
+                data.message ||
+                "Unable to delete product."
+            );
+
+        }
+
+
+        const productColumn =
+            deleteButton.closest(
+                ".product-column"
+            );
+
+
+        if (productColumn) {
+
+            productColumn.remove();
+
+        }
+
+
+        alert(
+            data.message ||
+            "Product deleted successfully."
+        );
+
+
+    })
+
+    .catch(error => {
+
+        console.error(
+            "Delete product error:",
+            error
+        );
+
+
+        deleteButton.disabled = false;
+
+
+        deleteButton.innerHTML =
+            originalButtonHTML;
+
+
+        alert(
+            error.message ||
+            "Unable to delete product. Please try again."
+        );
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

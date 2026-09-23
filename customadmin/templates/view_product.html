@@ -1,0 +1,2824 @@
+{% extends "admin_base.html" %}
+{% load static %}
+
+{% block title %}View Product - {{ product.name|default:"Product" }}{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   VIEW PRODUCT PAGE
+   Light / Compact Admin Theme
+   ========================================================= */
+
+.product-view-page,
+.product-view-page * {
+    box-sizing: border-box;
+}
+
+.product-view-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 18px 22px 30px;
+    background: #f6f8fb !important;
+    color: #263238 !important;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.product-view-page h1,
+.product-view-page h2,
+.product-view-page h3,
+.product-view-page h4,
+.product-view-page h5,
+.product-view-page p,
+.product-view-page span,
+.product-view-page div,
+.product-view-page label {
+    font-family: inherit;
+}
+
+.product-view-page button,
+.product-view-page a {
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.product-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.product-page-heading-left {
+    min-width: 0;
+}
+
+.product-page-heading h1 {
+    margin: 0 0 4px;
+    color: #263238 !important;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+}
+
+.product-page-heading p {
+    margin: 0;
+    color: #7b8794 !important;
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+
+.product-page-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.product-view-page .pv-btn {
+    height: 34px;
+    padding: 0 13px;
+    border-radius: 7px !important;
+    border: 1px solid #d8dee5 !important;
+    background: #ffffff !important;
+    color: #39464f !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.18s ease;
+}
+
+.product-view-page .pv-btn:hover {
+    background: #f8fafc !important;
+    border-color: #c6ced7 !important;
+    color: #263238 !important;
+}
+
+.product-view-page .pv-btn:active {
+    transform: translateY(1px);
+}
+
+.product-view-page .pv-btn-primary {
+    background: #415b75 !important;
+    border-color: #415b75 !important;
+    color: #ffffff !important;
+}
+
+.product-view-page .pv-btn-primary:hover {
+    background: #2c3e50 !important;
+    border-color: #2c3e50 !important;
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   MAIN PRODUCT CARD
+   ========================================================= */
+
+.product-main-card {
+    width: 100%;
+    background: #ffffff !important;
+    border: 1px solid #e1e6eb !important;
+    border-radius: 11px !important;
+    box-shadow: 0 3px 14px rgba(31, 41, 55, 0.045) !important;
+    overflow: hidden;
+}
+
+.product-main-grid {
+    display: grid;
+    grid-template-columns: minmax(330px, 0.88fr) minmax(400px, 1.12fr);
+    gap: 0;
+}
+
+
+/* =========================================================
+   GALLERY
+   ========================================================= */
+
+.product-gallery-column {
+    padding: 16px;
+    border-right: 1px solid #e6eaee !important;
+    background: #ffffff !important;
+}
+
+.gallery-main-wrapper {
+    position: relative;
+    width: 100%;
+    height: 345px;
+    overflow: hidden;
+    border: 1px solid #e1e6eb !important;
+    border-radius: 9px !important;
+    background: #f8fafc !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 14px;
+    display: block;
+    cursor: zoom-in;
+    transform-origin: center center;
+    transition: transform 0.18s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.gallery-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    color: #9aa5af !important;
+    font-size: 11px;
+    text-align: center;
+}
+
+.gallery-empty strong {
+    color: #687580 !important;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   ZOOM CONTROLS
+   ========================================================= */
+
+.gallery-zoom-controls {
+    position: absolute;
+    right: 9px;
+    bottom: 9px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #dce2e7 !important;
+    border-radius: 7px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 3px 10px rgba(31, 41, 55, 0.08) !important;
+    z-index: 3;
+}
+
+.product-view-page .zoom-btn {
+    width: 27px;
+    height: 27px;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #f5f7f9 !important;
+    color: #4b5861 !important;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-view-page .zoom-btn:hover {
+    background: #e9edf1 !important;
+    color: #263238 !important;
+}
+
+.zoom-level {
+    min-width: 43px;
+    text-align: center;
+    color: #687580 !important;
+    font-size: 9.5px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   GALLERY INFORMATION
+   ========================================================= */
+
+.gallery-info-row {
+    margin-top: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.gallery-source {
+    color: #7b8794 !important;
+    font-size: 10px;
+}
+
+.gallery-count {
+    color: #56636d !important;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   THUMBNAILS
+   ========================================================= */
+
+.gallery-thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+    min-height: 52px;
+}
+
+.gallery-thumbnail {
+    position: relative;
+    width: 62px;
+    height: 62px;
+    padding: 2px;
+    border: 1px solid #dce2e7 !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.gallery-thumbnail:hover {
+    border-color: #aeb8c1 !important;
+}
+
+.gallery-thumbnail.active {
+    border-color: #65727d !important;
+    box-shadow: 0 0 0 2px rgba(101, 114, 125, 0.10) !important;
+}
+
+.gallery-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 5px;
+}
+
+.gallery-thumbnail-label {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    padding: 2px 3px;
+    border-radius: 3px;
+    background: rgba(38, 50, 56, 0.78);
+    color: #ffffff;
+    font-size: 7px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+
+/* =========================================================
+   GALLERY HINT
+   ========================================================= */
+
+.gallery-hint {
+    margin-top: 9px;
+    padding: 7px 9px;
+    border: 1px solid #e6eaee !important;
+    border-radius: 6px !important;
+    background: #fafbfc !important;
+    color: #8a959e !important;
+    font-size: 9.5px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   PRODUCT INFORMATION
+   ========================================================= */
+
+.product-info-column {
+    padding: 18px 20px;
+    background: #ffffff !important;
+}
+
+.product-info-top {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e8ecef !important;
+}
+
+.product-category {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 3px 8px;
+    border: 1px solid #e1e6eb !important;
+    border-radius: 5px !important;
+    background: #f7f9fb !important;
+    color: #687580 !important;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+}
+
+.product-name {
+    margin: 0;
+    color: #263238 !important;
+    font-size: 21px;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+.product-description-short {
+    margin: 7px 0 0;
+    color: #7b8794 !important;
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   PRICE BOX
+   ========================================================= */
+
+.product-price-box {
+    margin-top: 13px;
+    padding: 11px 12px;
+    border: 1px solid #e3e8ed !important;
+    border-radius: 8px !important;
+    background: #fafbfc !important;
+}
+
+.price-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.current-price {
+    color: #263238 !important;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.original-price {
+    color: #9aa4ad !important;
+    font-size: 11px;
+    text-decoration: line-through;
+}
+
+.discount-price-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 19px;
+    padding: 2px 6px;
+    border-radius: 4px !important;
+    background: #eef2f4 !important;
+    color: #58656f !important;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.product-status-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 11px;
+}
+
+.product-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 23px;
+    padding: 3px 8px;
+    border-radius: 5px !important;
+    border: 1px solid #e1e6eb !important;
+    font-size: 9.5px;
+    font-weight: 600;
+}
+
+.product-status-active {
+    background: #f1f7f3 !important;
+    color: #4f735e !important;
+    border-color: #d7e8dd !important;
+}
+
+.product-status-inactive {
+    background: #faf3f3 !important;
+    color: #8a6262 !important;
+    border-color: #ecdada !important;
+}
+
+.product-status-featured {
+    background: #f7f4fb !important;
+    color: #716080 !important;
+    border-color: #e6dff0 !important;
+}
+
+
+/* =========================================================
+   INFORMATION SECTIONS
+   ========================================================= */
+
+.info-section {
+    margin-top: 13px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 7px;
+}
+
+.section-heading h3 {
+    margin: 0;
+    color: #39464f !important;
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+}
+
+.section-heading span {
+    color: #9aa4ad !important;
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   STOCK SUMMARY
+   ========================================================= */
+
+.stock-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.stock-box {
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #e4e8ec !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+}
+
+.stock-box-label {
+    margin-bottom: 3px;
+    color: #8a959e !important;
+    font-size: 8.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+}
+
+.stock-box-value {
+    color: #35424b !important;
+    font-size: 15px;
+    line-height: 1.1;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   META
+   ========================================================= */
+
+.product-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border: 1px solid #e4e8ec !important;
+    border-radius: 7px !important;
+    overflow: hidden;
+}
+
+.meta-item {
+    padding: 8px 10px;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e8ecef !important;
+}
+
+.meta-item:nth-child(odd) {
+    border-right: 1px solid #e8ecef !important;
+}
+
+.meta-item:nth-last-child(-n + 2) {
+    border-bottom: 0 !important;
+}
+
+.meta-label {
+    margin-bottom: 3px;
+    color: #8a959e !important;
+    font-size: 8.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+}
+
+.meta-value {
+    color: #4a5760 !important;
+    font-size: 10.5px;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.description-box {
+    padding: 10px 11px;
+    border: 1px solid #e4e8ec !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+}
+
+.description-box p {
+    margin: 0;
+    color: #66737d !important;
+    font-size: 10.5px;
+    line-height: 1.65;
+    white-space: pre-line;
+}
+
+
+/* =========================================================
+   VARIANT SECTION
+   ========================================================= */
+
+.variant-section {
+    margin-top: 13px;
+    padding: 14px 16px;
+    border-top: 1px solid #e8ecef !important;
+    background: #ffffff !important;
+}
+
+.variant-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.variant-header-left h3 {
+    margin: 0 0 3px;
+    color: #39464f !important;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.variant-header-left p {
+    margin: 0;
+    color: #8a959e !important;
+    font-size: 9.5px;
+}
+
+.variant-count {
+    flex-shrink: 0;
+    padding: 4px 7px;
+    border: 1px solid #e1e6eb !important;
+    border-radius: 5px !important;
+    background: #f7f9fb !important;
+    color: #687580 !important;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   VARIANT BUTTONS
+   ========================================================= */
+
+.variant-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.variant-button {
+    min-width: 145px;
+    padding: 8px 9px;
+    border: 1px solid #dfe5e9 !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+    color: #4a5760 !important;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.variant-button:hover {
+    border-color: #bfc8cf !important;
+    background: #fafbfc !important;
+}
+
+.variant-button.active {
+    border-color: #66737d !important;
+    background: #f6f8fa !important;
+    box-shadow: 0 0 0 2px rgba(102, 115, 125, 0.08) !important;
+}
+
+.variant-button.base-product {
+    border-color: #cfd8df !important;
+    background: #fbfcfd !important;
+}
+
+.variant-button.base-product .variant-button-title {
+    color: #35424b !important;
+}
+
+.variant-button-title {
+    margin-bottom: 4px;
+    color: #35424b !important;
+    font-size: 10.5px;
+    font-weight: 700;
+}
+
+.variant-button-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 7px;
+    color: #8a959e !important;
+    font-size: 8.5px;
+    line-height: 1.4;
+}
+
+.variant-stock {
+    color: #5d7567 !important;
+}
+
+.variant-stock-out {
+    color: #8a6262 !important;
+}
+
+.variant-inactive {
+    color: #9a7b52 !important;
+}
+
+.base-product-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 5px;
+    border-radius: 3px;
+    background: #eef2f4;
+    color: #687580;
+    font-size: 7.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+}
+
+
+/* =========================================================
+   SELECTED VARIANT
+   ========================================================= */
+
+.selected-variant-panel {
+    display: none;
+    margin-top: 11px;
+    padding: 11px;
+    border: 1px solid #e1e6eb !important;
+    border-radius: 8px !important;
+    background: #fafbfc !important;
+}
+
+.selected-variant-panel.show {
+    display: block;
+}
+
+.selected-variant-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.selected-variant-heading strong {
+    color: #39464f !important;
+    font-size: 10.5px;
+}
+
+.selected-variant-heading span {
+    color: #8a959e !important;
+    font-size: 8.5px;
+}
+
+.selected-variant-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.selected-variant-item {
+    padding: 7px 8px;
+    border: 1px solid #e4e8ec !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+}
+
+.selected-variant-label {
+    margin-bottom: 3px;
+    color: #919ba3 !important;
+    font-size: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.selected-variant-value {
+    color: #4a5760 !important;
+    font-size: 9.5px;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   ERROR STATE
+   ========================================================= */
+
+.product-error {
+    padding: 14px 15px;
+    border: 1px solid #ecdada !important;
+    border-radius: 8px !important;
+    background: #fffafa !important;
+    color: #815f5f !important;
+    font-size: 11px;
+}
+
+.product-error strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #744f4f !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .product-main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-gallery-column {
+        border-right: 0 !important;
+        border-bottom: 1px solid #e6eaee !important;
+    }
+
+    .gallery-main-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+}
+
+
+@media (max-width: 720px) {
+
+    .product-view-page {
+        padding: 14px 12px 24px;
+    }
+
+    .product-page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .product-page-actions {
+        width: 100%;
+    }
+
+    .product-page-actions .pv-btn {
+        flex: 1;
+    }
+
+    .product-info-column {
+        padding: 15px;
+    }
+
+    .stock-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .product-meta-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .meta-item:nth-child(odd) {
+        border-right: 0 !important;
+    }
+
+    .meta-item:nth-last-child(-n + 2) {
+        border-bottom: 1px solid #e8ecef !important;
+    }
+
+    .meta-item:last-child {
+        border-bottom: 0 !important;
+    }
+
+    .selected-variant-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .variant-button {
+        min-width: calc(50% - 4px);
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .gallery-main-wrapper {
+        height: 290px;
+    }
+
+    .product-name {
+        font-size: 18px;
+    }
+
+    .current-price {
+        font-size: 17px;
+    }
+
+    .variant-button {
+        min-width: 100%;
+    }
+
+    .selected-variant-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+
+
+<div class="product-view-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="product-page-heading">
+
+        <div class="product-page-heading-left">
+
+            <h1>
+                Product Details
+            </h1>
+
+            <p>
+                Product information, inventory and variants
+            </p>
+
+        </div>
+
+
+        <div class="product-page-actions">
+
+            <a
+                href="{% url 'customadmin:list_product' %}"
+                class="pv-btn pv-btn-primary"
+            >
+                ←
+                Products
+            </a>
+
+        </div>
+
+    </div>
+
+
+    {% if error %}
+
+        <div class="product-error">
+
+            <strong>
+                Unable to load product
+            </strong>
+
+            {{ error }}
+
+        </div>
+
+    {% else %}
+
+        <!-- =================================================
+             MAIN PRODUCT CARD
+             ================================================= -->
+
+        <div class="product-main-card">
+
+            <div class="product-main-grid">
+
+
+                <!-- =========================================
+                     LEFT : GALLERY
+                     ========================================= -->
+
+                <div class="product-gallery-column">
+
+                    <div class="gallery-main-wrapper">
+
+                        {% if product_images %}
+
+                            <img
+                                id="mainProductImage"
+                                class="gallery-main-image"
+                                src="{{ product_images.0.image.url }}"
+                                alt="{{ product.name }}"
+                            >
+
+                        {% else %}
+
+                            <div
+                                class="gallery-empty"
+                                id="galleryEmpty"
+                            >
+
+                                <strong>
+                                    No product image
+                                </strong>
+
+                                <span>
+                                    No images have been uploaded.
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="gallery-zoom-controls">
+
+                            <button
+                                type="button"
+                                class="zoom-btn"
+                                id="zoomOutBtn"
+                                title="Zoom out"
+                            >
+                                −
+                            </button>
+
+
+                            <span
+                                class="zoom-level"
+                                id="zoomLevel"
+                            >
+                                100%
+                            </span>
+
+
+                            <button
+                                type="button"
+                                class="zoom-btn"
+                                id="zoomInBtn"
+                                title="Zoom in"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="gallery-info-row">
+
+                        <span
+                            class="gallery-source"
+                            id="gallerySource"
+                        >
+                            Base Product
+                        </span>
+
+
+                        <span
+                            class="gallery-count"
+                            id="galleryCount"
+                        >
+                            {% if product_images %}
+                                {{ product_images|length }}
+                                image{{ product_images|length|pluralize }}
+                            {% else %}
+                                0 images
+                            {% endif %}
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="gallery-thumbnails"
+                        id="galleryThumbnails"
+                    ></div>
+
+
+                    <div class="gallery-hint">
+                        Select the base product or a variant below
+                        to preview its images. Use + / − or mouse wheel to zoom.
+                    </div>
+
+                </div>
+
+
+                <!-- =========================================
+                     RIGHT : PRODUCT INFORMATION
+                     ========================================= -->
+
+                <div class="product-info-column">
+
+
+                    <div class="product-info-top">
+
+                        {% if product.category %}
+
+                            <div class="product-category">
+                                {{ product.category.name }}
+                            </div>
+
+                        {% endif %}
+
+
+                        <h2 class="product-name">
+                            {{ product.name }}
+                        </h2>
+
+
+                        <!-- DESCRIPTION -->
+
+                        {% if product.description %}
+
+                            <div class="info-section">
+
+                                <div class="section-heading">
+                                    <h3>Description</h3>
+                                </div>
+
+
+                                <div class="description-box">
+
+                                    <p>
+                                        {{ product.description }}
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- PRICE -->
+
+                        <div class="product-price-box">
+
+                            <div class="price-row">
+
+                                {% if product.discount_price %}
+
+                                    <span class="current-price">
+                                        ₹{{ product.discount_price }}
+                                    </span>
+
+                                    <span class="original-price">
+                                        ₹{{ product.sale_price }}
+                                    </span>
+
+                                    <span class="discount-price-label">
+                                        Discounted
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="current-price">
+                                        ₹{{ product.sale_price }}
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS -->
+
+                        <div class="product-status-row">
+
+                            {% if product.is_active %}
+
+                                <span class="product-status product-status-active">
+                                    ● Active
+                                </span>
+
+                            {% else %}
+
+                                <span class="product-status product-status-inactive">
+                                    ● Inactive
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if product.is_deleted %}
+
+                                <span class="product-status product-status-inactive">
+                                    Deleted
+                                </span>
+
+                            {% endif %}
+
+
+                            {% if product.featured %}
+
+                                <span class="product-status product-status-featured">
+                                    ★ Featured
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         STOCK SUMMARY
+                         ===================================== -->
+
+                    <div class="info-section">
+
+                        <div class="section-heading">
+
+                            <h3>
+                                Inventory
+                            </h3>
+
+                            <span>
+                                Current stock overview
+                            </span>
+
+                        </div>
+
+
+                        <div class="stock-summary">
+
+                            <div class="stock-box">
+
+                                <div class="stock-box-label">
+                                    Variants
+                                </div>
+
+                                <div class="stock-box-value">
+                                    {{ variants|length }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="stock-box">
+
+                                <div class="stock-box-label">
+                                    Product Stock
+                                </div>
+
+                                <div class="stock-box-value">
+                                    {{ product.quantity|default:"0" }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="stock-box">
+
+                                <div class="stock-box-label">
+                                    Variant Stock
+                                </div>
+
+                                <div
+                                    class="stock-box-value"
+                                    id="totalVariantStock"
+                                >
+                                    {{ total_variant_stock|default:"0" }}
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         PRODUCT INFORMATION
+                         ===================================== -->
+
+                    <div class="info-section">
+
+                        <div class="section-heading">
+
+                            <h3>
+                                Product Information
+                            </h3>
+
+                        </div>
+
+
+                        <div class="product-meta-grid">
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Product ID
+                                </div>
+
+                                <div class="meta-value">
+                                    {{ product.id }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Product Code
+                                </div>
+
+                                <div class="meta-value">
+
+                                    {% if product.product_code %}
+                                        {{ product.product_code }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Category
+                                </div>
+
+                                <div class="meta-value">
+
+                                    {% if product.category %}
+                                        {{ product.category.name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Color
+                                </div>
+
+                                <div class="meta-value">
+
+                                    {% if product.color %}
+                                        {{ product.color }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Size
+                                </div>
+
+                                <div class="meta-value">
+
+                                    {% if product.size %}
+                                        {{ product.size }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Product Stock
+                                </div>
+
+                                <div class="meta-value">
+                                    {{ product.quantity|default:"0" }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Created
+                                </div>
+
+                                <div class="meta-value">
+                                    {{ product.created_at|date:"d M Y, h:i A" }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Updated
+                                </div>
+
+                                <div class="meta-value">
+                                    {{ product.updated_at|date:"d M Y, h:i A" }}
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Images
+                                </div>
+
+                                <div class="meta-value">
+
+                                    {% if product_images %}
+                                        {{ product_images|length }}
+                                        uploaded
+                                    {% else %}
+                                        None
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
+                                <div class="meta-label">
+                                    Featured
+                                </div>
+
+                                <div class="meta-value">
+
+                                    {% if product.featured %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 VARIANTS
+                 ============================================= -->
+
+            <div class="variant-section">
+
+                <div class="variant-header">
+
+                    <div class="variant-header-left">
+
+                        <h3>
+                            Product Variants
+                        </h3>
+
+                        <p>
+                            Select the base product or a variant
+                            to preview its images, price and inventory.
+                        </p>
+
+                    </div>
+
+
+                    <div class="variant-count">
+
+                        {{ variants|length|add:"1" }}
+                        item{{ variants|length|add:"1"|pluralize }}
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="variant-list"
+                    id="variantList"
+                >
+
+
+                    <!-- =====================================
+                         BASE PRODUCT BUTTON
+                         ===================================== -->
+
+                    <button
+                        type="button"
+                        class="variant-button base-product active"
+                        data-variant-type="base"
+                        data-variant-index="-1"
+                    >
+
+                        <div class="variant-button-title">
+
+                            {% if product.color and product.size %}
+
+                                {{ product.color }} / {{ product.size }}
+
+                            {% elif product.color %}
+
+                                {{ product.color }}
+
+                            {% elif product.size %}
+
+                                {{ product.size }}
+
+                            {% else %}
+
+                                Base Product
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="variant-button-meta">
+
+                            <span class="base-product-label">
+                                Base Product
+                            </span>
+
+
+                            {% if product.product_code %}
+
+                                <span>
+                                    {{ product.product_code }}
+                                </span>
+
+                            {% endif %}
+
+
+                            <span
+                                class="
+                                    {% if product.quantity > 0 %}
+                                        variant-stock
+                                    {% else %}
+                                        variant-stock-out
+                                    {% endif %}
+                                "
+                            >
+
+                                Stock:
+                                {{ product.quantity|default:"0" }}
+
+                            </span>
+
+                        </div>
+
+                    </button>
+
+
+                    <!-- =====================================
+                         ACTUAL PRODUCT VARIANTS
+                         ===================================== -->
+
+                    {% for variant in variants %}
+
+                        <button
+                            type="button"
+                            class="variant-button"
+                            data-variant-type="variant"
+                            data-variant-index="{{ forloop.counter0 }}"
+                        >
+
+                            <div class="variant-button-title">
+
+                                {% if variant.color and variant.size %}
+
+                                    {{ variant.color }} /
+                                    {{ variant.size }}
+
+                                {% elif variant.color %}
+
+                                    {{ variant.color }}
+
+                                {% elif variant.size %}
+
+                                    {{ variant.size }}
+
+                                {% else %}
+
+                                    Variant {{ forloop.counter }}
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="variant-button-meta">
+
+                                {% if variant.product_code %}
+
+                                    <span>
+                                        {{ variant.product_code }}
+                                    </span>
+
+                                {% endif %}
+
+
+                                <span
+                                    class="
+                                        {% if variant.quantity > 0 %}
+                                            variant-stock
+                                        {% else %}
+                                            variant-stock-out
+                                        {% endif %}
+                                    "
+                                >
+
+                                    Stock:
+                                    {{ variant.quantity|default:"0" }}
+
+                                </span>
+
+
+                                {% if not variant.is_active %}
+
+                                    <span class="variant-inactive">
+                                        Inactive
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </button>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <!-- =========================================
+                     SELECTED ITEM
+                     ========================================= -->
+
+                <div
+                    class="selected-variant-panel show"
+                    id="selectedVariantPanel"
+                >
+
+                    <div class="selected-variant-heading">
+
+                        <strong id="selectedVariantTitle">
+                            Base Product
+                        </strong>
+                    </div>
+
+
+                    <div class="selected-variant-grid">
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Sale Price
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantSalePrice"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Discount Price
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantDiscountPrice"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Color
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantColor"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Size
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantSize"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Product Code
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantCode"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Stock
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantStock"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Status
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantStatus"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+
+                        <div class="selected-variant-item">
+
+                            <div class="selected-variant-label">
+                                Images
+                            </div>
+
+                            <div
+                                class="selected-variant-value"
+                                id="selectedVariantImages"
+                            >
+                                —
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    /* =====================================================
+       BASE PRODUCT IMAGE DATA
+       ===================================================== */
+
+    const productImages = [
+
+        {% for image in product_images %}
+
+        {
+            url: "{{ image.image.url|escapejs }}",
+            type: "{{ image.image_type|escapejs }}"
+        }
+
+        {% if not forloop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    /* =====================================================
+       BASE PRODUCT DATA
+       ===================================================== */
+
+    const baseProduct = {
+
+        name:
+            "{% if product.color and product.size %}{{ product.color|escapejs }} / {{ product.size|escapejs }}{% elif product.color %}{{ product.color|escapejs }}{% elif product.size %}{{ product.size|escapejs }}{% else %}Base Product{% endif %}",
+
+        color:
+            "{{ product.color|default:''|escapejs }}",
+
+        size:
+            "{{ product.size|default:''|escapejs }}",
+
+        code:
+            "{{ product.product_code|default:''|escapejs }}",
+
+        salePrice:
+            "{{ product.sale_price|default:''|escapejs }}",
+
+        discountPrice:
+            "{{ product.discount_price|default:''|escapejs }}",
+
+        stock:
+            {{ product.quantity|default:0 }},
+
+        active:
+            {% if product.is_active %}
+                true
+            {% else %}
+                false
+            {% endif %},
+
+        images:
+            productImages
+
+    };
+
+
+    /* =====================================================
+       VARIANT DATA
+       ===================================================== */
+
+    const variants = [
+
+        {% for variant in variants %}
+
+        {
+
+            name:
+                "{% if variant.color and variant.size %}{{ variant.color|escapejs }} / {{ variant.size|escapejs }}{% elif variant.color %}{{ variant.color|escapejs }}{% elif variant.size %}{{ variant.size|escapejs }}{% else %}Variant {{ forloop.counter }}{% endif %}",
+
+            color:
+                "{{ variant.color|default:''|escapejs }}",
+
+            size:
+                "{{ variant.size|default:''|escapejs }}",
+
+            code:
+                "{{ variant.product_code|default:''|escapejs }}",
+
+            salePrice:
+                "{{ variant.sale_price|default:''|escapejs }}",
+
+            discountPrice:
+                "{{ variant.discount_price|default:''|escapejs }}",
+
+            stock:
+                {{ variant.quantity|default:0 }},
+
+            active:
+                {% if variant.is_active %}
+                    true
+                {% else %}
+                    false
+                {% endif %},
+
+            images: [
+
+                {% for image in variant.images.all %}
+
+                {
+                    url: "{{ image.image.url|escapejs }}",
+                    type: "{{ image.image_type|escapejs }}"
+                }
+
+                {% if not forloop.last %},{% endif %}
+
+                {% endfor %}
+
+            ]
+
+        }
+
+        {% if not forloop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    /* =====================================================
+       ELEMENTS
+       ===================================================== */
+
+    const mainImage =
+        document.getElementById("mainProductImage");
+
+    const thumbnailsContainer =
+        document.getElementById("galleryThumbnails");
+
+    const gallerySource =
+        document.getElementById("gallerySource");
+
+    const galleryCount =
+        document.getElementById("galleryCount");
+
+    const zoomInBtn =
+        document.getElementById("zoomInBtn");
+
+    const zoomOutBtn =
+        document.getElementById("zoomOutBtn");
+
+    const zoomLevel =
+        document.getElementById("zoomLevel");
+
+    const totalVariantStock =
+        document.getElementById("totalVariantStock");
+
+    const selectedVariantPanel =
+        document.getElementById("selectedVariantPanel");
+
+    const selectedVariantTitle =
+        document.getElementById("selectedVariantTitle");
+
+    const selectedVariantSalePrice =
+        document.getElementById("selectedVariantSalePrice");
+
+    const selectedVariantDiscountPrice =
+        document.getElementById("selectedVariantDiscountPrice");
+
+    const selectedVariantColor =
+        document.getElementById("selectedVariantColor");
+
+    const selectedVariantSize =
+        document.getElementById("selectedVariantSize");
+
+    const selectedVariantCode =
+        document.getElementById("selectedVariantCode");
+
+    const selectedVariantStock =
+        document.getElementById("selectedVariantStock");
+
+    const selectedVariantStatus =
+        document.getElementById("selectedVariantStatus");
+
+    const selectedVariantImages =
+        document.getElementById("selectedVariantImages");
+
+
+    /* =====================================================
+       IMAGE TYPE LABEL
+       ===================================================== */
+
+    function getImageTypeLabel(type) {
+
+        const labels = {
+            main: "Main",
+            front: "Front",
+            side: "Side",
+            back: "Back"
+        };
+
+        return labels[type] || type || "Image";
+
+    }
+
+
+    /* =====================================================
+       SORT IMAGES
+       Main → Front → Side → Back
+       ===================================================== */
+
+    function sortImages(images) {
+
+        const order = {
+            main: 0,
+            front: 1,
+            side: 2,
+            back: 3
+        };
+
+        return [...(images || [])].sort(function (a, b) {
+
+            return (
+                (order[a.type] ?? 99) -
+                (order[b.type] ?? 99)
+            );
+
+        });
+
+    }
+
+
+    /* =====================================================
+       ZOOM
+       ===================================================== */
+
+    let zoom = 1;
+
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 3;
+    const ZOOM_STEP = 0.25;
+
+
+    function updateZoom() {
+
+        if (!mainImage) {
+            return;
+        }
+
+        mainImage.style.transform =
+            `scale(${zoom})`;
+
+        if (zoomLevel) {
+
+            zoomLevel.textContent =
+                `${Math.round(zoom * 100)}%`;
+
+        }
+
+    }
+
+
+    function setZoom(value) {
+
+        zoom = Math.max(
+            MIN_ZOOM,
+            Math.min(MAX_ZOOM, value)
+        );
+
+        updateZoom();
+
+    }
+
+
+    if (zoomInBtn) {
+
+        zoomInBtn.addEventListener(
+            "click",
+            function () {
+
+                setZoom(
+                    zoom + ZOOM_STEP
+                );
+
+            }
+        );
+
+    }
+
+
+    if (zoomOutBtn) {
+
+        zoomOutBtn.addEventListener(
+            "click",
+            function () {
+
+                setZoom(
+                    zoom - ZOOM_STEP
+                );
+
+            }
+        );
+
+    }
+
+
+    if (mainImage) {
+
+        mainImage.addEventListener(
+            "wheel",
+            function (event) {
+
+                event.preventDefault();
+
+                if (event.deltaY < 0) {
+
+                    setZoom(
+                        zoom + ZOOM_STEP
+                    );
+
+                } else {
+
+                    setZoom(
+                        zoom - ZOOM_STEP
+                    );
+
+                }
+
+            },
+            {
+                passive: false
+            }
+        );
+
+
+        mainImage.addEventListener(
+            "dblclick",
+            function () {
+
+                if (zoom === 1) {
+
+                    setZoom(2);
+
+                } else {
+
+                    setZoom(1);
+
+                }
+
+            }
+        );
+
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "+" ||
+                event.key === "="
+            ) {
+
+                setZoom(
+                    zoom + ZOOM_STEP
+                );
+
+            }
+
+
+            if (event.key === "-") {
+
+                setZoom(
+                    zoom - ZOOM_STEP
+                );
+
+            }
+
+
+            if (event.key === "0") {
+
+                setZoom(1);
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       THUMBNAILS
+       ===================================================== */
+
+    function renderThumbnails(
+        images,
+        activeIndex = 0
+    ) {
+
+        if (!thumbnailsContainer) {
+            return;
+        }
+
+        thumbnailsContainer.innerHTML = "";
+
+
+        if (!images || images.length === 0) {
+
+            if (galleryCount) {
+
+                galleryCount.textContent =
+                    "0 images";
+
+            }
+
+            return;
+
+        }
+
+
+        if (galleryCount) {
+
+            galleryCount.textContent =
+                `${images.length} image${images.length === 1 ? "" : "s"}`;
+
+        }
+
+
+        images.forEach(function (item, index) {
+
+            const button =
+                document.createElement("button");
+
+            button.type = "button";
+
+            button.className =
+                "gallery-thumbnail" +
+                (
+                    index === activeIndex
+                        ? " active"
+                        : ""
+                );
+
+
+            const image =
+                document.createElement("img");
+
+            image.src = item.url;
+
+            image.alt =
+                `${getImageTypeLabel(item.type)} image`;
+
+
+            const label =
+                document.createElement("span");
+
+            label.className =
+                "gallery-thumbnail-label";
+
+            label.textContent =
+                getImageTypeLabel(item.type);
+
+
+            button.appendChild(image);
+            button.appendChild(label);
+
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    changeMainImage(
+                        item.url,
+                        index
+                    );
+
+                }
+            );
+
+
+            thumbnailsContainer.appendChild(
+                button
+            );
+
+        });
+
+    }
+
+
+    /* =====================================================
+       CHANGE MAIN IMAGE
+       ===================================================== */
+
+    function changeMainImage(
+        src,
+        index = 0
+    ) {
+
+        if (!mainImage) {
+            return;
+        }
+
+        mainImage.src = src;
+
+        mainImage.style.display =
+            "block";
+
+        setZoom(1);
+
+
+        document
+            .querySelectorAll(
+                ".gallery-thumbnail"
+            )
+            .forEach(function (
+                item,
+                itemIndex
+            ) {
+
+                item.classList.toggle(
+                    "active",
+                    itemIndex === index
+                );
+
+            });
+
+    }
+
+
+    /* =====================================================
+       LOAD BASE PRODUCT GALLERY
+       ===================================================== */
+
+    function loadBaseProductGallery() {
+
+        const images =
+            sortImages(productImages);
+
+
+        if (gallerySource) {
+
+            gallerySource.textContent =
+                "Base Product";
+
+        }
+
+
+        if (images.length > 0) {
+
+            if (mainImage) {
+
+                mainImage.src =
+                    images[0].url;
+
+                mainImage.style.display =
+                    "block";
+
+            }
+
+
+            renderThumbnails(
+                images,
+                0
+            );
+
+        } else {
+
+            if (mainImage) {
+
+                mainImage.style.display =
+                    "none";
+
+            }
+
+
+            if (galleryCount) {
+
+                galleryCount.textContent =
+                    "0 images";
+
+            }
+
+
+            if (thumbnailsContainer) {
+
+                thumbnailsContainer.innerHTML =
+                    "";
+
+            }
+
+        }
+
+
+        setZoom(1);
+
+    }
+
+
+    /* =====================================================
+       LOAD VARIANT GALLERY
+       ===================================================== */
+
+    function loadVariantGallery(
+        variant
+    ) {
+
+        const images =
+            sortImages(
+                variant.images || []
+            );
+
+
+        if (gallerySource) {
+
+            gallerySource.textContent =
+                variant.name
+                    ? `Variant · ${variant.name}`
+                    : "Variant Gallery";
+
+        }
+
+
+        if (images.length > 0) {
+
+            if (mainImage) {
+
+                mainImage.src =
+                    images[0].url;
+
+                mainImage.style.display =
+                    "block";
+
+            }
+
+
+            renderThumbnails(
+                images,
+                0
+            );
+
+        } else {
+
+            if (mainImage) {
+
+                mainImage.style.display =
+                    "none";
+
+            }
+
+
+            if (galleryCount) {
+
+                galleryCount.textContent =
+                    "0 images";
+
+            }
+
+
+            if (thumbnailsContainer) {
+
+                thumbnailsContainer.innerHTML =
+                    "";
+
+            }
+
+        }
+
+
+        setZoom(1);
+
+    }
+
+
+    /* =====================================================
+       FORMAT PRICE
+       ===================================================== */
+
+    function formatPrice(price) {
+
+        if (
+            price === null ||
+            price === undefined ||
+            price === ""
+        ) {
+
+            return "—";
+
+        }
+
+        return `₹${price}`;
+
+    }
+
+
+    /* =====================================================
+       UPDATE SELECTED ITEM DETAILS
+       ===================================================== */
+
+    function updateSelectedDetails(
+        item,
+        title
+    ) {
+
+        if (!selectedVariantPanel) {
+            return;
+        }
+
+
+        selectedVariantPanel.classList.add(
+            "show"
+        );
+
+
+        if (selectedVariantTitle) {
+
+            selectedVariantTitle.textContent =
+                title || "Selected Item";
+
+        }
+
+
+        if (selectedVariantSalePrice) {
+
+            selectedVariantSalePrice.textContent =
+                formatPrice(
+                    item.salePrice
+                );
+
+        }
+
+
+        if (selectedVariantDiscountPrice) {
+
+            selectedVariantDiscountPrice.textContent =
+                item.discountPrice
+                    ? formatPrice(
+                        item.discountPrice
+                    )
+                    : "—";
+
+        }
+
+
+        if (selectedVariantColor) {
+
+            selectedVariantColor.textContent =
+                item.color ||
+                "—";
+
+        }
+
+
+        if (selectedVariantSize) {
+
+            selectedVariantSize.textContent =
+                item.size ||
+                "—";
+
+        }
+
+
+        if (selectedVariantCode) {
+
+            selectedVariantCode.textContent =
+                item.code ||
+                "—";
+
+        }
+
+
+        if (selectedVariantStock) {
+
+            selectedVariantStock.textContent =
+                item.stock ?? 0;
+
+        }
+
+
+        if (selectedVariantStatus) {
+
+            selectedVariantStatus.textContent =
+                item.active
+                    ? "Active"
+                    : "Inactive";
+
+        }
+
+
+        if (selectedVariantImages) {
+
+            const imageCount =
+                (item.images || []).length;
+
+            selectedVariantImages.textContent =
+                imageCount === 0
+                    ? "No images"
+                    : `${imageCount} image${imageCount === 1 ? "" : "s"}`;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SET ACTIVE BUTTON
+       ===================================================== */
+
+    function setActiveButton(button) {
+
+        document
+            .querySelectorAll(
+                ".variant-button"
+            )
+            .forEach(function (item) {
+
+                item.classList.remove(
+                    "active"
+                );
+
+            });
+
+
+        if (button) {
+
+            button.classList.add(
+                "active"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SELECT BASE PRODUCT
+       ===================================================== */
+
+    function selectBaseProduct(
+        button
+    ) {
+
+        setActiveButton(button);
+
+        loadBaseProductGallery();
+
+        updateSelectedDetails(
+            baseProduct,
+            "Base Product"
+        );
+
+    }
+
+
+    /* =====================================================
+       SELECT VARIANT
+       ===================================================== */
+
+    function selectVariant(
+        button,
+        index
+    ) {
+
+        const variant =
+            variants[index];
+
+
+        if (!variant) {
+            return;
+        }
+
+
+        setActiveButton(button);
+
+        loadVariantGallery(
+            variant
+        );
+
+        updateSelectedDetails(
+            variant,
+            variant.name ||
+            `Variant ${index + 1}`
+        );
+
+    }
+
+
+    /* =====================================================
+       TOTAL VARIANT STOCK
+       ===================================================== */
+
+    let totalStock = 0;
+
+
+    variants.forEach(
+        function (variant) {
+
+            totalStock +=
+                Number(
+                    variant.stock || 0
+                );
+
+        }
+    );
+
+
+    if (totalVariantStock) {
+
+        totalVariantStock.textContent =
+            totalStock;
+
+    }
+
+
+    /* =====================================================
+       BASE PRODUCT BUTTON
+       ===================================================== */
+
+    const baseProductButton =
+        document.querySelector(
+            '.variant-button[data-variant-type="base"]'
+        );
+
+
+    if (baseProductButton) {
+
+        baseProductButton.addEventListener(
+            "click",
+            function () {
+
+                selectBaseProduct(
+                    baseProductButton
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       VARIANT BUTTON EVENTS
+       ===================================================== */
+
+    document
+        .querySelectorAll(
+            '.variant-button[data-variant-type="variant"]'
+        )
+        .forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    const index =
+                        Number(
+                            button.dataset.variantIndex
+                        );
+
+
+                    selectVariant(
+                        button,
+                        index
+                    );
+
+                }
+            );
+
+        });
+
+
+    /* =====================================================
+       INITIAL LOAD
+       BASE PRODUCT IS SELECTED BY DEFAULT
+       ===================================================== */
+
+    selectBaseProduct(
+        baseProductButton
+    );
+
+});
+
+</script>
+
+{% endblock %}

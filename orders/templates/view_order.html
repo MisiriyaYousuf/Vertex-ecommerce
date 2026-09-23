@@ -1,0 +1,1485 @@
+{% extends "user_base.html" %}
+
+{% block content %}
+
+<style>
+    .order-detail-page {
+        max-width: 1150px;
+        margin: 40px auto;
+        padding: 0 20px 50px;
+        color: #ffffff;
+    }
+
+    /* Header */
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .order-header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .order-header p {
+        margin: 7px 0 0;
+        color: rgba(255,255,255,0.62);
+        font-size: 14px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 15px;
+        border-radius: 9px;
+        text-decoration: none;
+        color: rgba(255,255,255,0.78);
+        background: rgba(255,255,255,0.045);
+        border: 1px solid rgba(255,255,255,0.13);
+        transition: 0.2s ease;
+    }
+
+    .back-btn:hover {
+        color: #fff;
+        background: rgba(255,255,255,0.09);
+        border-color: rgba(255,255,255,0.22);
+    }
+
+    /* Glass cards */
+    .glass-card {
+        background: linear-gradient(
+            145deg,
+            rgba(73,46,91,0.58),
+            rgba(45,27,61,0.50)
+        );
+        border: 1px solid rgba(255,255,255,0.15);
+        box-shadow:
+            0 15px 40px rgba(20,12,30,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 16px;
+    }
+
+    /* Order summary */
+    .order-summary {
+        padding: 22px;
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        margin: 0 0 18px;
+        font-size: 18px;
+        font-weight: 650;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+
+    .summary-box {
+        padding: 15px;
+        border-radius: 11px;
+        background: rgba(255,255,255,0.035);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .summary-label {
+        display: block;
+        font-size: 12px;
+        color: rgba(255,255,255,0.52);
+        margin-bottom: 6px;
+    }
+
+    .summary-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #fff;
+        word-break: break-word;
+    }
+
+    /* Status */
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .status-pending {
+        color: #f5d878;
+        background: rgba(245,216,120,0.10);
+    }
+
+    .status-shipped {
+        color: #8ec9ff;
+        background: rgba(80,160,255,0.10);
+    }
+
+    .status-out {
+        color: #c5a4ff;
+        background: rgba(160,110,255,0.10);
+    }
+
+    .status-delivered {
+        color: #8ee0ad;
+        background: rgba(80,210,130,0.10);
+    }
+
+    .status-cancelled {
+        color: #ff9494;
+        background: rgba(255,80,80,0.10);
+    }
+
+    .status-returned {
+        color: #e8a9ff;
+        background: rgba(220,100,255,0.10);
+    }
+
+    /* Product */
+    .products-card {
+        padding: 22px;
+        margin-bottom: 25px;
+    }
+
+    .product-card {
+        margin: 0 8px;
+        padding: 24px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .product-card:first-of-type {
+        padding-top: 12px;
+    }
+
+    .product-card:last-child {
+        border-bottom: none;
+        padding-bottom: 12px;
+    }
+
+    .product-layout {
+        display: grid;
+        grid-template-columns: 145px 1fr;
+        gap: 22px;
+    }
+
+    /* Images */
+    .product-images {
+        width: 145px;
+    }
+
+    .main-image-box {
+        width: 145px;
+        height: 145px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.035);
+        border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .main-product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 8px;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+
+    /* Thumbnail glass scroller */
+    .sub-images {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 12px;
+        padding: 8px;
+        width: 100%;
+        box-sizing: border-box;
+
+        background: linear-gradient(
+            145deg,
+            rgba(73,46,91,0.45),
+            rgba(45,27,61,0.38)
+        );
+
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 11px;
+
+        box-shadow:
+            0 8px 22px rgba(20,12,30,0.22),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.18) transparent;
+    }
+
+    /* Individual thumbnails */
+    .sub-image {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        object-fit: contain;
+        padding: 4px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        cursor: pointer;
+
+        background: rgba(255,255,255,0.045);
+        border: 1px solid rgba(255,255,255,0.10);
+
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .sub-image:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.25);
+        transform: translateY(-2px);
+
+        box-shadow:
+            0 5px 14px rgba(20,12,30,0.25),
+            inset 0 1px 0 rgba(255,255,255,0.07);
+    }
+
+    .sub-images::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .sub-images::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.025);
+        border-radius: 10px;
+    }
+
+    .sub-images::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.16);
+        border-radius: 10px;
+    }
+
+    .sub-images::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.25);
+    }
+
+    /* Product information */
+    .product-info {
+        min-width: 0;
+    }
+
+    .product-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .product-name {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 650;
+    }
+
+    .product-id {
+        margin-top: 5px;
+        color: rgba(255,255,255,0.45);
+        font-size: 12px;
+    }
+
+    .product-description {
+        margin: 12px 0 16px;
+        color: rgba(255,255,255,0.63);
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    /* Product details */
+    .product-details-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(100px, 1fr));
+        gap: 10px;
+        margin-bottom: 17px;
+    }
+
+    .detail-box {
+        padding: 10px 12px;
+        border-radius: 9px;
+        background: rgba(255,255,255,0.035);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .detail-label {
+        display: block;
+        color: rgba(255,255,255,0.45);
+        font-size: 11px;
+        margin-bottom: 4px;
+    }
+
+    .detail-value {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Price */
+    .price-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 17px;
+    }
+
+    .current-price {
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+    .original-price {
+        color: rgba(255,255,255,0.42);
+        text-decoration: line-through;
+        font-size: 13px;
+    }
+
+    .discount-text {
+        color: #8ee0ad;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Action buttons */
+    .product-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex-wrap: wrap;
+    }
+
+    .order-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.76);
+        background: rgba(255,255,255,0.045);
+        border: 1px solid rgba(255,255,255,0.13);
+        transition: 0.2s ease;
+    }
+
+    .order-btn:hover {
+        color: #fff;
+        background: rgba(255,255,255,0.09);
+        border-color: rgba(255,255,255,0.22);
+    }
+
+    .cancel-btn {
+        color: #ff9b9b;
+        border-color: rgba(255,100,100,0.20);
+    }
+
+    .cancel-btn:hover {
+        color: #ffb5b5;
+        background: rgba(255,80,80,0.08);
+    }
+
+    .return-btn {
+        color: #dfa9ff;
+        border-color: rgba(210,120,255,0.20);
+    }
+
+    .return-btn:hover {
+        color: #ecc8ff;
+        background: rgba(210,120,255,0.08);
+    }
+
+    /* Bottom layout */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .address-card,
+    .total-card,
+    .tracking-card {
+        padding: 22px;
+    }
+
+    .address-text {
+        color: rgba(255,255,255,0.68);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .address-text strong {
+        color: #fff;
+    }
+
+    /* Totals */
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 9px 0;
+        color: rgba(255,255,255,0.65);
+        font-size: 14px;
+    }
+
+    .total-row.discount {
+        color: #8ee0ad;
+    }
+
+    .total-row.grand-total {
+        margin-top: 8px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255,255,255,0.10);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    /* ================= TRACKING ================= */
+
+    .tracking-card {
+        grid-column: 1 / -1;
+        margin-bottom: 25px;
+    }
+
+    .page-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 0;
+    margin-top: 10px;
+    }
+
+    .tracking-wrapper {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 25px;
+        padding: 0 30px;
+    }
+
+    .tracking-line {
+        position: absolute;
+        top: 17px;
+        left: 55px;
+        right: 55px;
+        height: 2px;
+        background: rgba(255,255,255,0.12);
+        z-index: 0;
+    }
+
+    .tracking-steps {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+    }
+
+    .tracking-step {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        width: 130px;
+    }
+
+    /* Default / upcoming status */
+    .tracking-dot {
+        width: 35px;
+        height: 35px;
+        margin: 0 auto 9px;
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: rgba(45,27,61,1);
+        border: 2px solid rgba(255,255,255,0.18);
+
+        color: rgba(255,255,255,0.40);
+        font-size: 13px;
+        font-weight: 600;
+
+        transition:
+            color 0.25s ease,
+            background 0.25s ease,
+            border-color 0.25s ease,
+            box-shadow 0.25s ease;
+    }
+
+    /* Previous/completed statuses */
+    .tracking-step.completed .tracking-dot {
+        border-color: rgba(196, 202, 199, 0.75);
+        background: rgba(142,224,173,0.13);
+        color: #afb3b1;
+        box-shadow: 0 0 12px rgba(142,224,173,0.10);
+    }
+
+    /* Current status */
+    .tracking-step.current .tracking-dot {
+        border-color: rgba(197,164,255,0.95);
+        background: rgba(197,164,255,0.18);
+        color: #c5a4ff;
+        box-shadow:
+            0 0 18px rgba(197,164,255,0.30),
+            0 0 30px rgba(197,164,255,0.10);
+    }
+
+    .order-cancel-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 25px;
+    }
+
+    /* Default label */
+    .tracking-label {
+        margin-top: 9px;
+        color: rgba(255,255,255,0.40);
+        font-size: 12px;
+
+        transition:
+            color 0.25s ease,
+            font-weight 0.25s ease;
+    }
+
+    /* Completed label */
+    .tracking-step.completed .tracking-label {
+        color: #b9c0bb;
+        font-weight: 600;
+    }
+
+    /* Current label */
+    .tracking-step.current .tracking-label {
+        color: #a784e3;
+        font-weight: 700;
+    }
+
+    /* Cancelled order */
+    .cancelled-track {
+        text-align: center;
+        padding: 25px;
+        color: #ff9b9b;
+    }
+
+    .cancelled-track strong {
+        display: block;
+        margin-bottom: 7px;
+    }
+
+    .returned-track {
+    text-align: center;
+    padding: 25px;
+    color: #e8a9ff;
+    }
+
+    .returned-track strong {
+        display: block;
+        margin-bottom: 7px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .product-details-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .bottom-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tracking-card {
+            grid-column: auto;
+        }
+    }
+
+    @media (max-width: 650px) {
+
+        .order-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .product-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .product-images {
+            width: 120px;
+        }
+
+        .main-image-box {
+            width: 120px;
+            height: 120px;
+        }
+
+        .product-top {
+            flex-direction: column;
+        }
+
+        .tracking-wrapper {
+            overflow-x: auto;
+            justify-content: flex-start;
+            gap: 35px;
+            padding-bottom: 10px;
+        }
+
+        .tracking-steps {
+            min-width: 600px;
+        }
+
+        .tracking-line {
+            display: none;
+        }
+    }
+</style>
+
+
+<div class="order-detail-page">
+
+    <!-- HEADER -->
+    <div class="order-header">
+
+        <div>
+            <h1>Order Details</h1>
+            <p>Order #{{ order.id }}</p>
+        </div>
+
+    
+
+    </div>
+
+
+    <!-- ORDER SUMMARY -->
+    <div class="glass-card order-summary">
+
+        <h2 class="section-title">
+            Order Information
+        </h2>
+
+        <div class="summary-grid">
+
+            <div class="summary-box">
+                <span class="summary-label">
+                    Order ID
+                </span>
+
+                <span class="summary-value">
+                    #{{ order.id }}
+                </span>
+            </div>
+
+
+            <div class="summary-box">
+
+                <span class="summary-label">
+                    Order Placed
+                </span>
+
+                <span class="summary-value">
+                    {{ placed_datetime|date:"d M Y" }}
+                    <br>
+                    {{ placed_datetime|date:"h:i A" }}
+                </span>
+
+            </div>
+
+
+            <div class="summary-box">
+
+                <span class="summary-label">
+                    Payment Method
+                </span>
+
+                <span class="summary-value">
+                    {{ order.get_payment_method_display }}
+                </span>
+
+            </div>
+
+
+            <div class="summary-box">
+
+                <span class="summary-label">
+                    Order Status
+                </span>
+
+                {% if order.status == "Pending" %}
+
+                    <span class="status-badge status-pending">
+                        Pending
+                    </span>
+
+                {% elif order.status == "Shipped" %}
+
+                    <span class="status-badge status-shipped">
+                        Shipped
+                    </span>
+
+                {% elif order.status == "Out for Delivery" %}
+
+                    <span class="status-badge status-out">
+                        Out for Delivery
+                    </span>
+
+                {% elif order.status == "Delivered" %}
+
+                    <span class="status-badge status-delivered">
+                        Delivered
+                    </span>
+
+                {% elif order.status == "Cancelled" %}
+
+                    <span class="status-badge status-cancelled">
+                        Cancelled
+                    </span>
+
+                {% else %}
+
+                    <span class="status-badge">
+                        {{ order.status }}
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+   
+    <!-- PRODUCTS -->
+    <div class="glass-card products-card">
+
+        <h2 class="section-title">
+            Products in this Order
+        </h2>
+
+
+        {% for item in order.items.all %}
+
+            <div class="product-card">
+
+                <div class="product-layout">
+
+                  <!-- PRODUCT IMAGES -->
+
+                        <div class="product-images">
+
+                            <div class="main-image-box">
+
+                                {% if item.main_display_image %}
+
+                                    <img
+                                        id="main-image-{{ item.id }}"
+                                        class="main-product-image"
+                                        src="{{ item.main_display_image.image.url }}"
+                                        alt="{{ item.product_name }}"
+                                    >
+
+                                {% else %}
+
+                                    <div style="
+                                        width:100%;
+                                        height:100%;
+                                        display:flex;
+                                        align-items:center;
+                                        justify-content:center;
+                                        color:rgba(255,255,255,0.35);
+                                        font-size:12px;
+                                    ">
+                                        No Image
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- SUB IMAGES -->
+
+                            {% if item.display_images %}
+
+                                <div class="sub-images">
+
+                                    {% for image in item.display_images %}
+
+                                        <img
+                                            class="sub-image"
+                                            src="{{ image.image.url }}"
+                                            alt="{{ item.product_name }}"
+                                            onclick="changeMainImage(
+                                                'main-image-{{ item.id }}',
+                                                '{{ image.image.url }}'
+                                            )"
+                                        >
+
+                                    {% endfor %}
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                    <!-- PRODUCT INFORMATION -->
+                    <div class="product-info">
+
+                        <div class="product-top">
+
+                            <div>
+
+                                <h3 class="product-name">
+                                    {{ item.product_name }}
+                                </h3>
+
+                                <div class="product-id">
+                                    Product ID: {{ item.product.id }}
+                                </div>
+
+                            </div>
+
+
+                            <!-- ITEM STATUS -->
+                            <div>
+
+                                {% if item.display_status == "Pending" %}
+
+                                    <span class="status-badge status-pending">
+                                        Pending
+                                    </span>
+
+                                {% elif item.display_status == "Shipped" %}
+
+                                    <span class="status-badge status-shipped">
+                                        Shipped
+                                    </span>
+
+                                {% elif item.display_status == "Out for Delivery" %}
+
+                                    <span class="status-badge status-out">
+                                        Out for Delivery
+                                    </span>
+
+                                {% elif item.display_status == "Delivered" %}
+
+                                    <span class="status-badge status-delivered">
+                                        Delivered
+                                    </span>
+
+                                {% elif item.display_status == "Cancelled" %}
+
+                                    <span class="status-badge status-cancelled">
+                                        Cancelled
+                                    </span>
+
+                                {% elif item.display_status == "Returned" %}
+
+                                    <span class="status-badge status-returned">
+                                        Returned
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- DESCRIPTION -->
+                        <div class="product-description">
+
+                            {% if item.product.description %}
+
+                                {{ item.product.description }}
+
+                            {% else %}
+
+                                No description available.
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- PRODUCT DETAILS -->
+                        <div class="product-details-grid">
+
+                           <div class="detail-box">
+
+                                <span class="detail-label">
+                                    Size
+                                </span>
+
+                                <span class="detail-value">
+
+                                    {% if item.display_size %}
+                                        {{ item.display_size }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail-box">
+
+                                <span class="detail-label">
+                                    Color
+                                </span>
+
+                                <span class="detail-value">
+
+                                    {% if item.display_color %}
+                                        {{ item.display_color }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail-box">
+
+                                <span class="detail-label">
+                                    Quantity
+                                </span>
+
+                                <span class="detail-value">
+                                    {{ item.quantity }}
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail-box">
+
+                                <span class="detail-label">
+                                    Item Total
+                                </span>
+
+                                <span class="detail-value">
+                                    ₹{{ item.item_total }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PRICE -->
+                        <div class="price-row">
+
+                            <span class="current-price">
+                                ₹{{ item.price }}
+                            </span>
+
+                            {% if item.discount > 0 %}
+
+                                <span class="original-price">
+                                    ₹{% widthratio item.price 1 1 %}
+                                </span>
+
+                                <span class="discount-text">
+                                    Discount: ₹{{ item.discount }}
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <p style="color:rgba(255,255,255,0.55);">
+                No products found in this order.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- ================= TRACK ORDER ================= -->
+
+        <div class="glass-card tracking-card">
+
+        <h2 class="section-title">
+            Track Order
+        </h2>
+
+
+        {% if order.status == "Cancelled" %}
+
+            <div class="cancelled-track">
+
+                <strong>
+                    Order Cancelled
+                </strong>
+
+                This order has been cancelled.
+
+            </div>
+
+
+        {% elif order.status == "Returned" %}
+
+            <div class="returned-track">
+
+                <strong>
+                    Order Returned
+                </strong>
+
+                This order has been returned successfully.
+
+            </div>
+
+
+        {% else %}
+
+            <div class="tracking-wrapper">
+
+                <div class="tracking-line"></div>
+
+
+                <div class="tracking-steps">
+
+
+                    <!-- PENDING -->
+
+                    <div class="
+                        tracking-step
+
+                        {% if order.status == 'Pending' %}
+                            current
+
+                        {% elif order.status == 'Shipped' %}
+                            completed
+
+                        {% elif order.status == 'Out for Delivery' %}
+                            completed
+
+                        {% elif order.status == 'Delivered' %}
+                            completed
+
+                        {% endif %}
+                    ">
+
+                        <div class="tracking-dot">
+                            1
+                        </div>
+
+                        <div class="tracking-label">
+                            Pending
+                        </div>
+
+                    </div>
+
+
+                    <!-- SHIPPED -->
+
+                    <div class="
+                        tracking-step
+
+                        {% if order.status == 'Shipped' %}
+                            current
+
+                        {% elif order.status == 'Out for Delivery' %}
+                            completed
+
+                        {% elif order.status == 'Delivered' %}
+                            completed
+
+                        {% endif %}
+                    ">
+
+                        <div class="tracking-dot">
+                            2
+                        </div>
+
+                        <div class="tracking-label">
+                            Shipped
+                        </div>
+
+                    </div>
+
+
+                    <!-- OUT FOR DELIVERY -->
+
+                    <div class="
+                        tracking-step
+
+                        {% if order.status == 'Out for Delivery' %}
+                            current
+
+                        {% elif order.status == 'Delivered' %}
+                            completed
+
+                        {% endif %}
+                    ">
+
+                        <div class="tracking-dot">
+                            3
+                        </div>
+
+                        <div class="tracking-label">
+                            Out for Delivery
+                        </div>
+
+                    </div>
+
+
+                    <!-- DELIVERED -->
+
+                    <div class="
+                        tracking-step
+
+                        {% if order.status == 'Delivered' %}
+                            current
+                        {% endif %}
+                    ">
+
+                        <div class="tracking-dot">
+                            4
+                        </div>
+
+                        <div class="tracking-label">
+                            Delivered
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+        </div>
+
+
+
+    <!-- ADDRESS + TOTALS -->
+
+    <div class="bottom-grid">
+
+       <!-- DELIVERY ADDRESS -->
+
+<div class="glass-card address-card">
+
+    <h2 class="section-title">
+        Delivery Address
+    </h2>
+
+    <div class="address-text">
+
+        {% if order.address %}
+
+            <!-- ADDRESS TYPE -->
+
+            <strong>
+                {{ order.address.address_type }}
+            </strong>
+
+            <br>
+
+
+            <!-- BUILDING -->
+
+            {{ order.address.building }}
+
+            <br>
+
+
+            <!-- AREA -->
+
+            {{ order.address.area }}
+
+            <br>
+
+
+            <!-- LANDMARK -->
+
+            {% if order.address.landmark %}
+
+                Landmark:
+                {{ order.address.landmark }}
+
+                <br>
+
+            {% endif %}
+
+
+            <!-- CITY + STATE -->
+
+            {{ order.address.city }},
+            {{ order.address.state }}
+
+            <br>
+
+
+            <!-- PINCODE -->
+
+            {{ order.address.pincode }}
+
+            <br>
+
+
+            <!-- COUNTRY -->
+
+            {{ order.address.country }}
+
+        {% else %}
+
+            Address information unavailable.
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+        <!-- ORDER TOTAL -->
+
+        <div class="glass-card total-card">
+
+            <h2 class="section-title">
+                Order Summary
+            </h2>
+
+
+            <div class="total-row">
+
+                <span>
+                    Subtotal
+                </span>
+
+                <span>
+                    ₹{{ order.subtotal }}
+                </span>
+
+            </div>
+
+
+            <div class="total-row discount">
+
+                <span>
+                    Discount
+                </span>
+
+                <span>
+                    - ₹{{ order.discount }}
+                </span>
+
+            </div>
+
+
+            <div class="total-row">
+
+                <span>
+                    Tax
+                </span>
+
+                <span>
+                    ₹{{ order.tax }}
+                </span>
+
+            </div>
+
+
+            <div class="total-row">
+
+                <span>
+                    Shipping
+                </span>
+
+                <span>
+
+                    {% if order.shipping_charge > 0 %}
+
+                        ₹{{ order.shipping_charge }}
+
+                    {% else %}
+
+                        Free
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="total-row grand-total">
+
+                <span>
+                    Total
+                </span>
+
+                <span>
+                    ₹{{ order.total_amount }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+ 
+    <!-- ================= PAGE ACTIONS ================= -->
+
+<div class="page-actions">
+
+    <!-- BACK TO ORDERS -->
+
+   <form
+    method="POST"
+    action="{% url 'orders:view_order' %}"
+>
+    {% csrf_token %}
+
+    <input
+        type="hidden"
+        name="order_id"
+        value="{{ order.id }}"
+    >
+
+    <button
+        type="submit"
+        class="back-btn"
+    >
+        Back to Order
+    </button>
+</form>
+
+
+    <div style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
+    ">
+
+        <!-- RETURN ORDER -->
+
+        {% if can_return_order %}
+
+            <form
+                method="POST"
+                action="{% url 'orders:return_order' %}"
+            >
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="order_id"
+                    value="{{ order.id }}"
+                >
+
+                <button
+                    type="submit"
+                    class="order-btn return-btn"
+                >
+                    Return Order
+                </button>
+
+            </form>
+
+        {% endif %}
+
+
+        <!-- CANCEL ORDER -->
+
+        {% if can_cancel_order %}
+
+            <form
+                method="POST"
+                action="{% url 'orders:cancel_order' %}"
+            >
+
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="order_id"
+                    value="{{ order.id }}"
+                >
+
+                <button
+                    type="submit"
+                    class="order-btn cancel-btn"
+                >
+                    Cancel Order
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+    function changeMainImage(imageId, imageUrl) {
+
+        const image = document.getElementById(imageId);
+
+        if (image) {
+            image.src = imageUrl;
+        }
+
+    }
+
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,1671 @@
+{% extends 'user_base.html' %}
+{% load static %}
+
+{% block title %}
+Home - Vertex
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+/* =========================================================
+   HERO SECTION
+========================================================= */
+
+.hero-section {
+    position: relative;
+    overflow: hidden;
+    background: #18121f;
+}
+
+/* =========================================================
+   CAROUSEL
+========================================================= */
+
+.hero-carousel {
+    position: relative;
+}
+
+.hero-carousel .carousel-item {
+    min-height: 520px;
+}
+
+.hero-slide {
+    position: relative;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+}
+
+/* =========================================================
+   HERO BACKGROUND
+========================================================= */
+
+.hero-slide-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.hero-slide-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* =========================================================
+   HERO OVERLAY
+========================================================= */
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(20, 12, 28, 0.88) 0%,
+            rgba(20, 12, 28, 0.62) 45%,
+            rgba(20, 12, 28, 0.18) 100%
+        );
+}
+
+/* =========================================================
+   HERO CONTENT
+========================================================= */
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 60px 0;
+}
+
+.hero-content-inner {
+    max-width: 600px;
+}
+
+.hero-content h1 {
+    color: #ffffff;
+    font-size: 48px;
+    line-height: 1.15;
+    font-weight: 700;
+    margin-bottom: 20px;
+
+    text-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.hero-content p {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 540px;
+}
+
+.hero-content-inner p {
+    width: 100%;
+    max-width: 560px;
+    text-align: left;
+    line-height: 1.7;
+    margin-left: 0;
+    margin-right: 0;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+/* =========================================================
+   HERO BUTTON
+========================================================= */
+
+.hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 11px 28px;
+    border-radius: 25px;
+
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+
+    text-decoration: none !important;
+
+    transition: all 0.35s ease;
+}
+
+.hero-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+/* =========================================================
+   CAROUSEL CONTROLS
+========================================================= */
+
+.hero-carousel .carousel-control-prev,
+.hero-carousel .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 1;
+    z-index: 5;
+}
+
+.hero-carousel .carousel-control-prev {
+    left: 20px;
+}
+
+.hero-carousel .carousel-control-next {
+    right: 20px;
+}
+
+.hero-carousel .carousel-control-prev-icon,
+.hero-carousel .carousel-control-next-icon {
+    width: 42px;
+    height: 42px;
+
+    background-color: rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+
+    background-size: 45%;
+    backdrop-filter: blur(5px);
+}
+
+/* =========================================================
+   PRODUCT SECTION
+========================================================= */
+
+.product-section {
+    position: relative;
+
+    padding: 65px 0 85px;
+
+    background-image: url("{% static 'images/hero.png' %}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    background-color: #2d1b3d;
+
+    overflow: hidden;
+}
+
+/* =========================================================
+   PRODUCT SECTION OVERLAY
+========================================================= */
+
+.product-section::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(45, 27, 61, 0.38),
+            rgba(45, 27, 61, 0.25),
+            rgba(20, 12, 30, 0.38)
+        );
+
+    z-index: 0;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.product-section .container {
+    position: relative;
+
+    z-index: 1;
+
+    background: transparent !important;
+}
+
+/* =========================================================
+   PRODUCT HEADING
+========================================================= */
+
+.product-heading {
+    text-align: center;
+
+    margin-bottom: 38px;
+
+    background: transparent !important;
+}
+
+.product-heading h2 {
+    margin: 0;
+
+    color: rgba(255, 255, 255, 0.94);
+
+    font-size: 30px;
+
+    font-weight: 600;
+
+    letter-spacing: 0.4px;
+
+    text-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.product-heading p {
+    margin: 9px 0 0;
+
+    color: rgba(255, 255, 255, 0.62);
+
+    font-size: 14px;
+
+    letter-spacing: 0.2px;
+}
+
+/* =========================================================
+   PRODUCT GRID
+========================================================= */
+
+.product-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+    gap: 24px;
+
+    background: transparent !important;
+}
+
+/* =========================================================
+   PRODUCT CARD
+========================================================= */
+
+.product-card {
+    width: 100%;
+
+    height: 365px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(195, 145, 83, 0.533),
+            rgba(172, 131, 208, 0.54)
+        );
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    display: flex;
+
+    flex-direction: column;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.16);
+
+    box-shadow:
+        0 10px 30px rgba(15, 7, 22, 0.22);
+
+    backdrop-filter: blur(3px);
+
+    -webkit-backdrop-filter: blur(3px);
+
+    transition:
+        transform 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+
+    border-color:
+        rgba(255, 255, 255, 0.32);
+
+    box-shadow:
+        0 15px 35px rgba(15, 7, 22, 0.30);
+}
+
+/* =========================================================
+   PRODUCT IMAGE
+========================================================= */
+
+.product-image {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    height: 185px;
+
+    min-height: 185px;
+
+    padding: 12px;
+
+    background:
+        rgba(45, 27, 61, 0.22);
+
+    overflow: hidden;
+
+    position: relative;
+
+    text-decoration: none;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.09);
+}
+
+.product-image img {
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+    transition:
+        transform 0.4s ease,
+        filter 0.4s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.045);
+
+    filter:
+        drop-shadow(
+            0 7px 12px rgba(0, 0, 0, 0.20)
+        );
+}
+
+/* =========================================================
+   PRODUCT DETAILS
+========================================================= */
+
+.product-details {
+    flex: 1;
+
+    padding: 13px 15px 14px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 0;
+
+    background:
+        rgba(45, 27, 61, 0.16);
+}
+
+/* =========================================================
+   PRODUCT NAME
+========================================================= */
+
+.product-name {
+    margin: 0 0 5px;
+
+    height: 38px;
+
+    overflow: hidden;
+
+    color: rgba(255, 255, 255, 0.94);
+
+    font-size: 14px;
+
+    line-height: 19px;
+
+    font-weight: 600;
+
+    display: -webkit-box;
+
+    -webkit-box-orient: vertical;
+
+    -webkit-line-clamp: 2;
+}
+
+.product-name:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.product-price {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin-bottom: 4px;
+
+    color: rgba(255, 255, 255, 0.94);
+
+    font-size: 17px;
+
+    font-weight: 600;
+}
+
+.product-price .old-price {
+    color:
+        rgba(255, 255, 255, 0.43);
+
+    font-size: 12px;
+
+    font-weight: 400;
+}
+
+/* =========================================================
+   RATING
+========================================================= */
+
+.product-rating {
+    display: flex;
+
+    align-items: center;
+
+    gap: 2px;
+
+    height: 20px;
+
+    margin-bottom: 7px;
+}
+
+.product-rating i {
+    color: rgba(245, 201, 106, 0.78);
+
+    font-size: 11px;
+}
+
+.rating-text {
+    color:
+        rgba(255, 255, 255, 0.45);
+
+    font-size: 11px;
+
+    margin-left: 4px;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.product-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: auto;
+
+    padding-top: 9px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.09);
+}
+
+/* =========================================================
+   ADD TO CART
+========================================================= */
+
+.add-cart-form {
+    flex: 1;
+
+    margin: 0;
+}
+
+.add-to-cart-btn {
+    width: 100%;
+
+    height: 34px;
+
+    padding: 0 10px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.55);
+
+    border-radius: 18px;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.92) !important;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    transition:
+        border-color 0.3s ease,
+        color 0.3s ease,
+        background 0.3s ease;
+}
+
+.add-to-cart-btn:hover:not(:disabled) {
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border-color:
+        rgba(255, 255, 255, 0.95);
+
+    color:
+        #ffffff !important;
+}
+
+.add-to-cart-btn:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+}
+
+/* =========================================================
+   VIEW DETAILS
+========================================================= */
+
+.view-details-btn {
+    flex: 1;
+
+    height: 34px;
+
+    padding: 0 8px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.42);
+
+    border-radius: 18px;
+
+    background: transparent;
+
+    color:
+        rgba(255, 255, 255, 0.82) !important;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-decoration: none !important;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition:
+        border-color 0.3s ease,
+        color 0.3s ease,
+        background 0.3s ease;
+}
+
+.view-details-btn:hover {
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border-color:
+        rgba(255, 255, 255, 0.90);
+
+    color:
+        #ffffff !important;
+}
+
+/* =========================================================
+   WISHLIST
+========================================================= */
+
+.wishlist-form {
+    flex-shrink: 0;
+
+    margin: 0;
+}
+
+.wishlist-btn {
+    width: 34px;
+
+    height: 34px;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.35);
+
+    background: transparent;
+
+    color:
+        rgba(255, 255, 255, 0.78);
+
+    font-size: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.3s ease,
+        color 0.3s ease,
+        background 0.3s ease;
+}
+
+.wishlist-btn:hover {
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border-color:
+        rgba(255, 255, 255, 0.90);
+
+    color:
+        #ffffff;
+}
+
+/* =========================================================
+   NO PRODUCTS FOUND
+========================================================= */
+
+.no-products-message {
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    min-height: 250px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 60px 20px;
+
+    background: transparent !important;
+
+    color: #ffffff !important;
+}
+
+.no-products-message i {
+    display: block;
+
+    margin-bottom: 18px;
+
+    font-size: 42px;
+
+    color: #ffffff !important;
+
+    opacity: 0.90;
+}
+
+.no-products-message h4 {
+    display: block;
+
+    margin: 0 0 10px;
+
+    padding: 0;
+
+    color: #ffffff !important;
+
+    font-size: 22px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+    text-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.no-products-message p {
+    display: block;
+
+    margin: 0;
+
+    padding: 0;
+
+    color: #ffffff !important;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    opacity: 0.78;
+}
+
+/* =========================================================
+   ACCOUNT DROPDOWN
+========================================================= */
+
+.navbar-main .dropdown-menu {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(73, 46, 91, 0.72),
+            rgba(45, 27, 61, 0.68)
+        ) !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+
+    border-radius: 12px !important;
+
+    box-shadow:
+        0 14px 35px rgba(20, 12, 30, 0.30) !important;
+
+    backdrop-filter: blur(8px);
+
+    -webkit-backdrop-filter: blur(8px);
+
+    padding: 8px !important;
+}
+
+.navbar-main .dropdown-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.78) !important;
+
+    background: transparent !important;
+
+    border-radius: 8px;
+
+    padding: 10px 13px;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        padding-left 0.2s ease;
+}
+
+.navbar-main .dropdown-menu .dropdown-item:hover,
+.navbar-main .dropdown-menu .dropdown-item:focus {
+    color: #ffffff !important;
+
+    background:
+        rgba(255, 255, 255, 0.11) !important;
+
+    padding-left: 17px;
+}
+
+.navbar-main .dropdown-menu .dropdown-item i {
+    color: rgba(255, 255, 255, 0.68);
+
+    transition: color 0.2s ease;
+}
+
+.navbar-main .dropdown-menu .dropdown-item:hover i {
+    color: #ffffff;
+}
+
+.navbar-main .dropdown-menu .dropdown-divider {
+    border-top-color:
+        rgba(255, 255, 255, 0.10) !important;
+
+    margin: 6px 4px;
+}
+
+.navbar-main .dropdown-menu .dropdown-header {
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .hero-carousel .carousel-item,
+    .hero-slide {
+        min-height: 450px;
+    }
+
+    .hero-content h1 {
+        font-size: 38px;
+    }
+
+    .product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 767px) {
+
+    .hero-carousel .carousel-item,
+    .hero-slide {
+        min-height: 420px;
+    }
+
+    .hero-content {
+        padding: 40px 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 30px;
+    }
+
+    .hero-content p {
+        font-size: 14px;
+    }
+
+    .product-section {
+        padding: 45px 0 55px;
+    }
+
+    .product-heading {
+        margin-bottom: 28px;
+    }
+
+    .product-heading h2 {
+        font-size: 25px;
+    }
+
+    .product-heading p {
+        font-size: 13px;
+    }
+
+    .product-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 14px;
+    }
+
+    .product-card {
+        height: 335px;
+    }
+
+    .product-image {
+        height: 155px;
+        min-height: 155px;
+    }
+
+    .no-products-message {
+        min-height: 220px;
+
+        padding: 50px 15px;
+    }
+}
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .hero-carousel .carousel-item,
+    .hero-slide {
+        min-height: 380px;
+    }
+
+    .hero-content h1 {
+        font-size: 25px;
+    }
+
+    .hero-content p {
+        font-size: 13px;
+    }
+
+    .hero-carousel .carousel-control-prev,
+    .hero-carousel .carousel-control-next {
+        display: none;
+    }
+
+    .product-card {
+        height: 320px;
+    }
+
+    .product-image {
+        height: 140px;
+        min-height: 140px;
+    }
+
+    .product-details {
+        padding: 10px;
+    }
+
+    .product-name {
+        font-size: 12px;
+        line-height: 17px;
+        height: 34px;
+    }
+
+    .product-price {
+        font-size: 15px;
+    }
+
+    .add-to-cart-btn,
+    .view-details-btn {
+        font-size: 10px;
+        padding: 0 5px;
+    }
+
+    .wishlist-btn {
+        width: 31px;
+        height: 31px;
+    }
+
+    .no-products-message {
+        min-height: 200px;
+
+        padding: 40px 12px;
+    }
+
+    .no-products-message i {
+        font-size: 35px;
+    }
+
+    .no-products-message h4 {
+        font-size: 19px;
+    }
+
+    .no-products-message p {
+        font-size: 13px;
+    }
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================================================
+     HERO SECTION
+========================================================= -->
+
+<section class="hero-section">
+
+
+<div
+    id="customCarousel1"
+    class="carousel slide hero-carousel"
+    data-bs-ride="carousel"
+    data-bs-interval="5000"
+    data-bs-pause="hover"
+>
+
+    <div class="carousel-inner">
+
+        <!-- SLIDE 1 -->
+        <div class="carousel-item active">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Stylish Watches</h1>
+
+                        <p>
+                            Discover a curated collection of elegant
+                            wristwatches designed to combine timeless
+                            style, quality and everyday practicality.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 2 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Affordable Luxury</h1>
+
+                        <p>
+                            Premium-looking watches at prices that make
+                            everyday luxury accessible.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 3 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Wide Selection</h1>
+
+                        <p>
+                            From classic analog designs to sophisticated
+                            chronographs and modern smartwatches.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 4 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Customer-Centric</h1>
+
+                        <p>
+                            Enjoy simple navigation, secure shopping and
+                            reliable after-sales support.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 5 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Trusted Brands</h1>
+
+                        <p>
+                            Shop with confidence through authentic,
+                            reliable and carefully selected watch brands.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 6 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Timeless Elegance</h1>
+
+                        <p>
+                            Discover sophisticated timepieces crafted to
+                            complement your personal style and bring
+                            timeless elegance to every occasion.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 7 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Precision &amp; Performance</h1>
+
+                        <p>
+                            Experience dependable timekeeping with carefully
+                            selected watches designed for precision,
+                            performance and lasting reliability.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 8 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Designed For You</h1>
+
+                        <p>
+                            Find a watch that reflects your personality,
+                            whether you prefer classic sophistication,
+                            contemporary design or everyday versatility.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 9 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Watches For Every Occasion</h1>
+
+                        <p>
+                            From professional moments to casual weekends
+                            and special celebrations, choose a timepiece
+                            that fits every part of your life.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SLIDE 10 -->
+        <div class="carousel-item">
+
+            <div class="hero-slide">
+
+                <div class="hero-slide-bg">
+                    <div class="hero-overlay"></div>
+                </div>
+
+                <div class="container hero-content">
+
+                    <div class="hero-content-inner">
+
+                        <h1>Your Time, Your Style</h1>
+
+                        <p>
+                            Make every moment count with a carefully chosen
+                            watch that combines refined design, dependable
+                            quality and everyday comfort.
+                        </p>
+
+                        <a
+                            href="https://www.tissotwatches.com/en-in"
+                            class="hero-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Explore Collection
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PREVIOUS -->
+    <button
+        class="carousel-control-prev"
+        type="button"
+        data-bs-target="#customCarousel1"
+        data-bs-slide="prev"
+    >
+        <span
+            class="carousel-control-prev-icon"
+            aria-hidden="true">
+        </span>
+
+        <span class="visually-hidden">
+            Previous
+        </span>
+    </button>
+
+
+    <!-- NEXT -->
+    <button
+        class="carousel-control-next"
+        type="button"
+        data-bs-target="#customCarousel1"
+        data-bs-slide="next"
+    >
+        <span
+            class="carousel-control-next-icon"
+            aria-hidden="true">
+        </span>
+
+        <span class="visually-hidden">
+            Next
+        </span>
+    </button>
+
+</div>
+
+</section>
+
+<!-- =========================================================
+     TOP SALE PRODUCTS
+========================================================= -->
+
+<section class="product-section">
+
+<div class="container">
+
+    <!-- Heading -->
+    <div class="product-heading">
+
+        <h2>
+            Top Sale Watches
+        </h2>
+
+        <p>
+            Discover our best discounted watches
+        </p>
+
+    </div>
+
+
+    <!-- Product Grid -->
+    <div class="product-grid">
+
+        {% for product in products %}
+
+            <!-- PRODUCT CARD -->
+            <div class="product-card">
+
+                <!-- Product Image -->
+                <a
+                    href="{% url 'products:products_details' product.name %}"
+                    class="product-image"
+                >
+
+                    {% if product.main_image %}
+
+                        <img
+                            src="{{ product.main_image.image.url }}"
+                            alt="{{ product.name }}"
+                        >
+
+                    {% else %}
+
+                        <img
+                            src="{% static 'images/no-image.png' %}"
+                            alt="No image available"
+                        >
+
+                    {% endif %}
+
+                </a>
+
+
+                <!-- Product Details -->
+                <div class="product-details">
+
+                    <!-- Product Name -->
+                    <a
+                        href="{% url 'products:products_details' product.name %}"
+                        style="text-decoration:none;"
+                    >
+
+                        <h6 class="product-name">
+                            {{ product.name }}
+                        </h6>
+
+                    </a>
+
+
+                    <!-- Price -->
+                    <div class="product-price">
+
+                        ₹{{ product.discount_price|floatformat:2 }}
+
+                        <del class="old-price">
+                            ₹{{ product.sale_price|floatformat:2 }}
+                        </del>
+
+                    </div>
+
+
+                    <!-- Rating -->
+                    <div class="product-rating">
+
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+                        <i class="fa fa-star"></i>
+
+                        <span class="rating-text">
+                            (5.0)
+                        </span>
+
+                    </div>
+
+
+                    <!-- Actions -->
+                    <div class="product-actions">
+
+                        <!-- Add To Cart -->
+                        {% if product.total_stock > 0 %}
+
+                            <form
+                                method="POST"
+                                action="{% url 'cart:add_to_cart' %}"
+                                class="add-cart-form"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="product_id"
+                                    value="{{ product.id }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="add-to-cart-btn"
+                                >
+
+                                    <i class="fas fa-cart-plus"></i>
+
+                                    Add to Cart
+
+                                </button>
+
+                            </form>
+
+                        {% else %}
+
+                            <button
+                                type="button"
+                                class="add-to-cart-btn"
+                                disabled
+                            >
+                                Out of Stock
+                            </button>
+
+                        {% endif %}
+
+
+                        <!-- View Details -->
+                        <a
+                            href="{% url 'products:products_details' product.name %}"
+                            class="view-details-btn"
+                        >
+                            View Details
+                        </a>
+
+
+                        <!-- Wishlist -->
+                        <form
+                            method="POST"
+                            action="{% url 'cart:add_to_wishlist' %}"
+                            class="wishlist-form"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="product_id"
+                                value="{{ product.id }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="wishlist-btn"
+                                title="Add to Wishlist"
+                                aria-label="Add {{ product.name }} to wishlist"
+                            >
+                                ♡
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <!-- =================================================
+                 NO PRODUCTS FOUND
+            ================================================== -->
+
+            <div class="no-products-message">
+
+                <i class="fas fa-box-open"></i>
+
+                <h4>
+                    No products found
+                </h4>
+
+                <p>
+                    There are currently no sale products available.
+                    Please check back later.
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

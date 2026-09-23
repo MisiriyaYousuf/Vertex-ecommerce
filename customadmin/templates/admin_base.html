@@ -1,0 +1,324 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/admin_base.css' %}">
+    {% block extra_css %}{% endblock %}
+    <style>
+        
+        body {
+            display: flex;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding-top: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            background: #2c3e50;
+        }
+
+        .sidebar .brand {
+            display: block;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ecf0f1;
+            padding: 15px 0;
+            text-decoration: none;
+        }
+
+        .sidebar .brand:hover {
+            color: #ecf0f1;
+        }
+
+        .sidebar hr {
+            border-color: #34495e;
+            margin: 10px 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px 25px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #34495e;
+            color: #fff;
+            padding-left: 30px;
+        }
+
+        .sidebar a i {
+            width: 20px;
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        .sidebar .collapse a {
+            padding-left: 45px;
+            font-size: 0.9rem;
+        }
+
+        .sidebar .collapse a:hover,
+        .sidebar .collapse a.active {
+            padding-left: 55px;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            min-height: 90vh;
+            overflow: hidden;
+        }
+
+        .admin-navbar {
+            background: #394f66 !important;
+            border-radius: 10px 10px 0 0;
+            padding: 12px 25px;
+        }
+
+        .admin-navbar .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .admin-navbar .navbar-brand i {
+            margin-right: 10px;
+        }
+
+        .admin-navbar .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            transition: color 0.3s;
+        }
+
+        .admin-navbar .nav-link:hover {
+            color: white !important;
+        }
+
+        .admin-navbar .nav-link i {
+            margin-right: 5px;
+        }
+
+        .page-content {
+            padding: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .content {
+                margin-left: 200px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                display: none;
+            }
+            .content {
+                margin-left: 0;
+                padding: 10px;
+            }
+            .admin-navbar {
+                border-radius: 0;
+            }
+        }
+
+        .text-muted-light {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .badge-count {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            padding: 5px 10px;
+        }
+
+        @media (max-width: 576px) {
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <a href="{% url 'customadmin:dashboard' %}" class="brand">
+            <i class="fas fa-crown me-2"></i>Admin Panel
+        </a>
+        <hr>
+
+        <a href="{% url 'customadmin:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-pie"></i>Dashboard
+        </a>
+
+        <a href="{% url 'customadmin:user_management' %}" class="{% if request.resolver_match.url_name == 'user_management' %}active{% endif %}">
+            <i class="fas fa-users"></i>User Management
+        </a>
+
+        <a href="#" data-bs-toggle="collapse" data-bs-target="#productManagementMenu" 
+           class="{% if request.resolver_match.url_name in 'list_product,add_product,edit_product' %}active{% endif %}">
+            <i class="fas fa-box"></i>Product Management
+            <i class="fas fa-chevron-down float-end mt-1" style="font-size: 12px;"></i>
+        </a>
+        <div class="collapse {% if request.resolver_match.url_name in 'list_product,add_product,edit_product' %}show{% endif %}" id="productManagementMenu">
+            <a href="{% url 'customadmin:list_product' %}" class="{% if request.resolver_match.url_name == 'list_product' %}active{% endif %}">
+                <i class="fas fa-list"></i>List Products
+            </a>
+            <a href="{% url 'customadmin:add_product' %}" class="{% if request.resolver_match.url_name == 'add_product' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i>Add Product
+            </a>
+        </div>
+
+        <a href="{% url 'customadmin:category_management' %}" class="{% if request.resolver_match.url_name in 'category_management,edit_category' %}active{% endif %}">
+            <i class="fas fa-tags"></i>Category Management
+        </a>
+
+        <a
+            href="{% url 'customadmin:order_management' %}"
+            class="nav-link"
+        >
+            <i class="fas fa-shopping-cart"></i>
+            <span>Order Management</span>
+        </a>
+
+        <a
+            href="{% url 'customadmin:inventory_management' %}"
+            class="nav-link"
+        >
+            <i class="fas fa-boxes"></i>
+            <span>Inventory</span>
+        </a>
+
+        <hr>
+        <a href="{% url 'customadmin:logout' %}">
+            <i class="fas fa-sign-out-alt"></i>Logout
+        </a>
+    </div>
+
+    <div class="content">
+        <div class="main-card">
+
+            <nav class="navbar navbar-expand-lg admin-navbar">
+                <div class="container-fluid">
+    
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <span class="navbar-brand">
+                        <i class="fas fa-{% block navbar_icon %}cog{% endblock %}"></i>
+                        {% block navbar_title %}Admin Panel{% endblock %}
+                    </span>
+
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav ms-auto">
+                            {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <span class="nav-link">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    {{ user.username }}
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'customadmin:logout' %}">
+                                    <i class="fas fa-power-off"></i> Logout
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="page-content">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.style.display === 'block' || sidebar.style.display === '') {
+                sidebar.style.display = 'none';
+            } else {
+                sidebar.style.display = 'block';
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.sidebar-toggle');
+            if (window.innerWidth <= 576) {
+                if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+                    sidebar.style.display = 'none';
+                }
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 576) {
+                sidebar.style.display = 'block';
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

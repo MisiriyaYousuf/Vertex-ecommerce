@@ -1,0 +1,911 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}
+User Management - Admin Panel
+{% endblock %}
+
+{% block navbar_icon %}
+users
+{% endblock %}
+
+{% block navbar_title %}
+User Management
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   USER MANAGEMENT PAGE
+========================================================= */
+
+.user-management-page {
+    padding: 25px;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.user-management-header {
+    margin-bottom: 25px;
+}
+
+.user-management-header h5 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #26384a;
+    margin-bottom: 5px;
+}
+
+.user-management-header p {
+    font-size: 14px;
+    color: #7b8794;
+}
+
+
+/* =========================================================
+   TOTAL USERS BUTTON
+========================================================= */
+
+.total-users-btn {
+    background: #315170;
+    color: #ffffff;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SEARCH AREA
+========================================================= */
+
+.user-search-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.user-search-wrapper i {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #9aa5af;
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.user-search-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 45px 0 40px;
+    border: 1px solid #dce2e8;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #344454;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.user-search-input::placeholder {
+    color: #9aa4ad;
+}
+
+.user-search-input:focus {
+    border-color: #315170;
+    box-shadow: 0 0 0 3px rgba(49, 81, 112, 0.09);
+}
+
+.user-search-btn {
+    height: 42px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 7px;
+    background: #315170;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.user-search-btn:hover {
+    background: #263f58;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.user-clear-btn {
+    height: 42px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid #dce2e8;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #66727d;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.user-clear-btn:hover {
+    border-color: #315170;
+    background: #f7f9fb;
+    color: #315170;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   TABLE CONTAINER
+========================================================= */
+
+.user-table-wrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+    overflow-x: auto;
+    padding: 0;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.user-table-wrapper .table {
+    margin-bottom: 0;
+    min-width: 900px;
+}
+
+.user-table-wrapper thead {
+    background: #f5f7fa;
+}
+
+.category-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 6px;
+    color: #315170;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.user-table-wrapper thead th {
+    color: #465568;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 16px 15px;
+    border-bottom: 1px solid #e5e9ef;
+    white-space: nowrap;
+}
+
+.user-table-wrapper tbody td {
+    padding: 15px;
+    vertical-align: middle;
+    color: #495057;
+    font-size: 14px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.user-table-wrapper tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.user-table-wrapper tbody tr {
+    transition: all 0.2s ease;
+}
+
+.user-table-wrapper tbody tr:hover {
+    background-color: #f9fbfd;
+}
+
+
+/* =========================================================
+   USERNAME
+========================================================= */
+
+.user-table-wrapper tbody td strong {
+    color: #26384a;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+========================================================= */
+
+.user-status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.user-status-active {
+    background: #e7f7ee;
+    color: #198754;
+}
+
+.user-status-blocked {
+    background: #fdeaea;
+    color: #dc3545;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
+.user-action-btn {
+    min-width: 82px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.user-block-btn {
+    background: #dc3545;
+    color: #ffffff;
+}
+
+.user-block-btn:hover {
+    background: #bb2d3b;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.user-unblock-btn {
+    background: #198754;
+    color: #ffffff;
+}
+
+.user-unblock-btn:hover {
+    background: #157347;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   PAGINATION AREA
+========================================================= */
+
+.user-pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-top: 1px solid #edf0f3;
+    background: #ffffff;
+}
+
+.user-pagination-info {
+    font-size: 13px;
+    color: #7b8794;
+}
+
+.user-pagination-info strong {
+    color: #315170;
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.user-pagination {
+    margin: 0;
+    gap: 5px;
+}
+
+.user-pagination .page-item {
+    margin: 0;
+}
+
+.user-pagination .page-link {
+    border: 1px solid #dee2e6;
+    color: #315170;
+    background: #ffffff;
+    min-width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+
+    padding: 0 10px;
+
+    transition: all 0.2s ease;
+}
+
+.user-pagination .page-link:hover {
+    background: #315170;
+    border-color: #315170;
+    color: #ffffff;
+}
+
+.user-pagination .page-item.active .page-link {
+    background: #315170;
+    border-color: #315170;
+    color: #ffffff;
+}
+
+.user-pagination .page-item.disabled .page-link {
+    background: #f5f6f8;
+    border-color: #e5e7eb;
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.user-empty-state {
+    padding: 45px 20px !important;
+    text-align: center;
+    color: #7b8794;
+}
+
+.user-empty-state p {
+    margin: 0;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .user-management-page {
+        padding: 15px;
+    }
+
+    .user-management-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+
+    .total-users-btn {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
+
+    .user-search-btn,
+    .user-clear-btn {
+        width: 100%;
+    }
+
+    .user-table-wrapper {
+        border-radius: 8px;
+    }
+
+    .user-pagination-wrapper {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .user-pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .user-management-header h5 {
+        font-size: 19px;
+    }
+
+    .user-pagination .page-link {
+        min-width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+}
+
+</style>
+
+
+<!-- =========================================================
+     USER MANAGEMENT PAGE
+========================================================= -->
+
+<div class="user-management-page">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="user-management-header d-flex justify-content-between align-items-center">
+
+        <div>
+            
+            <div class="category-eyebrow">
+                <i class="fas fa-layer-group"></i>
+                USER MANAGEMENT
+            </div>
+            <h5 class="mb-0">
+                Manage Users
+            </h5>
+
+            <p class="text-muted mb-0">
+                View and manage all registered users.
+            </p>
+
+        </div>
+
+
+        <!-- TOTAL USERS -->
+
+        <button 
+            type="button" 
+            class="total-users-btn"
+        >
+            Total Users : {{ total_users }}
+        </button>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+    <form
+        method="GET"
+        action="{% url 'customadmin:user_management' %}"
+        class="mb-0"
+    >
+
+        <div class="row g-2 align-items-center">
+
+            <!-- SEARCH INPUT -->
+
+            <div class="col-lg-8 col-md-7 col-12">
+
+                <div class="user-search-wrapper mb-0">
+
+                    <i class="fas fa-search"></i>
+
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ search }}"
+                        class="user-search-input"
+                        placeholder="Search by username, email, first name, last name or phone..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- SEARCH BUTTON -->
+
+            <div class="col-lg-2 col-md-2 col-12">
+
+                <button
+                    type="submit"
+                    class="user-search-btn w-100"
+                >
+                    <i class="fas fa-search me-1"></i>
+                    Search
+                </button>
+
+            </div>
+
+
+            <!-- CLEAR BUTTON -->
+
+            <div class="col-lg-2 col-md-3 col-12">
+
+                <a
+                    href="{% url 'customadmin:user_management' %}"
+                    class="user-clear-btn w-100"
+                >
+                    <i class="fas fa-times"></i>
+                    Clear
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+
+    <!-- =====================================================
+         USER TABLE
+    ====================================================== -->
+
+    <div class="user-table-wrapper mt-4">
+
+        <table class="table table-hover">
+
+
+            <!-- TABLE HEADER -->
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Sl.no
+                    </th>
+
+                    <th>
+                        Username
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Phone
+                    </th>
+
+                    <th>
+                        Joined
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+
+            <!-- TABLE BODY -->
+
+            <tbody>
+
+
+                {% for profile in profiles %}
+
+                <tr>
+
+
+                    <!-- SL.NO -->
+
+                    <td>
+                        {{ profiles.start_index|add:forloop.counter0 }}
+                    </td>
+
+
+
+                    <!-- USERNAME -->
+
+                    <td>
+
+                        <strong>
+                            {{ profile.user.username }}
+                        </strong>
+
+                    </td>
+
+
+
+                    <!-- EMAIL -->
+
+                    <td>
+                        {{ profile.user.email }}
+                    </td>
+
+
+
+                    <!-- PHONE -->
+
+                    <td>
+                        {{ profile.phone }}
+                    </td>
+
+
+
+                    <!-- JOINED -->
+
+                    <td>
+                        {{ profile.user.date_joined|date:"M d, Y" }}
+                    </td>
+
+
+
+                    <!-- STATUS -->
+
+                    <td>
+
+                        {% if profile.blocked %}
+
+                            <span class="user-status-badge user-status-blocked">
+                                Blocked
+                            </span>
+
+                        {% else %}
+
+                            <span class="user-status-badge user-status-active">
+                                Active
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+
+                    <!-- ACTION -->
+
+                    <td>
+
+                        {% if profile.blocked %}
+
+
+                            <!-- =========================
+                                 UNBLOCK USER
+                            ========================== -->
+
+                            <form
+                                method="POST"
+                                action="{% url 'customadmin:unblock_user' %}"
+                                style="display:inline;"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="profile_id"
+                                    value="{{ profile.id }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="user-action-btn user-unblock-btn"
+                                >
+                                    Unblock
+                                </button>
+
+                            </form>
+
+
+                        {% else %}
+
+
+                            <!-- =========================
+                                 BLOCK USER
+                            ========================== -->
+
+                            <form
+                                method="POST"
+                                action="{% url 'customadmin:block_user' %}"
+                                style="display:inline;"
+                            >
+
+                                {% csrf_token %}
+
+                                <input
+                                    type="hidden"
+                                    name="profile_id"
+                                    value="{{ profile.id }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="user-action-btn user-block-btn"
+                                >
+                                    Block
+                                </button>
+
+                            </form>
+
+
+                        {% endif %}
+
+                    </td>
+
+
+                </tr>
+
+
+                {% empty %}
+
+
+                <!-- =================================================
+                     EMPTY STATE
+                ================================================== -->
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="user-empty-state"
+                    >
+
+                        <p>
+                            {% if search %}
+                                No users found matching "{{ search }}".
+                            {% else %}
+                                No users found.
+                            {% endif %}
+                        </p>
+
+                    </td>
+
+                </tr>
+
+
+                {% endfor %}
+
+
+            </tbody>
+
+        </table>
+
+
+
+        <!-- =====================================================
+             PAGINATION
+        ====================================================== -->
+
+        {% if profiles.paginator.num_pages > 1 %}
+
+        <div class="user-pagination-wrapper">
+
+            <!-- PAGINATION NAVIGATION -->
+
+            <nav aria-label="User pagination">
+
+                <ul class="pagination user-pagination">
+
+
+                    <!-- PREVIOUS -->
+
+                    {% if profiles.has_previous %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link"
+                                href="?search={{ search|urlencode }}&page={{ profiles.previous_page_number }}"
+                            >
+                                Previous
+                            </a>
+
+                        </li>
+
+                    {% else %}
+
+                        <li class="page-item disabled">
+
+                            <span class="page-link">
+                                Previous
+                            </span>
+
+                        </li>
+
+                    {% endif %}
+
+
+
+                    <!-- PAGE NUMBERS -->
+
+                    {% for num in profiles.paginator.page_range %}
+
+                        {% if profiles.number == num %}
+
+                            <li class="page-item active">
+
+                                <span class="page-link">
+                                    {{ num }}
+                                </span>
+
+                            </li>
+
+                        {% else %}
+
+                            <li class="page-item">
+
+                                <a
+                                    class="page-link"
+                                    href="?search={{ search|urlencode }}&page={{ num }}"
+                                >
+                                    {{ num }}
+                                </a>
+
+                            </li>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+
+
+                    <!-- NEXT -->
+
+                    {% if profiles.has_next %}
+
+                        <li class="page-item">
+
+                            <a
+                                class="page-link"
+                                href="?search={{ search|urlencode }}&page={{ profiles.next_page_number }}"
+                            >
+                                Next
+                            </a>
+
+                        </li>
+
+                    {% else %}
+
+                        <li class="page-item disabled">
+
+                            <span class="page-link">
+                                Next
+                            </span>
+
+                        </li>
+
+                    {% endif %}
+
+
+                </ul>
+
+            </nav>
+
+
+        </div>
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+
+{% endblock %}

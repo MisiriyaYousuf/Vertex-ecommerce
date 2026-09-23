@@ -1,0 +1,898 @@
+{% extends 'user_base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Vertex{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+.profile-page {
+    background: transparent;
+    min-height: 85vh;
+    padding: 50px 0;
+}
+
+.profile-wrapper {
+    max-width: 1100px;
+    margin: auto;
+}
+
+.avatar-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+}
+
+
+/* =========================
+   PROFILE IMAGE
+========================= */
+
+.avatar-container .profile-image,
+.avatar-container .default-profile {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.75);
+    box-shadow:
+        0 5px 20px rgba(20, 12, 30, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.10);
+}
+
+.default-profile {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.10);
+    color: rgba(255, 255, 255, 0.80);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: auto;
+
+    font-size: 42px;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 5px 20px rgba(20, 12, 30, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+
+/* =========================
+   PAGE HEADER
+========================= */
+
+.profile-page-header {
+    margin-bottom: 25px;
+}
+
+.profile-page-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.profile-page-header p {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 14px;
+}
+
+
+/* =========================
+   MAIN LAYOUT
+========================= */
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 25px;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.profile-sidebar {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 46, 91, 0.58),
+            rgba(45, 27, 61, 0.48)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 16px;
+
+    padding: 30px 20px;
+
+    box-shadow:
+        0 8px 30px rgba(20, 12, 30, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    height: fit-content;
+}
+
+.profile-avatar-wrapper {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.profile-sidebar h3 {
+    text-align: center;
+    margin: 15px 0 5px;
+    font-size: 19px;
+    color: #ffffff;
+}
+
+.profile-email {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.62);
+    word-break: break-word;
+}
+
+
+/* =========================
+   SIDEBAR NAVIGATION
+========================= */
+
+.profile-menu {
+    margin-top: 30px;
+}
+
+.profile-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 13px 15px;
+    margin-bottom: 6px;
+
+    border-radius: 9px;
+
+    text-decoration: none;
+
+    color: rgba(255, 255, 255, 0.76);
+
+    font-size: 14px;
+    font-weight: 500;
+
+    border: 1px solid transparent;
+
+    transition:
+        background 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.profile-menu a:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+    transform: translateX(2px);
+}
+
+.profile-menu a.active {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.profile-menu i {
+    width: 18px;
+    text-align: center;
+}
+
+
+/* =========================
+   RIGHT CONTENT
+========================= */
+
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+/* =========================
+   PROFILE CARD
+========================= */
+
+.profile-card {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 46, 91, 0.58),
+            rgba(45, 27, 61, 0.48)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 16px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 8px 30px rgba(20, 12, 30, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 25px;
+}
+
+.card-header h4 {
+    margin: 0;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.card-header p {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.edit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 15px;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.edit-link:hover {
+    background: rgba(255, 255, 255, 0.16);
+
+    color: #ffffff;
+
+    border-color: rgba(255, 255, 255, 0.28);
+
+    transform: translateY(-1px);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.info-item {
+    padding: 16px;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 10px;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.info-item:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.info-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    color: rgba(255, 255, 255, 0.52);
+
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    color: #ffffff;
+    font-size: 14px;
+
+    word-break: break-word;
+}
+
+.security-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 10px;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.security-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.security-icon {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #ffffff;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.security-title {
+    margin: 0;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #ffffff;
+}
+
+.security-description {
+    margin: 4px 0 0;
+
+    font-size: 12px;
+
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.password-link {
+    padding: 8px 14px;
+
+    border-radius: 8px;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.password-link:hover {
+    background: rgba(255, 255, 255, 0.16);
+
+    color: #ffffff;
+
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width: 850px) {
+
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-sidebar {
+        padding: 25px;
+    }
+
+    .profile-menu {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+    }
+
+    .profile-menu a {
+        white-space: nowrap;
+        margin-bottom: 0;
+    }
+
+}
+
+
+@media(max-width: 600px) {
+
+    .profile-page {
+        padding: 30px 15px;
+    }
+
+    .profile-page-header h2 {
+        font-size: 23px;
+    }
+
+    .profile-card {
+        padding: 20px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-item.full-width {
+        grid-column: auto;
+    }
+
+    .card-header {
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .security-item {
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .security-left {
+        align-items: flex-start;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<section class="profile-page">
+
+    <div class="container profile-wrapper">
+
+        <!-- PAGE HEADER -->
+
+        <div class="profile-page-header">
+
+            <h2>My profile</h2>
+
+            <p>
+                Manage your personal information and account settings.
+            </p>
+
+        </div>
+
+
+        <div class="profile-layout">
+
+
+            <!-- =========================
+                 LEFT SIDEBAR
+            ========================== -->
+
+            <aside class="profile-sidebar">
+
+                <div class="profile-avatar-wrapper">
+
+                    <div class="avatar-container">
+
+                        {% if user.profile.profile_image %}
+
+                            <img
+                                src="{{ user.profile.profile_image.url }}"
+                                class="profile-image"
+                                alt="Profile Image"
+                            >
+
+                        {% else %}
+
+                            <div class="default-profile">
+                                <i class="fas fa-user"></i>
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- EDIT PROFILE IMAGE BUTTON -->
+
+                    </div>
+                    <br>
+                    <h3>
+                        {{ user.first_name }} {{ user.last_name }}
+                    </h3>
+
+                    <div class="profile-email">
+                        {{ user.email }}
+                    </div>
+
+                </div>
+
+
+                <!-- PROFILE MENU -->
+
+                <nav class="profile-menu">
+
+                    <a
+                        href="{% url 'users:user_profile' %}"
+                        class="active"
+                    >
+
+                        <i class="fas fa-user"></i>
+
+                        <span>Personal Information</span>
+
+                    </a>
+
+
+                    <a href="{% url 'orders:order_list' %}">
+
+                        <i class="fas fa-shopping-bag"></i>
+
+                        <span>
+                            My Orders
+                        </span>
+
+                    </a>
+
+
+                     <a
+                        href="{% url 'users:address' %}"
+                    >
+
+                        <i class="fas fa-map-marker-alt"></i>
+
+                        <span>My Address</span>
+
+                    </a>
+
+
+                    <a
+                        href="{% url 'users:change_password' %}"
+                    >
+
+                        <i class="fas fa-lock"></i>
+
+                        <span>Password & Security</span>
+
+                    </a>
+
+                </nav>
+
+            </aside>
+
+
+            <!-- =========================
+                 RIGHT CONTENT
+            ========================== -->
+
+            <main class="profile-content">
+
+
+                <!-- PERSONAL INFORMATION -->
+
+                <div class="profile-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h4>
+                                Personal Information
+                            </h4>
+
+                            <p>
+                                Your basic personal details
+                            </p>
+
+                        </div>
+
+
+                        <a
+                            href="{% url 'users:edit_profile' %}"
+                            class="edit-link"
+                        >
+
+                            <i class="fas fa-pen"></i>
+
+                            Edit
+
+                        </a>
+
+                    </div>
+
+                    <div class="info-grid">
+                    <!-- FIRST NAME -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            First Name
+                        </span>
+
+                        <span class="info-value">
+                            {{ user.first_name|default:"Not provided" }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- LAST NAME -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Last Name
+                        </span>
+
+                        <span class="info-value">
+                            {{ user.last_name|default:"Not provided" }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Email Address
+                        </span>
+
+                        <span class="info-value">
+                            {{ user.email|default:"Not provided" }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- PHONE -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Phone Number
+                        </span>
+
+                        <span class="info-value">
+                            {{ user.profile.phone|default:"Not provided" }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- ADDRESS TYPE -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Address Type
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if default_address %}
+                                {{ default_address.address_type }}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- COUNTRY -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            Country
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if default_address %}
+                                {{ default_address.country }}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- CITY -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            City
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if default_address %}
+                                {{ default_address.city }}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- STATE -->
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            State
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if default_address %}
+                                {{ default_address.state }}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- PINCODE -->
+
+                    <div class="info-item full-width">
+
+                        <span class="info-label">
+                            Pincode
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if default_address %}
+                                {{ default_address.pincode }}
+                            {% else %}
+                                Not provided
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- FULL ADDRESS -->
+                    <!-- ADDRESS -->
+
+                    <div class="info-item full-width">
+
+                        <span class="info-label">
+                            Default Address
+                        </span>
+
+                        <span class="info-value">
+
+                            {% if default_address %}
+
+                                {{ default_address.building }},
+                                {{ default_address.area }},
+
+                                {% if default_address.landmark %}
+                                    {{ default_address.landmark }},
+                                {% endif %}
+
+                                {{ default_address.city }},
+                                {{ default_address.state }}
+                                - {{ default_address.pincode }},
+
+                                {{ default_address.country }}
+
+                            {% else %}
+
+                                No address added
+
+                            {% endif %}
+
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+                </div>
+            </main>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

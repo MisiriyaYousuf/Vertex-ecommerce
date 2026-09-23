@@ -1,0 +1,164 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+{% block navbar_icon %}chart-pie{% endblock %}
+{% block navbar_title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: white;
+        padding: 15px 20px; 
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+        height: 100%;
+    }
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+    .stats-card h3 {
+        margin: 0;
+        font-size: 26px; 
+        font-weight: bold;
+        color: #2c3e50;
+        line-height: 1.2;
+    }
+    .stats-card p {
+        margin: 3px 0 0;
+        color: #7f8c8d;
+        font-size: 12px; 
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .stats-card .icon {
+        font-size: 24px; 
+        margin-bottom: 5px;
+        display: block;
+    }
+    .stats-card.users { border-bottom: 3px solid #3498db; }
+    .stats-card.products { border-bottom: 3px solid #2ecc71; }
+    .stats-card.categories { border-bottom: 3px solid #f39c12; }
+    .stats-card.orders { border-bottom: 3px solid #9b59b6; }
+    .stats-card.returns { border-bottom: 3px solid #e74c3c; }
+    .stats-card.sales { border-bottom: 3px solid #1abc9c; }
+
+    .welcome-section {
+        text-align: center;
+        padding: 10px 0 15px; 
+    }
+    .welcome-section h2 {
+        color: #2c3e50;
+        font-weight: 300;
+        font-size: 1.5rem; 
+        margin-bottom: 2px;
+    }
+    .welcome-section p {
+        color: #7f8c8d;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    
+    .row.g-4 {
+        --bs-gutter-y: 0.75rem;
+        --bs-gutter-x: 0.75rem;
+    }
+
+    
+    @media (max-width: 768px) {
+        .stats-card {
+            padding: 12px 15px;
+        }
+        .stats-card h3 {
+            font-size: 22px;
+        }
+        .stats-card .icon {
+            font-size: 20px;
+        }
+        .welcome-section h2 {
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-card {
+            padding: 10px 12px;
+        }
+        .stats-card h3 {
+            font-size: 18px;
+        }
+        .stats-card .icon {
+            font-size: 18px;
+        }
+        .stats-card p {
+            font-size: 10px;
+        }
+        .welcome-section h2 {
+            font-size: 1.1rem;
+        }
+        .welcome-section p {
+            font-size: 0.8rem;
+        }
+        .row.g-4 {
+            --bs-gutter-y: 0.5rem;
+            --bs-gutter-x: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h2>Welcome back, {{ user.username }}!</h2>
+    <p>Here's an overview of your e-commerce store</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-6 col-md-4 col-lg-4"> 
+        <div class="stats-card users">
+            <span class="icon"><i class="fas fa-users text-primary"></i></span>
+            <h3>{{ user_count|default:"0" }}</h3>
+            <p>Registered Users</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-4">
+        <div class="stats-card products">
+            <span class="icon"><i class="fas fa-box text-success"></i></span>
+            <h3>{{ product_count|default:"0" }}</h3>
+            <p>Products</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-4">
+        <div class="stats-card categories">
+            <span class="icon"><i class="fas fa-tags text-warning"></i></span>
+            <h3>{{ category_count|default:"0" }}</h3>
+            <p>Categories</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-4">
+        <div class="stats-card orders">
+            <span class="icon"><i class="fas fa-shopping-cart text-info"></i></span>
+            <h3>{{ order_count|default:"0" }}</h3>
+            <p>Orders</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-4">
+        <div class="stats-card returns">
+            <span class="icon"><i class="fas fa-undo text-danger"></i></span>
+            <h3>{{ return_count|default:"0" }}</h3>
+            <p>Returns</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-4">
+        <div class="stats-card sales">
+            <span class="icon"><i class="fas fa-chart-line text-success"></i></span>
+            <h3>₹ {{ total_sales|default:"0.00" }}</h3>
+            <p>Total Sales</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

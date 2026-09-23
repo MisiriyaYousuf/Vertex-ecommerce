@@ -1,0 +1,1831 @@
+{% extends "user_base.html" %}
+{% load static %}
+
+{% block title %}Products{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   PRODUCTS PAGE
+   ========================================================= */
+
+.products-page {
+    padding-top: 30px;
+    padding-bottom: 55px;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.products-header {
+    margin-bottom: 22px;
+}
+
+.products-header h2 {
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.products-header p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.70);
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   FILTER CARD
+   ========================================================= */
+
+.filter-card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(73, 46, 91, 0.58),
+            rgba(45, 27, 61, 0.50)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 28px;
+
+    box-shadow:
+        0 10px 30px rgba(20, 12, 30, 0.18);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.filter-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 14px;
+}
+
+.filter-label {
+    display: block;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: rgba(255, 255, 255, 0.72);
+
+    margin-bottom: 6px;
+}
+
+
+/* =========================================================
+   FILTER INPUTS
+   ========================================================= */
+
+.filter-card .form-control,
+.filter-card .form-select {
+    height: 38px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+
+    color: rgba(255, 255, 255, 0.86);
+
+    background: rgba(20, 12, 30, 0.30);
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.filter-card .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.48);
+}
+
+.filter-card .form-control:focus,
+.filter-card .form-select:focus {
+    color: #ffffff;
+
+    background: rgba(20, 12, 30, 0.38);
+
+    border-color: rgba(255, 255, 255, 0.30);
+
+    box-shadow: none;
+}
+
+.filter-card .form-select option {
+    background: #2d1b3d;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   FILTER BUTTONS
+   ========================================================= */
+
+.filter-actions {
+    display: flex;
+    align-items: end;
+    gap: 8px;
+}
+
+.filter-actions .btn {
+    height: 38px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    padding: 0 14px;
+}
+
+.filter-actions .btn-dark {
+    background: rgba(20, 12, 30, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.filter-actions .btn-dark:hover {
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.filter-card .btn-outline-secondary {
+    color: rgba(255, 255, 255, 0.76);
+
+    border-color: rgba(255, 255, 255, 0.18);
+
+    background: transparent;
+}
+
+.filter-card .btn-outline-secondary:hover {
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+
+/* =========================================================
+   PRODUCTS GRID
+   ========================================================= */
+
+.products-grid {
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.product-column {
+    display: flex;
+
+    padding-left: 10px;
+    padding-right: 10px;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   PRODUCT CARD
+   ========================================================= */
+
+.product-card {
+    width: 100%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(73, 46, 91, 0.58),
+            rgba(45, 27, 61, 0.50)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    box-shadow:
+        0 10px 30px rgba(20, 12, 30, 0.18);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 16px 38px rgba(20, 12, 30, 0.28);
+
+    border-color:
+        rgba(255, 255, 255, 0.22);
+}
+
+
+/* =========================================================
+   PRODUCT IMAGE
+   ========================================================= */
+
+.product-image-wrapper {
+    width: 100%;
+
+    height: 185px;
+
+    position: relative;
+
+    background:
+        rgba(45, 27, 61, 0.20);
+
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image-wrapper > a {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-decoration: none;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    padding: 10px;
+
+    display: block;
+
+    transition:
+        transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.04);
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(45, 27, 61, 0.20);
+
+    color: rgba(255, 255, 255, 0.55);
+}
+
+
+/* =========================================================
+   WISHLIST
+   ========================================================= */
+
+.wishlist-form {
+    position: absolute;
+
+    top: 9px;
+    right: 9px;
+
+    z-index: 5;
+}
+
+.wishlist-btn {
+    width: 36px;
+    height: 36px;
+
+    padding: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 50%;
+
+    background:
+        rgba(45, 27, 61, 0.68);
+
+    color: rgba(255, 255, 255, 0.82);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 12px rgba(20, 12, 30, 0.20);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.wishlist-btn:hover {
+    color: #ffffff;
+
+    background:
+        rgba(73, 46, 91, 0.82);
+
+    transform: scale(1.08);
+}
+
+
+/* =========================================================
+   PRODUCT BODY
+   ========================================================= */
+
+.product-card-body {
+    padding: 12px 14px 10px;
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        rgba(45, 27, 61, 0.12);
+}
+
+.product-category {
+    font-size: 11px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    margin-bottom: 4px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+}
+
+.product-name {
+    min-height: 40px;
+
+    margin-bottom: 4px;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    line-height: 1.3;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+}
+
+.product-name a {
+    color: rgba(255, 255, 255, 0.92);
+
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.product-name a:hover {
+    color: #ffffff;
+}
+
+.product-description {
+    min-height: 34px;
+
+    margin-bottom: 5px;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+
+    color: rgba(255, 255, 255, 0.58);
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 2;
+
+    -webkit-box-orient: vertical;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   PRICE
+   ========================================================= */
+
+.product-price {
+    margin-top: auto;
+
+    padding-top: 5px;
+}
+
+.current-price {
+    font-size: 18px;
+
+    font-weight: 700;
+
+    color: #ffffff;
+}
+
+.old-price {
+    margin-left: 6px;
+
+    font-size: 12px;
+
+    color: rgba(255, 255, 255, 0.42);
+}
+
+
+/* =========================================================
+   CARD FOOTER
+   ========================================================= */
+
+.product-card-footer {
+    padding: 0 14px 13px;
+
+    background:
+        rgba(45, 27, 61, 0.12);
+}
+
+
+/* =========================================================
+   STOCK
+   ========================================================= */
+
+.stock-row {
+    min-height: 23px;
+
+    margin-bottom: 7px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+.stock-badge {
+    padding: 4px 8px;
+
+    border-radius: 5px;
+
+    font-size: 10px;
+
+    font-weight: 500;
+}
+
+
+/* =========================================================
+   VARIANT SELECTOR
+   ========================================================= */
+
+.variant-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.variant-select {
+    width: 100%;
+
+    height: 35px;
+
+    margin-bottom: 8px;
+
+    padding: 0 9px;
+
+    border-radius: 6px;
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    background:
+        rgba(20, 12, 30, 0.38);
+
+    color:
+        rgba(255, 255, 255, 0.88);
+
+    font-size: 11px;
+
+    outline: none;
+}
+
+.variant-select:focus {
+    border-color:
+        rgba(255, 255, 255, 0.28);
+
+    box-shadow: none;
+}
+
+.variant-select option {
+    background: #2d1b3d;
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   PRODUCT BUTTONS
+   ========================================================= */
+
+.product-actions {
+    display: flex;
+
+    gap: 7px;
+}
+
+.product-actions > a,
+.product-actions > button {
+    flex: 1;
+}
+
+.product-actions .btn {
+    width: 100%;
+
+    min-height: 35px;
+
+    padding: 7px 8px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+/* View */
+
+.product-actions .btn-outline-dark {
+    color: rgba(255, 255, 255, 0.80);
+
+    background: transparent;
+
+    border-color:
+        rgba(255, 255, 255, 0.18);
+}
+
+.product-actions .btn-outline-dark:hover {
+    color: #ffffff;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    border-color:
+        rgba(255, 255, 255, 0.28);
+}
+
+
+/* Add to Cart */
+
+.product-actions .btn-dark {
+    color: #ffffff;
+
+    background:
+        rgba(20, 12, 30, 0.65);
+
+    border-color:
+        rgba(255, 255, 255, 0.16);
+}
+
+.product-actions .btn-dark:hover {
+    color: #ffffff;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    border-color:
+        rgba(255, 255, 255, 0.26);
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.product-pagination {
+    width: 100%;
+
+    margin-top: 25px;
+
+    padding-top: 10px;
+}
+
+.pagination-wrapper {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 18px;
+}
+
+.pagination-btn {
+    min-width: 105px;
+
+    height: 40px;
+
+    padding: 0 15px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+
+    border-radius: 7px;
+
+    background:
+        rgba(45, 27, 61, 0.55);
+
+    color: rgba(255, 255, 255, 0.78);
+
+    text-decoration: none;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:hover {
+    background:
+        rgba(255, 255, 255, 0.09);
+
+    border-color:
+        rgba(255, 255, 255, 0.25);
+
+    color: #ffffff;
+}
+
+.pagination-btn.disabled {
+    background:
+        rgba(45, 27, 61, 0.28);
+
+    border-color:
+        rgba(255, 255, 255, 0.08);
+
+    color:
+        rgba(255, 255, 255, 0.30);
+
+    cursor: not-allowed;
+}
+
+.current-page {
+    min-width: 90px;
+
+    text-align: center;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   EMPTY PRODUCTS
+   ========================================================= */
+
+.empty-products {
+    padding: 70px 20px;
+
+    text-align: center;
+}
+
+.empty-products h4 {
+    color: #ffffff;
+
+    margin-bottom: 8px;
+}
+
+.empty-products p {
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 991px) {
+
+    .products-page {
+        padding-top: 25px;
+    }
+
+    .product-image-wrapper {
+        height: 175px;
+    }
+
+    .filter-actions {
+        margin-top: 10px;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    .products-page {
+        padding-top: 20px;
+        padding-bottom: 40px;
+    }
+
+    .products-header {
+        margin-bottom: 20px;
+    }
+
+    .products-header h2 {
+        font-size: 25px;
+    }
+
+    .product-image-wrapper {
+        height: 175px;
+    }
+
+    .product-image {
+        padding: 10px;
+    }
+
+    .product-column {
+        margin-bottom: 15px;
+    }
+
+    .pagination-wrapper {
+        gap: 10px;
+    }
+
+    .pagination-btn {
+        min-width: 92px;
+
+        height: 38px;
+
+        padding: 0 9px;
+
+        font-size: 11px;
+    }
+
+    .current-page {
+        min-width: auto;
+
+        font-size: 11px;
+    }
+
+    .filter-card {
+        padding: 14px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .product-image-wrapper {
+        height: 165px;
+    }
+
+    .product-card-body {
+        padding: 11px 12px 9px;
+    }
+
+    .product-card-footer {
+        padding: 0 12px 12px;
+    }
+
+    .product-name {
+        font-size: 15px;
+    }
+
+    .current-price {
+        font-size: 17px;
+    }
+
+    .pagination-wrapper {
+        gap: 6px;
+    }
+
+    .pagination-btn {
+        min-width: 82px;
+
+        height: 36px;
+
+        padding: 0 7px;
+
+        font-size: 10px;
+    }
+
+    .current-page {
+        font-size: 10px;
+    }
+}
+
+</style>
+
+
+<div class="container products-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="products-header">
+
+        <h2>
+            Our Products
+        </h2>
+
+        <p>
+            Explore our latest collection
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTERS
+         ===================================================== -->
+
+    <form method="GET" class="filter-card">
+
+        <div class="filter-title">
+            Filter & Sort
+        </div>
+
+        <div class="row g-3">
+
+            <!-- Category -->
+
+            <div class="col-12 col-md-6 col-lg-3">
+
+                <label class="filter-label">
+                    Category
+                </label>
+
+                <select
+                    name="category"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All Categories
+                    </option>
+
+                    {% for category in categories %}
+
+                        <option
+                            value="{{ category.id }}"
+                            {% if selected_category == category.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ category.name }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Minimum Price -->
+
+            <div class="col-6 col-md-6 col-lg-2">
+
+                <label class="filter-label">
+                    Min Price
+                </label>
+
+                <input
+                    type="number"
+                    name="min_price"
+                    class="form-control"
+                    placeholder="₹ Min"
+                    min="0"
+                    value="{{ min_price }}"
+                >
+
+            </div>
+
+
+            <!-- Maximum Price -->
+
+            <div class="col-6 col-md-6 col-lg-2">
+
+                <label class="filter-label">
+                    Max Price
+                </label>
+
+                <input
+                    type="number"
+                    name="max_price"
+                    class="form-control"
+                    placeholder="₹ Max"
+                    min="0"
+                    value="{{ max_price }}"
+                >
+
+            </div>
+
+
+            <!-- Stock -->
+
+            <div class="col-12 col-md-6 col-lg-2">
+
+                <label class="filter-label">
+                    Stock
+                </label>
+
+                <select
+                    name="stock"
+                    class="form-select"
+                >
+
+                    <option value="">
+                        All Products
+                    </option>
+
+                    <option
+                        value="in_stock"
+                        {% if selected_stock == "in_stock" %}
+                            selected
+                        {% endif %}
+                    >
+                        In Stock
+                    </option>
+
+                    <option
+                        value="out_of_stock"
+                        {% if selected_stock == "out_of_stock" %}
+                            selected
+                        {% endif %}
+                    >
+                        Out of Stock
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Sort -->
+
+            <div class="col-12 col-md-6 col-lg-2">
+
+                <label class="filter-label">
+                    Sort By
+                </label>
+
+                <select
+                    name="sort"
+                    class="form-select"
+                >
+
+                    <option
+                        value="newest"
+                        {% if selected_sort == "newest" %}
+                            selected
+                        {% endif %}
+                    >
+                        Newest
+                    </option>
+
+                    <option
+                        value="price_low"
+                        {% if selected_sort == "price_low" %}
+                            selected
+                        {% endif %}
+                    >
+                        Price: Low to High
+                    </option>
+
+                    <option
+                        value="price_high"
+                        {% if selected_sort == "price_high" %}
+                            selected
+                        {% endif %}
+                    >
+                        Price: High to Low
+                    </option>
+
+                    <option
+                        value="name_asc"
+                        {% if selected_sort == "name_asc" %}
+                            selected
+                        {% endif %}
+                    >
+                        Name: A to Z
+                    </option>
+
+                    <option
+                        value="name_desc"
+                        {% if selected_sort == "name_desc" %}
+                            selected
+                        {% endif %}
+                    >
+                        Name: Z to A
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Apply -->
+
+            <div class="col-12 col-lg-1 filter-actions">
+
+                <button
+                    type="submit"
+                    class="btn btn-dark w-100"
+                >
+                    Apply
+                </button>
+
+            </div>
+
+
+            <!-- Clear -->
+
+            <div class="col-12">
+
+                <a
+                    href="{% url 'products:products' %}"
+                    class="btn btn-outline-secondary"
+                >
+                    Clear Filters
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+    <!-- =====================================================
+         PRODUCTS
+         ===================================================== -->
+
+    <div class="row g-4 products-grid">
+
+        {% for product in products %}
+
+            <div class="col-12 col-sm-6 col-lg-4 product-column">
+
+                <div
+                    class="product-card product-selection-card"
+                    data-product-id="{{ product.id }}"
+                >
+
+                    <!-- =================================================
+                         PRODUCT IMAGE
+                         ================================================= -->
+
+                    <div class="product-image-wrapper">
+
+                        <a
+                            href="{% url 'products:products_details' product.name %}"
+                            class="product-image-link"
+                        >
+
+                            {% if product.main_product_images %}
+
+                                <img
+                                    src="{{ product.main_product_images.0.image.url }}"
+                                    alt="{{ product.name }}"
+                                    class="product-image product-card-image"
+                                >
+
+                            {% else %}
+
+                                <div class="no-image product-no-image">
+
+                                    <span class="text-muted small">
+                                        No Image
+                                    </span>
+
+                                </div>
+
+                            {% endif %}
+
+                        </a>
+
+
+                        <!-- Wishlist -->
+
+                        <form
+                            method="POST"
+                            action="{% url 'cart:add_to_wishlist' %}"
+                            class="wishlist-form"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="product_id"
+                                value="{{ product.id }}"
+                            >
+
+                            <button
+                                type="submit"
+                                class="wishlist-btn"
+                                title="Add to Wishlist"
+                                aria-label="Add {{ product.name }} to wishlist"
+                            >
+                                ♡
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         PRODUCT INFORMATION
+                         ================================================= -->
+
+                    <div class="product-card-body">
+
+                        {% if product.category %}
+
+                            <div class="product-category">
+                                {{ product.category.name }}
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="product-name">
+
+                            <a
+                                href="{% url 'products:products_details' product.name %}"
+                            >
+                                {{ product.name }}
+                            </a>
+
+                        </div>
+
+
+                        {% if product.description %}
+
+                            <div class="product-description">
+                                {{ product.description|truncatechars:80 }}
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- Price -->
+
+                        <div class="product-price">
+
+                            <span class="current-price product-current-price">
+
+                                {% if product.discount_price %}
+                                    ₹{{ product.discount_price }}
+                                {% else %}
+                                    ₹{{ product.sale_price }}
+                                {% endif %}
+
+                            </span>
+
+
+                            <del
+                                class="old-price product-old-price"
+
+                                {% if not product.discount_price %}
+                                    style="display:none;"
+                                {% endif %}
+                            >
+
+                                {% if product.discount_price %}
+                                    ₹{{ product.sale_price }}
+                                {% endif %}
+
+                            </del>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         PRODUCT FOOTER
+                         ================================================= -->
+
+                    <div class="product-card-footer">
+
+                        <!-- =================================================
+                             DYNAMIC STOCK
+                             ================================================= -->
+
+                        <div class="stock-row">
+
+                            {% if product.has_stock %}
+
+                                <span class="badge bg-success stock-badge product-stock-badge">
+                                    In Stock
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger stock-badge product-stock-badge">
+                                    Out of Stock
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- =================================================
+                             PURCHASE OPTION
+                             ================================================= -->
+
+                        <label class="variant-label">
+                            Choose Option
+                        </label>
+
+
+                        <form
+                            method="POST"
+                            action="{% url 'cart:add_to_cart' %}"
+                            class="add-to-cart-form"
+                        >
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="product_id"
+                                value="{{ product.id }}"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="variant_id"
+                                value=""
+                                class="selected-variant-id"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="quantity"
+                                value="1"
+                            >
+
+
+                            <select
+                                class="variant-select product-option-select"
+                            >
+
+                                <!-- =================================================
+                                     BASE PRODUCT
+                                     ================================================= -->
+
+                                <option
+                                    value=""
+                                    selected
+                                    data-type="product"
+
+                                    data-price="{% if product.discount_price %}{{ product.discount_price }}{% else %}{{ product.sale_price }}{% endif %}"
+
+                                    data-mrp="{{ product.sale_price }}"
+
+                                    data-stock="{% if product.quantity > 0 %}1{% else %}0{% endif %}"
+
+                                    data-image="{% if product.main_product_images %}{{ product.main_product_images.0.image.url }}{% endif %}"
+                                >
+
+                                    {% if product.color %}
+                                        {{ product.color }}
+                                    {% endif %}
+
+                                    {% if product.color and product.size %}
+                                        /
+                                    {% endif %}
+
+                                    {% if product.size %}
+                                        {{ product.size }}
+                                    {% endif %}
+
+                                    {% if not product.color and not product.size %}
+                                        Base Product
+                                    {% endif %}
+
+                                    {% if product.quantity <= 0 %}
+                                        - Out of Stock
+                                    {% endif %}
+
+                                </option>
+
+
+                                <!-- =================================================
+                                     VARIANTS
+                                     ================================================= -->
+
+                                {% for variant in product.variants.all %}
+
+                                    {% if variant.is_active %}
+
+                                        {% with variant_image=variant.images.first %}
+
+                                            <option
+                                                value="{{ variant.id }}"
+
+                                                data-type="variant"
+
+                                                data-price="{% if variant.discount_price %}{{ variant.discount_price }}{% else %}{{ variant.sale_price }}{% endif %}"
+
+                                                data-mrp="{{ variant.sale_price }}"
+
+                                                data-stock="{% if variant.quantity > 0 %}1{% else %}0{% endif %}"
+
+                                                {% if variant_image and variant_image.image %}
+                                                    data-image="{{ variant_image.image.url }}"
+                                                {% else %}
+                                                    data-image=""
+                                                {% endif %}
+
+                                                {% if variant.quantity <= 0 %}
+                                                    disabled
+                                                {% endif %}
+                                            >
+
+                                                {% if variant.color %}
+                                                    {{ variant.color }}
+                                                {% endif %}
+
+                                                {% if variant.color and variant.size %}
+                                                    /
+                                                {% endif %}
+
+                                                {% if variant.size %}
+                                                    {{ variant.size }}
+                                                {% endif %}
+
+                                                {% if not variant.color and not variant.size %}
+                                                    Variant
+                                                {% endif %}
+
+                                                {% if variant.quantity <= 0 %}
+                                                    - Out of Stock
+                                                {% endif %}
+
+                                            </option>
+
+                                        {% endwith %}
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </select>
+
+
+                            <!-- =================================================
+                                 ACTION BUTTONS
+                                 ================================================= -->
+
+                            <div class="product-actions">
+
+                                <a
+                                    href="{% url 'products:products_details' product.name %}"
+                                    class="btn btn-outline-dark"
+                                >
+                                    View
+                                </a>
+
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-dark add-to-cart-button"
+                                >
+
+                                    {% if product.has_stock %}
+                                        Add to Cart
+                                    {% else %}
+                                        Out of Stock
+                                    {% endif %}
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+
+                <div class="empty-products">
+
+                    <h4>
+                        No Products Found
+                    </h4>
+
+                    <p>
+                        Try changing your filters or search criteria.
+                    </p>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGINATION
+         ===================================================== -->
+
+    {% if products.paginator.num_pages > 1 %}
+
+        <div class="product-pagination">
+
+            <div class="pagination-wrapper">
+
+                {% if products.has_previous %}
+
+                    <a
+                        href="?category={{ selected_category }}&min_price={{ min_price }}&max_price={{ max_price }}&stock={{ selected_stock }}&sort={{ selected_sort }}&page={{ products.previous_page_number }}"
+                        class="pagination-btn"
+                    >
+                        ← Previous
+                    </a>
+
+                {% else %}
+
+                    <span class="pagination-btn disabled">
+                        ← Previous
+                    </span>
+
+                {% endif %}
+
+
+                <span class="current-page">
+
+                    Page {{ products.number }}
+
+                    of
+
+                    {{ products.paginator.num_pages }}
+
+                </span>
+
+
+                {% if products.has_next %}
+
+                    <a
+                        href="?category={{ selected_category }}&min_price={{ min_price }}&max_price={{ max_price }}&stock={{ selected_stock }}&sort={{ selected_sort }}&page={{ products.next_page_number }}"
+                        class="pagination-btn"
+                    >
+                        Next →
+                    </a>
+
+                {% else %}
+
+                    <span class="pagination-btn disabled">
+                        Next →
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     BASE / VARIANT SWITCHING
+     ========================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const productCards = document.querySelectorAll(
+        ".product-selection-card"
+    );
+
+
+    productCards.forEach(function (card) {
+
+        const select = card.querySelector(
+            ".product-option-select"
+        );
+
+        const image = card.querySelector(
+            ".product-card-image"
+        );
+
+        const noImage = card.querySelector(
+            ".product-no-image"
+        );
+
+        const currentPrice = card.querySelector(
+            ".product-current-price"
+        );
+
+        const oldPrice = card.querySelector(
+            ".product-old-price"
+        );
+
+        const stockBadge = card.querySelector(
+            ".product-stock-badge"
+        );
+
+        const variantInput = card.querySelector(
+            ".selected-variant-id"
+        );
+
+        const addButton = card.querySelector(
+            ".add-to-cart-button"
+        );
+
+
+        if (!select) {
+            return;
+        }
+
+
+        function updateProductSelection() {
+
+            const selectedOption =
+                select.options[select.selectedIndex];
+
+
+            if (!selectedOption) {
+                return;
+            }
+
+
+            /* =================================================
+               OPTION TYPE
+               ================================================= */
+
+            const optionType =
+                selectedOption.dataset.type;
+
+
+            /* =================================================
+               VARIANT ID
+               ================================================= */
+
+            if (optionType === "variant") {
+
+                variantInput.value =
+                    selectedOption.value;
+
+            } else {
+
+                variantInput.value = "";
+
+            }
+
+
+            /* =================================================
+               PRICE
+               ================================================= */
+
+            const price =
+                selectedOption.dataset.price;
+
+            const mrp =
+                selectedOption.dataset.mrp;
+
+
+            if (price) {
+
+                currentPrice.textContent =
+                    "₹" + price;
+
+            }
+
+
+            if (
+                mrp &&
+                price &&
+                parseFloat(mrp) > parseFloat(price)
+            ) {
+
+                oldPrice.textContent =
+                    "₹" + mrp;
+
+                oldPrice.style.display =
+                    "inline";
+
+            } else {
+
+                oldPrice.textContent = "";
+
+                oldPrice.style.display =
+                    "none";
+            }
+
+
+            /* =================================================
+               IMAGE
+               ================================================= */
+
+            const selectedImage =
+                selectedOption.dataset.image;
+
+
+            if (selectedImage) {
+
+                if (image) {
+
+                    image.src =
+                        selectedImage;
+
+                    image.style.display =
+                        "block";
+                }
+
+                if (noImage) {
+
+                    noImage.style.display =
+                        "none";
+                }
+
+            } else {
+
+                /*
+                    If selected variant has no image,
+                    use the BASE PRODUCT main image.
+                */
+
+                const baseOption =
+                    select.options[0];
+
+                const baseImage =
+                    baseOption.dataset.image;
+
+
+                if (baseImage) {
+
+                    if (image) {
+
+                        image.src =
+                            baseImage;
+
+                        image.style.display =
+                            "block";
+                    }
+
+                    if (noImage) {
+
+                        noImage.style.display =
+                            "none";
+                    }
+
+                } else {
+
+                    if (image) {
+                        image.style.display =
+                            "none";
+                    }
+
+                    if (noImage) {
+                        noImage.style.display =
+                            "flex";
+                    }
+
+                }
+
+            }
+
+
+            /* =================================================
+               STOCK
+               ================================================= */
+
+            const hasStock =
+                selectedOption.dataset.stock === "1";
+
+
+            if (hasStock) {
+
+                stockBadge.textContent =
+                    "In Stock";
+
+                stockBadge.classList.remove(
+                    "bg-danger"
+                );
+
+                stockBadge.classList.add(
+                    "bg-success"
+                );
+
+                addButton.disabled =
+                    false;
+
+                addButton.textContent =
+                    "Add to Cart";
+
+            } else {
+
+                stockBadge.textContent =
+                    "Out of Stock";
+
+                stockBadge.classList.remove(
+                    "bg-success"
+                );
+
+                stockBadge.classList.add(
+                    "bg-danger"
+                );
+
+                addButton.disabled =
+                    true;
+
+                addButton.textContent =
+                    "Out of Stock";
+            }
+
+        }
+
+
+        /* =====================================================
+           INITIAL STATE
+           ===================================================== */
+
+        updateProductSelection();
+
+
+        /* =====================================================
+           CHANGE OPTION
+           ===================================================== */
+
+        select.addEventListener(
+            "change",
+            updateProductSelection
+        );
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

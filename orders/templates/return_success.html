@@ -1,0 +1,122 @@
+{% extends "user_base.html" %}
+
+{% block content %}
+
+<style>
+
+.success-page {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.success-card {
+    width: 100%;
+    max-width: 520px;
+    padding: 45px 35px;
+    text-align: center;
+    background: rgba(38, 23, 52, 0.78);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.30);
+    backdrop-filter: blur(15px);
+}
+
+.success-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(197,164,255,0.15);
+    border: 2px solid rgba(197,164,255,0.55);
+    color: #c5a4ff;
+    font-size: 32px;
+}
+
+.success-card h1 {
+    margin: 0 0 12px;
+    color: #ffffff;
+    font-size: 26px;
+}
+
+.success-card p {
+    margin: 0 auto 25px;
+    max-width: 400px;
+    color: rgba(255,255,255,0.60);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.order-number {
+    margin-bottom: 25px;
+    color: rgba(255,255,255,0.50);
+    font-size: 13px;
+}
+
+.order-number strong {
+    color: #ffffff;
+}
+
+.orders-btn {
+    display: inline-block;
+    padding: 13px 25px;
+    border-radius: 10px;
+    text-decoration: none;
+    background: rgba(197,164,255,0.18);
+    border: 1px solid rgba(197,164,255,0.45);
+    color: #c5a4ff;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.orders-btn:hover {
+    background: rgba(197,164,255,0.28);
+    transform: translateY(-1px);
+}
+
+</style>
+
+<div class="success-page">
+
+<div class="success-card">
+
+    <div class="success-icon">
+        ✓
+    </div>
+
+
+    <h1>
+        Return Request Submitted
+    </h1>
+
+
+    <p>
+        Your return request has been submitted successfully.
+    </p>
+
+
+    <div class="order-number">
+        Order ID:
+        <strong>{{ order.id }}</strong>
+    </div>
+
+
+    <a
+        href="{% url 'orders:order_list' %}"
+        class="orders-btn"
+    >
+        View Orders
+    </a>
+
+</div>
+
+
+</div>
+
+{% endblock %}

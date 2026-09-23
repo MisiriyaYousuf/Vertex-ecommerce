@@ -1,0 +1,499 @@
+{% extends "user_base.html" %}
+{% load static %}
+
+{% block title %}
+    Order Successful
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   ORDER SUCCESS PAGE
+   Same Glassmorphism Language as Products Page
+   ========================================================= */
+
+.order-success-page {
+    min-height: calc(100vh - 120px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 45px 20px;
+}
+
+
+/* =========================================================
+   SUCCESS CARD
+   ========================================================= */
+
+.success-card {
+
+    width: min(520px, 100%);
+
+    padding: 42px 38px;
+
+    text-align: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(73, 46, 91, 0.58),
+            rgba(45, 27, 61, 0.50)
+        );
+
+    border: 1px solid
+        rgba(255, 255, 255, 0.15);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 16px 40px
+        rgba(20, 12, 30, 0.28);
+
+    backdrop-filter: blur(8px);
+
+    -webkit-backdrop-filter: blur(8px);
+
+    animation:
+        successAppear 0.5s ease;
+}
+
+
+@keyframes successAppear {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(20px)
+            scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
+
+
+/* =========================================================
+   SUCCESS ICON
+   ========================================================= */
+
+.success-icon {
+
+    width: 78px;
+
+    height: 78px;
+
+    margin: 0 auto 22px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        rgba(34, 197, 94, 0.12);
+
+    border:
+        1px solid
+        rgba(34, 197, 94, 0.30);
+
+    color: #4ade80;
+
+    font-size: 38px;
+
+    font-weight: 600;
+
+    box-shadow:
+        0 8px 25px
+        rgba(34, 197, 94, 0.12);
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.success-card h1 {
+
+    margin-bottom: 10px;
+
+    color: #ffffff;
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+.success-message {
+
+    max-width: 400px;
+
+    margin:
+        0 auto 26px;
+
+    color:
+        rgba(255, 255, 255, 0.62);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   ORDER INFORMATION
+   ========================================================= */
+
+.order-info {
+
+    margin-bottom: 26px;
+
+    padding: 17px 20px;
+
+    text-align: left;
+
+    background:
+        rgba(45, 27, 61, 0.32);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    border-radius: 12px;
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.04);
+}
+
+
+.order-info p {
+
+    margin: 8px 0;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    color:
+        rgba(255, 255, 255, 0.58);
+
+    font-size: 12px;
+}
+
+
+.order-info p:last-child {
+    margin-bottom: 0;
+}
+
+
+.order-info strong {
+
+    color:
+        rgba(255, 255, 255, 0.90);
+
+    font-weight: 600;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   VIEW ORDERS BUTTON
+   Same style as Product Page Add to Cart
+   ========================================================= */
+
+.view-orders-btn {
+
+    width: 100%;
+
+    min-height: 40px;
+
+    padding: 9px 16px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 7px;
+
+    color: #ffffff;
+
+    background:
+        rgba(20, 12, 30, 0.65);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.16);
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    box-shadow:
+        0 6px 18px
+        rgba(20, 12, 30, 0.18);
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.view-orders-btn:hover {
+
+    color: #ffffff;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    border-color:
+        rgba(255, 255, 255, 0.26);
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 25px
+        rgba(20, 12, 30, 0.25);
+
+}
+
+.invoice-btn {
+    margin-bottom: 10px;
+}
+
+/* =========================================================
+   SMALL SUCCESS TEXT
+   ========================================================= */
+
+.success-status {
+
+    margin-top: 17px;
+
+    color:
+        rgba(255, 255, 255, 0.40);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .order-success-page {
+
+        min-height: calc(100vh - 100px);
+
+        padding:
+            30px 15px;
+    }
+
+
+    .success-card {
+
+        padding:
+            32px 22px;
+
+        border-radius: 15px;
+    }
+
+
+    .success-icon {
+
+        width: 68px;
+
+        height: 68px;
+
+        margin-bottom: 18px;
+
+        font-size: 32px;
+    }
+
+
+    .success-card h1 {
+
+        font-size: 23px;
+    }
+
+
+    .success-message {
+
+        font-size: 12px;
+    }
+
+
+    .order-info {
+
+        padding:
+            14px 15px;
+    }
+
+
+    .order-info p {
+
+        font-size: 11px;
+    }
+
+}
+
+</style>
+
+
+<div class="container order-success-page">
+
+    <div class="success-card">
+
+        <!-- Success Icon -->
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+
+        <!-- Heading -->
+
+        <h1>
+            Order Placed Successfully!
+        </h1>
+
+
+        <!-- Message -->
+
+        <p class="success-message">
+
+            Thank you for your purchase.
+            Your order has been placed successfully
+            and is now being processed.
+
+        </p>
+
+
+        <!-- Order Details -->
+
+        <div class="order-info">
+
+            <p>
+
+                <span>
+                    Order ID
+                </span>
+
+                <strong>
+                    {{ order.id }}
+                </strong>
+
+            </p>
+
+             <p>
+                <span>Billed Date &amp; Time</span>
+
+                <strong>
+                    {{ billed_datetime|date:"d M Y, h:i A" }}
+                </strong>
+            </p>
+
+            <p>
+
+                <span>
+                    Payment
+                </span>
+
+                <strong>
+                    {{ order.get_payment_method_display }}
+                </strong>
+
+            </p>
+
+
+            <p>
+
+                <span>
+                    Total
+                </span>
+
+                <strong>
+                    ₹{{ order.total_amount }}
+                </strong>
+
+            </p>
+
+
+            {% if order.delivery_date %}
+
+                <p>
+
+                    <span>
+                        Expected Delivery
+                    </span>
+
+                    <strong>
+                        {{ order.delivery_date|date:"d M Y" }}
+                    </strong>
+
+                </p>
+
+            {% endif %}
+
+        </div>
+
+        <!--download invoice and view orders-->
+
+        <a
+        href="{% url 'orders:download_invoice' %}"
+        class="view-orders-btn invoice-btn"
+        >
+            ↓ Download Invoice
+        </a>
+
+        <a
+            href="{% url 'orders:order_list' %}"
+            class="view-orders-btn"
+        >
+            View Orders
+        </a>
+
+        <div class="success-status">
+            Your order is now being processed.
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+

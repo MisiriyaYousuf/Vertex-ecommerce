@@ -1,0 +1,757 @@
+{% extends "user_base.html" %}
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   RETURN PAGE
+========================================================= */
+
+.return-page {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px 50px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.return-header {
+    margin-bottom: 25px;
+}
+
+.return-header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    color: #ffffff;
+}
+
+.return-header p {
+    margin: 0;
+    color: rgba(255,255,255,0.60);
+    font-size: 14px;
+}
+
+/* =========================================================
+   GLASS CARD
+========================================================= */
+
+.glass-card {
+    background: rgba(38, 23, 52, 0.78);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    backdrop-filter: blur(15px);
+}
+
+/* =========================================================
+   ORDER INFORMATION
+========================================================= */
+
+.order-info {
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.order-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.order-info-label {
+    color: rgba(255,255,255,0.50);
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.order-info-value {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   PRODUCTS CARD
+========================================================= */
+
+.products-card {
+    padding: 25px;
+}
+
+.section-title {
+    margin: 0 0 20px;
+    color: #ffffff;
+    font-size: 20px;
+}
+
+/* =========================================================
+   PRODUCT ROW
+========================================================= */
+
+.product-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+}
+
+.product-row:last-child {
+    border-bottom: none;
+}
+
+/* =========================================================
+   CHECKBOX
+========================================================= */
+
+.product-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #c5a4ff;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* =========================================================
+   PRODUCT IMAGE
+========================================================= */
+
+.product-image {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    display: block;
+}
+
+/* =========================================================
+   IMAGE PLACEHOLDER
+========================================================= */
+
+.product-image-placeholder {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.30);
+    font-size: 12px;
+}
+
+/* =========================================================
+   PRODUCT DETAILS
+========================================================= */
+
+.product-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-name {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.product-id {
+    color: rgba(255,255,255,0.45);
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.product-description {
+    color: rgba(255,255,255,0.60);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+/* =========================================================
+   PRODUCT META
+========================================================= */
+
+.product-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+}
+
+.product-meta span {
+    white-space: nowrap;
+}
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.product-price {
+    min-width: 110px;
+    text-align: right;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   RETURN FORM
+========================================================= */
+
+.return-form-card {
+    margin-top: 20px;
+    padding: 25px;
+}
+
+.reason-label {
+    display: block;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.reason-select {
+    width: 100%;
+    padding: 13px 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(20, 12, 30, 0.75);
+    color: #ffffff;
+    outline: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.reason-select:focus {
+    border-color: rgba(197,164,255,0.65);
+}
+
+.reason-select option {
+    background: #24152f;
+    color: #ffffff;
+}
+
+/* =========================================================
+   FORM ACTIONS
+========================================================= */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.return-btn,
+.back-btn {
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-family: inherit;
+}
+
+.return-btn {
+    background: rgba(197,164,255,0.18);
+    border: 1px solid rgba(197,164,255,0.45);
+    color: #c5a4ff;
+}
+
+.return-btn:hover {
+    background: rgba(197,164,255,0.28);
+    transform: translateY(-1px);
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.75);
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.12);
+}
+
+/* =========================================================
+   ERROR / MESSAGE
+========================================================= */
+
+.error-message {
+    margin-bottom: 20px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    background: rgba(255,80,80,0.10);
+    border: 1px solid rgba(255,80,80,0.20);
+    color: #ff9c9c;
+    font-size: 13px;
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-return-message {
+    padding: 35px 20px;
+    text-align: center;
+    color: rgba(255,255,255,0.55);
+    font-size: 14px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .return-page {
+        margin-top: 25px;
+        padding: 0 15px 40px;
+    }
+
+    .product-row {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .product-image,
+    .product-image-placeholder {
+        width: 70px;
+        height: 70px;
+    }
+
+    .product-price {
+        min-width: auto;
+        font-size: 14px;
+    }
+
+    .order-info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .return-btn,
+    .back-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+</style>
+
+
+<div class="return-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="return-header">
+
+        <h1>
+            Return Order
+        </h1>
+
+        <p>
+            Select the product(s) you want to return.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         MESSAGES
+    ====================================================== -->
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="error-message">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         ORDER INFORMATION
+    ====================================================== -->
+
+    <div class="glass-card order-info">
+
+        <div class="order-info-row">
+
+            <div>
+
+                <div class="order-info-label">
+                    Order ID
+                </div>
+
+                <div class="order-info-value">
+                    {{ order.id }}
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="order-info-label">
+                    Order Status
+                </div>
+
+                <div class="order-info-value">
+                    {{ order.status }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RETURN FORM
+    ====================================================== -->
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+
+        <!-- =================================================
+             PRODUCTS
+        ================================================== -->
+
+        <div class="glass-card products-card">
+
+            <h2 class="section-title">
+                Select Products
+            </h2>
+
+
+            {% if returnable_items %}
+
+                {% for item in returnable_items %}
+
+                    <label class="product-row">
+
+                        <!-- =================================
+                             SELECT PRODUCT
+                        ================================== -->
+
+                        <input
+                            type="checkbox"
+                            class="product-checkbox"
+                            name="selected_items"
+                            value="{{ item.id }}"
+                        >
+
+
+                        <!-- =================================
+                             PRODUCT / VARIANT IMAGE
+
+                             main_display_image is prepared
+                             inside return_order().
+                        ================================== -->
+
+                        {% if item.main_display_image %}
+
+                            <img
+                                src="{{ item.main_display_image.image.url }}"
+                                alt="{{ item.product_name }}"
+                                class="product-image"
+                            >
+
+                        {% else %}
+
+                            <div class="product-image-placeholder">
+                                No Image
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- =================================
+                             PRODUCT DETAILS
+                        ================================== -->
+
+                        <div class="product-details">
+
+                            <div class="product-name">
+                                {{ item.product_name }}
+                            </div>
+
+
+                            <div class="product-id">
+                                Product ID: {{ item.product.id }}
+                            </div>
+
+
+                            {% if item.product.description %}
+
+                                <div class="product-description">
+                                    {{ item.product.description }}
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- =============================
+                                 PRODUCT / VARIANT META
+                            ============================== -->
+
+                            <div class="product-meta">
+
+                                <span>
+                                    Quantity: {{ item.quantity }}
+                                </span>
+
+
+                                {% if item.variant %}
+
+                                    <!-- =====================
+                                         VARIANT
+                                    ====================== -->
+
+                                    {% if item.variant.color %}
+
+                                        <span>
+                                            Color: {{ item.variant.color }}
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if item.variant.size %}
+
+                                        <span>
+                                            Size: {{ item.variant.size }}
+                                        </span>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <!-- =====================
+                                         BASE PRODUCT
+                                    ====================== -->
+
+                                    {% if item.product.color %}
+
+                                        <span>
+                                            Color: {{ item.product.color }}
+                                        </span>
+
+                                    {% endif %}
+
+
+                                    {% if item.product.size %}
+
+                                        <span>
+                                            Size: {{ item.product.size }}
+                                        </span>
+
+                                    {% endif %}
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================
+                             PRODUCT PRICE
+                        ================================== -->
+
+                        <div class="product-price">
+                            ₹{{ item.item_total }}
+                        </div>
+
+                    </label>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="empty-return-message">
+                    No products are available for return.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             RETURN REASON
+        ================================================== -->
+
+        <div class="glass-card return-form-card">
+
+            <label
+                for="return_reason"
+                class="reason-label"
+            >
+                Return Reason
+            </label>
+
+
+            <select
+                name="return_reason"
+                id="return_reason"
+                class="reason-select"
+                required
+            >
+
+                <option value="">
+                    Select a reason
+                </option>
+
+                <option value="Product damaged">
+                    Product damaged
+                </option>
+
+                <option value="Wrong product received">
+                    Wrong product received
+                </option>
+
+                <option value="Product is defective">
+                    Product is defective
+                </option>
+
+                <option value="Product does not match description">
+                    Product does not match description
+                </option>
+
+                <option value="Received different size or color">
+                    Received different size or color
+                </option>
+
+                <option value="Changed my mind">
+                    Changed my mind
+                </option>
+
+                <option value="Other">
+                    Other
+                </option>
+
+            </select>
+
+
+            <!-- =================================================
+                 ACTION BUTTONS
+            ================================================== -->
+
+            <div class="form-actions">
+
+                <!-- =============================================
+                     BACK TO ORDER
+
+                     view_order() accepts POST, so don't use
+                     a normal <a href>.
+                ============================================== -->
+
+                <form
+                    method="POST"
+                    action="{% url 'orders:view_order' %}"
+                    style="display: inline;"
+                >
+
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="order_id"
+                        value="{{ order.id }}"
+                    >
+
+                    <button
+                        type="submit"
+                        class="back-btn"
+                    >
+                        Back to Order
+                    </button>
+
+                </form>
+
+
+                <!-- =============================================
+                     REQUEST RETURN
+                ============================================== -->
+
+                <button
+                    type="submit"
+                    class="return-btn"
+                >
+                    Request Return
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+<script>
+
+function goBackToOrder() {
+
+    const form = document.createElement("form");
+
+    form.method = "POST";
+    form.action = "{% url 'orders:view_order' %}";
+
+    const csrf = document.createElement("input");
+    csrf.type = "hidden";
+    csrf.name = "csrfmiddlewaretoken";
+    csrf.value = "{{ csrf_token }}";
+
+    const orderId = document.createElement("input");
+    orderId.type = "hidden";
+    orderId.name = "order_id";
+    orderId.value = "{{ order.id }}";
+
+    form.appendChild(csrf);
+    form.appendChild(orderId);
+
+    document.body.appendChild(form);
+
+    form.submit();
+}
+
+</script>
+{% endblock %}

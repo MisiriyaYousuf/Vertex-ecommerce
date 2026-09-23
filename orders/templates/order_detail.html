@@ -1,0 +1,1851 @@
+{% extends "user_base.html" %}
+{% load static %}
+
+{% block title %}
+Order Review
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    /* =========================================================
+       ORDER REVIEW PAGE
+    ========================================================= */
+
+    .order-review-page {
+        min-height: 90vh;
+        padding: 40px 0 65px;
+        background: transparent;
+    }
+
+
+    .order-review-wrapper {
+        width: 92%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+
+    /* =========================================================
+       TITLE
+    ========================================================= */
+
+    .order-review-title {
+        margin: 0 0 8px;
+
+        color: #ffffff;
+
+        font-size: 30px;
+        font-weight: 750;
+
+        letter-spacing: -0.5px;
+    }
+
+
+    .order-review-subtitle {
+        margin: 0 0 28px;
+
+        color: rgba(255, 255, 255, 0.58);
+
+        font-size: 14px;
+    }
+
+
+    /* =========================================================
+       LAYOUT
+    ========================================================= */
+
+    .review-layout {
+        display: grid;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            360px;
+
+        gap: 24px;
+
+        align-items: start;
+    }
+
+
+    /* =========================================================
+       GLASS CARD
+    ========================================================= */
+
+    .review-card {
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(73, 46, 91, 0.72),
+                rgba(45, 27, 61, 0.62)
+            ) !important;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.16);
+
+        border-radius: 15px;
+
+        padding: 24px;
+
+        margin-bottom: 20px;
+
+        box-shadow:
+            0 15px 40px
+            rgba(20, 12, 30, 0.30),
+
+            inset 0 1px 0
+            rgba(255, 255, 255, 0.06);
+
+        backdrop-filter: blur(14px);
+
+        -webkit-backdrop-filter:
+            blur(14px);
+    }
+
+
+    .review-card:last-child {
+        margin-bottom: 0;
+    }
+
+
+    /* =========================================================
+       SECTION TITLE
+    ========================================================= */
+
+    .review-section-title {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        margin-bottom: 20px;
+
+        color: #ffffff;
+
+        font-size: 19px;
+
+        font-weight: 750;
+    }
+
+
+    .review-section-number {
+
+        width: 30px;
+        height: 30px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        flex-shrink: 0;
+
+        border-radius: 50%;
+
+        background:
+            rgba(255, 255, 255, 0.10);
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.20);
+
+        color: #ffffff;
+
+        font-size: 13px;
+
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       ADDRESS
+    ========================================================= */
+
+    .address-review {
+
+        padding: 17px;
+
+        border-radius: 11px;
+
+        background:
+            rgba(255, 255, 255, 0.055);
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.13);
+    }
+
+
+    .address-review-type {
+
+        color: #ffffff;
+
+        font-size: 14px;
+
+        font-weight: 750;
+
+        margin-bottom: 10px;
+    }
+
+
+    .address-review-name {
+
+        color: #ffffff;
+
+        font-size: 14px;
+
+        font-weight: 700;
+
+        margin-bottom: 5px;
+    }
+
+
+    .address-review-text {
+
+        color:
+            rgba(255, 255, 255, 0.65);
+
+        font-size: 13px;
+
+        line-height: 1.65;
+    }
+
+
+    .address-review-phone {
+
+        margin-top: 7px;
+
+        color:
+            rgba(255, 255, 255, 0.60);
+
+        font-size: 13px;
+    }
+
+
+    /* =========================================================
+       DELIVERY INFORMATION
+    ========================================================= */
+
+    .delivery-info {
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 12px;
+    }
+
+
+    .delivery-box {
+
+        padding: 14px;
+
+        border-radius: 10px;
+
+        background:
+            rgba(255, 255, 255, 0.055);
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.12);
+    }
+
+
+    .delivery-label {
+
+        color:
+            rgba(255, 255, 255, 0.48);
+
+        font-size: 11px;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.5px;
+
+        font-weight: 700;
+    }
+
+
+    .delivery-value {
+
+        margin-top: 6px;
+
+        color: #ffffff;
+
+        font-size: 14px;
+
+        font-weight: 750;
+    }
+
+
+    /* =========================================================
+       PRODUCT
+    ========================================================= */
+
+    .review-product {
+
+        display: grid;
+
+        grid-template-columns:
+            115px
+            minmax(0, 1fr);
+
+        gap: 18px;
+
+        padding: 18px 0;
+
+        border-bottom:
+            1px solid
+            rgba(255, 255, 255, 0.10);
+    }
+
+
+    .review-product:first-of-type {
+        padding-top: 0;
+    }
+
+
+    .review-product:last-child {
+
+        padding-bottom: 0;
+
+        border-bottom: none;
+    }
+
+
+    /* =========================================================
+       PRODUCT IMAGE
+    ========================================================= */
+
+    .product-image-area {
+        min-width: 0;
+    }
+
+
+    .main-product-image {
+
+        width: 115px;
+        height: 115px;
+
+        overflow: hidden;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 11px;
+
+        background:
+            rgba(255, 255, 255, 0.07);
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.14);
+    }
+
+
+    .main-product-image img {
+
+        width: 100%;
+        height: 100%;
+
+        object-fit: contain;
+
+        padding: 7px;
+
+        display: block;
+
+        transition: opacity 0.18s ease;
+    }
+
+
+    /* =========================================================
+       THUMBNAILS
+    ========================================================= */
+
+    .product-thumbnails {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        margin-top: 8px;
+
+        overflow-x: auto;
+
+        overflow-y: hidden;
+
+        padding: 5px 4px 8px;
+
+        border-radius: 9px;
+
+        background:
+            rgba(255, 255, 255, 0.035);
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.08);
+
+        backdrop-filter:
+            blur(10px);
+
+        -webkit-backdrop-filter:
+            blur(10px);
+
+        scrollbar-width: thin;
+
+        scrollbar-color:
+            rgba(255, 255, 255, 0.25)
+            rgba(255, 255, 255, 0.035);
+    }
+
+
+    /* =========================================================
+    WEBKIT GLASS SCROLLBAR
+    ========================================================= */
+
+    .product-thumbnails::-webkit-scrollbar {
+
+        height: 6px;
+    }
+
+
+    .product-thumbnails::-webkit-scrollbar-track {
+
+        background:
+            rgba(255, 255, 255, 0.035);
+
+        border-radius: 20px;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.05);
+    }
+
+
+    .product-thumbnails::-webkit-scrollbar-thumb {
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.14),
+                rgba(255, 255, 255, 0.30)
+            );
+
+        border-radius: 20px;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.16);
+
+        box-shadow:
+            inset 0 1px 0
+            rgba(255, 255, 255, 0.20),
+
+            0 2px 8px
+            rgba(20, 12, 30, 0.20);
+    }
+
+
+    .product-thumbnails::-webkit-scrollbar-thumb:hover {
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.22),
+                rgba(255, 255, 255, 0.40)
+            );
+    }
+
+
+    .product-thumbnail {
+
+        width: 32px;
+
+        height: 32px;
+
+        flex-shrink: 0;
+
+        padding: 0;
+
+        border-radius: 7px;
+
+        overflow: hidden;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.13);
+
+        background:
+            rgba(255, 255, 255, 0.055);
+
+        backdrop-filter:
+            blur(8px);
+
+        -webkit-backdrop-filter:
+            blur(8px);
+
+        cursor: pointer;
+
+        opacity: 0.70;
+
+        transition:
+            opacity 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .product-thumbnail:hover {
+
+        opacity: 1;
+
+        border-color:
+            rgba(255, 255, 255, 0.40);
+
+        transform: translateY(-1px);
+    }
+
+
+    .product-thumbnail.active {
+
+    opacity: 1;
+
+    border-color:
+        rgba(255, 255, 255, 0.75);
+
+    background:
+        rgba(255, 255, 255, 0.11);
+
+    box-shadow:
+        0 0 0 1px
+        rgba(255, 255, 255, 0.16),
+
+        0 4px 12px
+        rgba(20, 12, 30, 0.20);
+}
+
+
+    .product-thumbnail img {
+
+        width: 100%;
+        height: 100%;
+
+        object-fit: contain;
+
+        display: block;
+    }
+
+
+    /* =========================================================
+       PRODUCT DETAILS
+    ========================================================= */
+
+    .review-product-info {
+        min-width: 0;
+    }
+
+
+    .review-product-name {
+
+        margin: 0;
+
+        color: #ffffff;
+
+        font-size: 16px;
+
+        font-weight: 750;
+    }
+
+
+    .review-product-id {
+
+        margin-top: 4px;
+
+        color:
+            rgba(255, 255, 255, 0.48);
+
+        font-size: 11px;
+    }
+
+
+    .review-product-description {
+
+        margin-top: 9px;
+
+        color:
+            rgba(255, 255, 255, 0.60);
+
+        font-size: 12px;
+
+        line-height: 1.55;
+
+        display: -webkit-box;
+
+        -webkit-line-clamp: 3;
+
+        -webkit-box-orient: vertical;
+
+        overflow: hidden;
+    }
+
+
+    .review-product-price {
+
+        margin-top: 12px;
+
+        color: #ffffff;
+
+        font-size: 15px;
+
+        font-weight: 750;
+    }
+
+
+    /* =========================================================
+       QUANTITY
+    ========================================================= */
+
+    .quantity-area {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        margin-top: 12px;
+    }
+
+
+    .quantity-label {
+
+        color:
+            rgba(255, 255, 255, 0.55);
+
+        font-size: 12px;
+
+        font-weight: 650;
+    }
+
+
+    .quantity-control {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.15);
+
+        border-radius: 8px;
+
+        overflow: hidden;
+
+        background:
+            rgba(255, 255, 255, 0.055);
+    }
+
+
+    .quantity-control form {
+        margin: 0;
+        padding: 0;
+    }
+
+
+    .quantity-btn {
+
+        width: 32px;
+        height: 30px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        border: none;
+
+        background:
+            rgba(255, 255, 255, 0.06);
+
+        color: #ffffff;
+
+        font-size: 17px;
+
+        cursor: pointer;
+
+        transition: 0.2s ease;
+    }
+
+
+    .quantity-btn:hover {
+
+        background:
+            rgba(255, 255, 255, 0.16);
+    }
+
+
+    .quantity-value {
+
+        min-width: 36px;
+
+        text-align: center;
+
+        color: #ffffff;
+
+        font-size: 13px;
+
+        font-weight: 750;
+    }
+
+
+    .max-note {
+
+        color:
+            rgba(255, 255, 255, 0.40);
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       ITEM TOTAL
+    ========================================================= */
+
+    .item-total {
+
+        margin-top: 10px;
+
+        color: #ffffff;
+
+        font-size: 14px;
+
+        font-weight: 750;
+    }
+
+
+    /* =========================================================
+       SUMMARY
+    ========================================================= */
+
+    .summary-card {
+
+        position: sticky;
+
+        top: 20px;
+    }
+
+
+    .summary-title {
+
+        margin: 0 0 20px;
+
+        color: #ffffff;
+
+        font-size: 20px;
+
+        font-weight: 750;
+    }
+
+
+    .summary-row {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 15px;
+
+        margin-bottom: 14px;
+
+        color:
+            rgba(255, 255, 255, 0.62);
+
+        font-size: 13px;
+    }
+
+
+    .summary-row span:last-child {
+
+        color: #ffffff;
+
+        font-weight: 650;
+
+        white-space: nowrap;
+    }
+
+
+    .summary-total {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 15px;
+
+        margin-top: 20px;
+
+        padding-top: 18px;
+
+        border-top:
+            1px solid
+            rgba(255, 255, 255, 0.14);
+
+        color: #ffffff;
+
+        font-size: 19px;
+
+        font-weight: 800;
+    }
+
+/* =========================================================
+   PLACE ORDER BUTTON
+========================================================= */
+
+.place-order-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+
+    margin-top: 10px;
+    padding: 11px 15px;
+
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    color: rgba(255, 255, 255, 0.70);
+
+    text-align: center;
+
+    font-size: 13px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.place-order-btn:hover {
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.09);
+
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.place-order-btn:active {
+    transform: translateY(1px);
+}
+    /* =========================================================
+       BACK TO CHECKOUT
+    ========================================================= */
+
+    .back-checkout-btn {
+
+        display: block;
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+        margin-top: 10px;
+
+        padding: 11px 15px;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.13);
+
+        border-radius: 9px;
+
+        background:
+            rgba(255, 255, 255, 0.045);
+
+        color:
+            rgba(255, 255, 255, 0.70) !important;
+
+        text-align: center;
+
+        text-decoration: none !important;
+
+        font-size: 13px;
+
+        font-weight: 650;
+
+        transition: 0.2s ease;
+    }
+
+
+    .back-checkout-btn:hover {
+
+        color: #ffffff !important;
+
+        background:
+            rgba(255, 255, 255, 0.09);
+    }
+    /* =========================================================
+   DELETE PRODUCT BUTTON
+========================================================= */
+
+    .delete-product-form {
+        margin-top: 10px;
+    }
+
+    .delete-product-btn {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 6px;
+
+        padding: 7px 11px;
+
+        border-radius: 8px;
+
+        border: 1px solid rgba(255, 120, 140, 0.20);
+
+        background:
+            rgba(255, 80, 110, 0.07);
+
+        color:
+            rgba(255, 180, 190, 0.82);
+
+        font-size: 11px;
+
+        font-weight: 650;
+
+        cursor: pointer;
+
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease,
+            transform 0.2s ease;
+    }
+
+
+    .delete-product-btn:hover {
+
+        background:
+            rgba(255, 80, 110, 0.14);
+
+        border-color:
+            rgba(255, 140, 160, 0.40);
+
+        color:
+            #ffffff;
+
+        transform: translateY(-1px);
+    }
+
+
+    .delete-product-btn:active {
+
+        transform: translateY(1px);
+    }
+
+    /* =========================================================
+    ADD MORE PRODUCTS BUTTON
+    ========================================================= */
+
+    .review-section-title {
+        position: relative;
+    }
+
+
+    .add-more-products-btn {
+
+        margin-left: auto;
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        padding: 8px 13px;
+
+        border-radius: 9px;
+
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.16);
+
+        background:
+            rgba(255, 255, 255, 0.065);
+
+        color:
+            rgba(255, 255, 255, 0.78);
+
+        text-decoration: none;
+
+        font-size: 11px;
+
+        font-weight: 700;
+
+        white-space: nowrap;
+
+        backdrop-filter: blur(12px);
+
+        -webkit-backdrop-filter: blur(12px);
+
+        box-shadow:
+            0 5px 18px
+            rgba(20, 12, 30, 0.18),
+
+            inset 0 1px 0
+            rgba(255, 255, 255, 0.07);
+
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease,
+            transform 0.2s ease;
+    }
+
+
+    .add-more-products-btn:hover {
+
+        background:
+            rgba(255, 255, 255, 0.11);
+
+        border-color:
+            rgba(255, 255, 255, 0.28);
+
+        color:
+            #ffffff;
+
+        transform:
+            translateY(-1px);
+
+        text-decoration: none;
+    }
+
+
+    .add-more-products-btn:active {
+
+        transform:
+            translateY(1px);
+    }
+
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 900px) {
+
+        .review-layout {
+
+            grid-template-columns: 1fr;
+        }
+
+
+        .summary-card {
+
+            position: static;
+        }
+    }
+
+    @media (max-width: 600px) {
+
+        .order-review-page {
+
+            padding: 25px 0 45px;
+        }
+
+
+        .order-review-title {
+
+            font-size: 26px;
+        }
+
+
+        .review-card {
+
+            padding: 18px;
+        }
+
+
+        .review-product {
+
+            grid-template-columns:
+                85px
+                minmax(0, 1fr);
+
+            gap: 13px;
+        }
+
+
+        .main-product-image {
+
+            width: 85px;
+            height: 85px;
+        }
+
+
+        .delivery-info {
+
+            grid-template-columns: 1fr;
+        }
+    }
+
+
+
+</style>
+
+
+<section class="order-review-page">
+
+    <div class="order-review-wrapper">
+
+        <h1 class="order-review-title">
+            Review Your Order
+        </h1>
+
+        <p class="order-review-subtitle">
+            Please check your products, delivery address and order total before placing your order.
+        </p>
+
+
+        <div class="review-layout">
+
+
+            <!-- =================================================
+                 LEFT
+            ================================================== -->
+
+            <div>
+
+
+                <!-- =================================================
+                     DELIVERY
+                ================================================== -->
+
+                <div class="review-card">
+
+                    <div class="review-section-title">
+
+                        <div class="review-section-number">
+                            1
+                        </div>
+
+                        Delivery Details
+
+                    </div>
+
+
+                    <div class="address-review">
+
+                        <div class="address-review-type">
+                            📍 {{ address.address_type }}
+                        </div>
+
+
+                        <div class="address-review-name">
+                            {{ request.user.get_full_name }}
+                        </div>
+
+
+                        <div class="address-review-text">
+
+                            {{ address.building }},
+                            {{ address.area }}
+
+                            {% if address.landmark %}
+                                <br>
+                                {{ address.landmark }}
+                            {% endif %}
+
+                            <br>
+
+                            {{ address.city }},
+                            {{ address.state }}
+                            - {{ address.pincode }}
+
+                            <br>
+
+                            {{ address.country }}
+
+                        </div>
+
+
+                        {% if address.phone %}
+
+                            <div class="address-review-phone">
+                                📞 {{ address.phone }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     DELIVERY DATE / PAYMENT
+                ================================================== -->
+
+                <div class="review-card">
+
+                    <div class="review-section-title">
+
+                        <div class="review-section-number">
+                            2
+                        </div>
+
+                        Order Information
+
+                    </div>
+
+
+                    <div class="delivery-info">
+
+                        <div class="delivery-box">
+
+                            <div class="delivery-label">
+                                Expected Delivery
+                            </div>
+
+                            <div class="delivery-value">
+
+                                {{ delivery_date|date:"d M Y" }}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="delivery-box">
+
+                            <div class="delivery-label">
+                                Payment Method
+                            </div>
+
+                            <div class="delivery-value">
+
+                                {{ payment_method_display }}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     PRODUCTS
+                ================================================== -->
+
+                <div class="review-card">
+
+                   <div class="review-section-title">
+
+                        <div class="review-section-number">
+                            3
+                        </div>
+
+                        <span>
+                            Products
+                        </span>
+
+                        <a
+                            href="{% url 'products:products' %}"
+                            class="add-more-products-btn"
+                        >
+                            + Add More Products
+                        </a>
+
+                    </div>
+
+
+                    {% for item in review_items %}
+                    
+                        <div class="review-product">
+
+
+                            <!-- =================================================
+                                 IMAGE
+                            ================================================== -->
+
+                            <div class="product-image-area">
+
+                                <div class="main-product-image">
+
+                                    {% if item.main_image %}
+
+                                        <img
+                                            id="main-image-{{ item.cart_id }}"
+                                            src="{{ item.main_image.image.url }}"
+                                            alt="{{ item.product_name }}"
+                                        >
+
+                                    {% else %}
+
+                                        <img
+                                            id="main-image-{{ item.cart_id }}"
+                                            src="{% static 'images/no-image.png' %}"
+                                            alt="No image"
+                                        >
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- =================================================
+                                     THUMBNAILS
+                                ================================================== -->
+
+                                <div class="product-thumbnails">
+
+
+                                    <!-- MAIN IMAGE AS FIRST THUMBNAIL -->
+
+                                    {% if item.main_image %}
+
+                                        <button
+                                            type="button"
+                                            class="product-thumbnail active"
+                                            onclick="changeProductImage(
+                                                '{{ item.cart_id }}',
+                                                '{{ item.main_image.image.url|escapejs }}',
+                                                this
+                                            )"
+                                        >
+
+                                            <img
+                                                src="{{ item.main_image.image.url }}"
+                                                alt="{{ item.product_name }}"
+                                            >
+
+                                        </button>
+
+                                    {% endif %}
+
+
+                                    <!-- OTHER IMAGES -->
+
+                                    {% for image in item.thumbnails %}
+
+                                        {% if item.main_image %}
+
+                                            {% if image.id != item.main_image.id %}
+
+                                                <button
+                                                    type="button"
+                                                    class="product-thumbnail"
+                                                    onclick="changeProductImage(
+                                                        '{{ item.cart_id }}',
+                                                        '{{ image.image.url|escapejs }}',
+                                                        this
+                                                    )"
+                                                >
+
+                                                    <img
+                                                        src="{{ image.image.url }}"
+                                                        alt="{{ item.product_name }}"
+                                                    >
+
+                                                </button>
+
+                                            {% endif %}
+
+                                        {% else %}
+
+                                            <button
+                                                type="button"
+                                                class="product-thumbnail {% if forloop.first %}active{% endif %}"
+                                                onclick="changeProductImage(
+                                                    '{{ item.cart_id }}',
+                                                    '{{ image.image.url|escapejs }}',
+                                                    this
+                                                )"
+                                            >
+
+                                                <img
+                                                    src="{{ image.image.url }}"
+                                                    alt="{{ item.product_name }}"
+                                                >
+
+                                            </button>
+
+                                        {% endif %}
+
+                                    {% endfor %}
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =================================================
+                                 PRODUCT DETAILS
+                            ================================================== -->
+
+                            <div class="review-product-info">
+
+                                <h3 class="review-product-name">
+
+                                    {{ item.product_name }}
+
+                                </h3>
+
+
+                                <div class="review-product-id">
+
+                                    Product ID:
+                                    #{{ item.product_id }}
+
+                                </div>
+
+
+                                <div class="review-product-description">
+
+                                    {{ item.description }}
+
+                                </div>
+
+
+                                <div class="review-product-price">
+
+                                    ₹{{ item.unit_price|floatformat:2 }}
+
+                                    <span style="
+                                        color: rgba(255,255,255,.42);
+                                        font-size: 11px;
+                                        font-weight: 500;
+                                    ">
+                                        / item
+                                    </span>
+
+                                </div>
+
+                                    <!-- =================================================
+                                        QUANTITY
+                                    ================================================= -->
+
+                                    <div class="quantity-area">
+
+                                        <span class="quantity-label">
+                                            Item Count:
+                                        </span>
+
+                                        <div class="quantity-control">
+
+                                            <!-- =============================================
+                                                DECREASE
+                                            ============================================== -->
+
+                                            <form
+                                                method="POST"
+                                                action="{% url 'orders:order_detail' %}"
+                                            >
+
+                                                {% csrf_token %}
+
+                                                <!-- IMPORTANT:
+                                                    Send the exact Cart row ID.
+                                                    The view expects cart_id.
+                                                -->
+                                                <input
+                                                    type="hidden"
+                                                    name="cart_id"
+                                                    value="{{ item.cart_id }}"
+                                                >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="action"
+                                                    value="decrease"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="quantity-btn"
+                                                    {% if item.quantity <= 1 %}title="Remove item"{% endif %}
+                                                >
+                                                    −
+                                                </button>
+
+                                            </form>
+
+
+                                            <!-- =============================================
+                                                CURRENT QUANTITY
+                                            ============================================== -->
+
+                                            <div class="quantity-value">
+                                                {{ item.quantity }}
+                                            </div>
+
+
+                                            <!-- =============================================
+                                                INCREASE
+                                            ============================================== -->
+
+                                            <form
+                                                method="POST"
+                                                action="{% url 'orders:order_detail' %}"
+                                            >
+
+                                                {% csrf_token %}
+
+                                                <!-- IMPORTANT:
+                                                    Use cart_id, NOT product_id.
+                                                -->
+                                                <input
+                                                    type="hidden"
+                                                    name="cart_id"
+                                                    value="{{ item.cart_id }}"
+                                                >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="action"
+                                                    value="increase"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="quantity-btn"
+                                                    {% if item.quantity >= item.max_quantity %}disabled{% endif %}
+                                                >
+                                                    +
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                            {% if item.max_quantity %}
+                                                <span class="max-note">
+                                                    Max {{ item.max_quantity }}
+                                                </span>
+                                            {% endif %}
+
+                                            </div>
+
+
+                                            <!-- =================================================
+                                                DELETE PRODUCT
+                                            ================================================== -->
+
+                                            <form
+                                                method="POST"
+                                                action="{% url 'orders:order_detail' %}"
+                                                class="delete-product-form"
+                                                onsubmit="return confirm('Remove this product from your order?');"
+                                            >
+
+                                                {% csrf_token %}
+
+                                                <input
+                                                    type="hidden"
+                                                    name="cart_id"
+                                                    value="{{ item.cart_id }}"
+                                                >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="action"
+                                                    value="delete"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="delete-product-btn"
+                                                    title="Remove product"
+                                                >
+                                                    🗑 Remove Product
+                                                </button>
+
+                                            </form>
+
+
+                                            <div class="item-total">
+                                    Item Total:
+                                    ₹{{ item.item_total|floatformat:2 }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        
+                    {% endfor %}
+
+                </div>
+                
+            </div>
+
+
+            <!-- =================================================
+                 RIGHT — SUMMARY
+            ================================================== -->
+
+            <div class="review-card summary-card">
+
+                <h2 class="summary-title">
+
+                    Order Summary
+
+                </h2>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Item Count
+                    </span>
+
+                    <span>
+                        {{ total_items }}
+                    </span>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <span>
+                        ₹{{ subtotal|floatformat:2 }}
+                    </span>
+
+                </div>
+
+
+                {% if discount > 0 %}
+
+                    <div class="summary-row">
+
+                        <span>
+                            Discount
+                        </span>
+
+                        <span>
+                            - ₹{{ discount|floatformat:2 }}
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Tax
+                    </span>
+
+                    <span>
+                        ₹{{ tax|floatformat:2 }}
+                    </span>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Shipping
+                    </span>
+
+                    <span>
+
+                        {% if shipping_charge == 0 %}
+
+                            FREE
+
+                        {% else %}
+
+                            ₹{{ shipping_charge|floatformat:2 }}
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <div class="summary-row">
+
+                    <span>
+                        Payment
+                    </span>
+
+                    <span>
+                        {{ payment_method_display }}
+                    </span>
+
+                </div>
+
+
+                <div class="summary-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <span>
+                        ₹{{ grand_total|floatformat:2 }}
+                    </span>
+
+                </div>
+
+
+                <!-- =================================================
+                     PLACE ORDER
+                ================================================== -->
+                <br>
+                <form
+                    method="POST"
+                    action="{% url 'orders:place_order' %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="place-order-btn"
+                    >
+                        Confirm Order
+                    </button>
+
+                </form>
+
+
+                <!-- =================================================
+                     BACK TO CHECKOUT
+                ================================================== -->
+
+                <a
+                    href="{% url 'orders:checkout' %}"
+                    class="back-checkout-btn"
+                >
+                    ← Back to Checkout
+                </a>
+
+
+                <div style="
+                    margin-top: 13px;
+                    text-align: center;
+                    color: rgba(255,255,255,.42);
+                    font-size: 10px;
+                ">
+
+                    🔒 Your order information is securely processed.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<script>
+
+/* =========================================================
+   CHANGE PRODUCT IMAGE
+========================================================= */
+
+function changeProductImage(
+    cartId,
+    imageUrl,
+    thumbnail
+) {
+
+    const image = document.getElementById(
+        "main-image-" + cartId
+    );
+
+    if (!image || !imageUrl) {
+        return;
+    }
+
+
+    /* Change main image */
+
+    image.style.opacity = "0";
+
+
+    setTimeout(function () {
+
+        image.src = imageUrl;
+
+        image.onload = function () {
+            image.style.opacity = "1";
+        };
+
+        /*
+         * If the image is already cached,
+         * onload may not fire.
+         */
+
+        if (image.complete) {
+            image.style.opacity = "1";
+        }
+
+    }, 100);
+
+
+    /* Remove active state */
+
+    const thumbnailContainer =
+        thumbnail.closest(".product-thumbnails");
+
+    if (thumbnailContainer) {
+
+        const thumbnails =
+            thumbnailContainer.querySelectorAll(
+                ".product-thumbnail"
+            );
+
+        thumbnails.forEach(function (item) {
+
+            item.classList.remove("active");
+
+        });
+
+    }
+
+
+    /* Add active state to clicked thumbnail */
+
+    thumbnail.classList.add("active");
+}
+
+</script>
+
+{% endblock %}

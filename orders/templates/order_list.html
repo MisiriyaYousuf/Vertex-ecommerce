@@ -1,0 +1,887 @@
+{% extends "user_base.html" %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+
+<style>
+    .orders-page {
+        width: min(1100px, 94%);
+        margin: 35px auto 60px;
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    .orders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .orders-heading h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 25px;
+        font-weight: 650;
+    }
+
+    .orders-heading p {
+        margin: 6px 0 0;
+        color: rgba(255,255,255,0.58);
+        font-size: 13px;
+    }
+
+    /* =========================
+       SEARCH
+    ========================== */
+
+    .order-search {
+        display: flex;
+        gap: 8px;
+        width: min(330px, 100%);
+    }
+
+    .order-search input {
+        width: 100%;
+        padding: 10px 13px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.13);
+        outline: none;
+        background: rgba(20,12,30,0.55);
+        color: #ffffff;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    .order-search input::placeholder {
+        color: rgba(255,255,255,0.38);
+    }
+
+    .search-btn {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.13);
+        background: rgba(255,255,255,0.055);
+        color: rgba(255,255,255,0.75);
+        cursor: pointer;
+        font-size: 13px;
+        transition: 0.2s ease;
+    }
+
+    .search-btn:hover {
+        color: #fff;
+        background: rgba(255,255,255,0.10);
+        border-color: rgba(255,255,255,0.22);
+    }
+
+    /* =========================
+       ORDER CARD
+    ========================== */
+
+    .order-card {
+        margin-bottom: 22px;
+        padding: 22px;
+        border-radius: 16px;
+
+        background:
+            linear-gradient(
+                145deg,
+                rgba(73,46,91,0.58),
+                rgba(45,27,61,0.50)
+            );
+
+        border: 1px solid rgba(255,255,255,0.15);
+
+        box-shadow:
+            0 15px 40px rgba(20,12,30,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    /* =========================
+       ORDER TOP
+    ========================== */
+
+    .order-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 17px;
+        margin-bottom: 17px;
+        border-bottom: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .order-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .meta-label {
+        color: rgba(255,255,255,0.42);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .meta-value {
+        color: rgba(255,255,255,0.86);
+        font-size: 13px;
+        font-weight: 550;
+    }
+
+    /* =========================
+       ORDER ITEMS
+    ========================== */
+
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 17px;
+        padding: 15px 0;
+
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    /* =========================
+       PRODUCT IMAGE
+    ========================== */
+
+    .product-thumb {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+    border-radius: 9px;
+
+    background: rgba(20, 12, 30, 0.45);
+    border: 1px solid rgba(255,255,255,0.10);
+}
+
+.product-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 5px;
+    box-sizing: border-box;
+    display: block;
+}
+
+    .no-image {
+        color: rgba(255,255,255,0.30);
+        font-size: 11px;
+        text-align: center;
+    }
+
+    /* =========================
+       PRODUCT INFO
+    ========================== */
+
+    .product-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .product-name {
+        margin: 0 0 5px;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .product-description {
+        margin: 0 0 9px;
+        max-width: 600px;
+
+        color: rgba(255,255,255,0.53);
+        font-size: 12px;
+        line-height: 1.5;
+
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+
+        color: rgba(255,255,255,0.52);
+        font-size: 11px;
+    }
+
+    .product-details strong {
+        color: rgba(255,255,255,0.78);
+        font-weight: 550;
+    }
+
+    /* =========================
+       STATUS
+    ========================== */
+
+    .item-right {
+        min-width: 145px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 5px 10px;
+        border-radius: 20px;
+
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.05);
+        color: rgba(255,255,255,0.72);
+    }
+
+    .status-pending {
+        color: #f2c46d;
+        background: rgba(242,196,109,0.08);
+        border-color: rgba(242,196,109,0.18);
+    }
+
+    .status-shipped {
+        color: #a9c8ff;
+        background: rgba(120,160,255,0.08);
+        border-color: rgba(120,160,255,0.18);
+    }
+
+    .status-out {
+        color: #d0b4ff;
+        background: rgba(170,120,255,0.08);
+        border-color: rgba(170,120,255,0.18);
+    }
+
+    .status-delivered {
+        color: #9fe0ae;
+        background: rgba(100,210,125,0.08);
+        border-color: rgba(100,210,125,0.18);
+    }
+
+    .status-cancelled {
+        color: #e99b9b;
+        background: rgba(220,90,90,0.08);
+        border-color: rgba(220,90,90,0.18);
+    }
+
+    .status-returned {
+        color: #e1b1e8;
+        background: rgba(190,100,210,0.08);
+        border-color: rgba(190,100,210,0.18);
+    }
+
+    /* =========================
+       ITEM PRICE
+    ========================== */
+
+    .item-price {
+        color: rgba(255,255,255,0.85);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* =========================
+       ORDER FOOTER
+    ========================== */
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+
+        margin-top: 17px;
+        padding-top: 17px;
+
+        border-top: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .order-total {
+        color: rgba(255,255,255,0.55);
+        font-size: 12px;
+    }
+
+    .order-total strong {
+        margin-left: 5px;
+        color: #ffffff;
+        font-size: 15px;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 9px;
+    }
+
+    .order-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 105px;
+        padding: 9px 14px;
+
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.13);
+
+        background: rgba(255,255,255,0.045);
+        color: rgba(255,255,255,0.72);
+
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+
+        transition:
+            background .2s ease,
+            border-color .2s ease,
+            color .2s ease,
+            transform .2s ease;
+    }
+
+    .order-btn:hover {
+        color: #ffffff;
+        background: rgba(255,255,255,0.09);
+        border-color: rgba(255,255,255,0.20);
+        transform: translateY(-1px);
+    }
+
+    /* =========================
+       EMPTY STATE
+    ========================== */
+
+    .empty-orders {
+        padding: 55px 25px;
+        text-align: center;
+
+        border-radius: 16px;
+
+        background:
+            linear-gradient(
+                145deg,
+                rgba(73,46,91,0.58),
+                rgba(45,27,61,0.50)
+            );
+
+        border: 1px solid rgba(255,255,255,0.15);
+        box-shadow: 0 15px 40px rgba(20,12,30,0.28);
+
+        backdrop-filter: blur(14px);
+    }
+
+    .empty-orders h3 {
+        margin: 0 0 8px;
+        color: #fff;
+        font-size: 18px;
+    }
+
+    .empty-orders p {
+        margin: 0;
+        color: rgba(255,255,255,0.52);
+        font-size: 13px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+
+    @media (max-width: 750px) {
+
+        .orders-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .order-search {
+            width: 100%;
+        }
+
+        .order-top {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .order-item {
+            align-items: flex-start;
+        }
+
+        .item-right {
+            min-width: 105px;
+        }
+
+        .order-footer {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .order-actions {
+            width: 100%;
+        }
+
+        .order-btn {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 520px) {
+
+        .orders-page {
+            width: 92%;
+        }
+
+        .order-card {
+            padding: 16px;
+        }
+
+        .order-item {
+            display: grid;
+            grid-template-columns: 65px 1fr;
+            gap: 12px;
+        }
+
+        .product-thumb {
+            width: 65px;
+            height: 65px;
+        }
+
+        .item-right {
+            grid-column: 2;
+            align-items: flex-start;
+            min-width: 0;
+        }
+
+        .order-meta {
+            gap: 15px;
+        }
+    }
+
+    /* =========================
+   PAGINATION
+========================== */
+/* =========================
+   PAGINATION
+========================== */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+}
+
+.pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Previous / Next / Page number boxes */
+.pagination-btn,
+.pagination-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 42px;
+    height: 40px;
+    padding: 0 14px;
+
+    box-sizing: border-box;
+
+    border-radius: 8px;
+
+    /* More visible box */
+    border: 1px solid rgba(244, 235, 235, 0.25);
+
+    background: rgba(37, 9, 71, 0.1);
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition:
+       
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Hover */
+.pagination-btn:hover,
+.pagination-page:hover {
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.18);
+
+    border-color: rgba(255, 255, 255, 0.40);
+
+    transform: translateY(-1px);
+}
+
+
+.pagination-page.active {
+    color: #ffffff;
+
+    background: rgba(53, 6, 133, 0.3);
+
+    border-color: rgba(245, 244, 247, 0.65);
+
+    box-shadow: 0 4px 14px rgba(170, 120, 255, 0.15);
+}
+
+
+</style>
+
+
+<div class="orders-page">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <div class="orders-header">
+
+        <div class="orders-heading">
+            <h2>My Orders</h2>
+            <p>Track your recent purchases and order status.</p>
+        </div>
+
+        <form method="GET" class="order-search">
+            <input
+                type="text"
+                name="search"
+                value="{{ search }}"
+                placeholder="Search by order ID or product..."
+            >
+
+            <button type="submit" class="search-btn">
+                Search
+            </button>
+        </form>
+
+    </div>
+
+
+    <!-- =========================
+         ORDERS
+    ========================== -->
+
+    {% if orders %}
+
+        {% for order in orders %}
+
+            <div class="order-card">
+
+                <!-- ORDER HEADER -->
+
+                <div class="order-top">
+
+                    <div class="order-meta">
+
+                        <div class="meta-item">
+                            <span class="meta-label">
+                                Order ID
+                            </span>
+
+                            <span class="meta-value">
+                                #{{ order.id }}
+                            </span>
+                        </div>
+
+                        <div class="meta-item">
+                            <span class="meta-label">
+                                Order Placed
+                            </span>
+
+                            <span class="meta-value">
+                                {{ order.created_at|date:"d M Y, h:i A" }}
+                            </span>
+                        </div>
+
+                        <div class="meta-item">
+                            <span class="meta-label">
+                                Items
+                            </span>
+
+                            <span class="meta-value">
+                                {{ order.items.count }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PRODUCTS -->
+
+                {% for item in order.items.all %}
+
+                    <div class="order-item">
+
+                        <!-- IMAGE -->
+
+                            <div class="product-thumb">
+
+                                {% if item.display_image %}
+
+                                    <img
+                                        src="{{ item.display_image.image.url }}"
+                                        alt="{{ item.product_name }}"
+                                    >
+
+                                {% else %}
+
+                                    <span class="no-image">
+                                        No Image
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+
+                        <!-- PRODUCT INFO -->
+
+                        <div class="product-info">
+
+                            <h3 class="product-name">
+                                {{ item.product_name }}
+                            </h3>
+
+                            {% if item.product.description %}
+                                <p class="product-description">
+                                    {{ item.product.description }}
+                                </p>
+                            {% else %}
+                                <p class="product-description">
+                                    Product purchased from our store.
+                                </p>
+                            {% endif %}
+
+                            <div class="product-details">
+
+                                <span>
+                                    Qty:
+                                    <strong>{{ item.quantity }}</strong>
+                                </span>
+
+                                <span>
+                                    Price:
+                                    <strong>₹{{ item.price }}</strong>
+                                </span>
+
+                                <span>
+                                    Total:
+                                    <strong>₹{{ item.item_total }}</strong>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- STATUS / PRICE -->
+
+                        <div class="item-right">
+
+                            {% if item.display_status == "Pending" %}
+                                <span class="status status-pending">
+                                    Pending
+                                </span>
+
+                            {% elif item.display_status == "Shipped" %}
+                                <span class="status status-shipped">
+                                    Shipped
+                                </span>
+
+                            {% elif item.display_status == "Out for Delivery" %}
+                                <span class="status status-out">
+                                    Out for Delivery
+                                </span>
+
+                            {% elif item.display_status == "Delivered" %}
+                                <span class="status status-delivered">
+                                    Delivered
+                                </span>
+
+                            {% elif item.display_status == "Cancelled" %}
+                                <span class="status status-cancelled">
+                                    Cancelled
+                                </span>
+
+                            {% elif item.display_status == "Returned" %}
+                                <span class="status status-returned">
+                                    Returned
+                                </span>
+                            {% endif %}
+
+                            <span class="item-price">
+                                ₹{{ item.item_total }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+
+                <!-- ORDER FOOTER -->
+
+                <div class="order-footer">
+
+                    <div class="order-total">
+                        Order Total:
+                        <strong>₹{{ order.total_amount }}</strong>
+                    </div>
+
+                    <div class="order-actions">
+
+                       <form method="POST" action="{% url 'orders:view_order' %}" style="margin:0;">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+
+                            <button type="submit" class="order-btn">
+                                View Order
+                            </button>
+                        </form>
+                        <a
+                            href="{% url 'products:products_details'"
+                            class="order-btn"
+                        >
+                            Buy Again
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty-orders">
+            <h3>No Orders Found</h3>
+
+            {% if search %}
+                <p>
+                    No orders matched "{{ search }}".
+                </p>
+            {% else %}
+                <p>
+                    You haven't placed any orders yet.
+                </p>
+            {% endif %}
+        </div>
+
+    {% endif %}
+
+    <!-- =========================
+         PAGINATION
+    ========================== -->
+
+    {% if orders.paginator.num_pages > 1 %}
+
+        <div class="pagination">
+
+            {% if orders.has_previous %}
+                <a
+                    href="?page={{ orders.previous_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}"
+                    class="pagination-btn"
+                >
+                    Previous
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">
+                    Previous
+                </span>
+            {% endif %}
+
+
+            <div class="pagination-pages">
+
+                {% for num in orders.paginator.page_range %}
+
+                    {% if orders.number == num %}
+
+                        <span class="pagination-page active">
+                            {{ num }}
+                        </span>
+
+                    {% else %}
+
+                        <a
+                            href="?page={{ num }}{% if search %}&search={{ search|urlencode }}{% endif %}"
+                            class="pagination-page"
+                        >
+                            {{ num }}
+                        </a>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+
+            {% if orders.has_next %}
+                <a
+                    href="?page={{ orders.next_page_number }}{% if search %}&search={{ search|urlencode }}{% endif %}"
+                    class="pagination-btn"
+                >
+                    Next
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">
+                    Next
+                </span>
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+</div>
+
+{% endblock %}

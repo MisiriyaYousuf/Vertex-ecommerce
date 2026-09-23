@@ -1,0 +1,130 @@
+.address-container {
+    max-width: 750px;
+    margin: 40px auto;
+    padding: 35px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+}
+
+.address-header {
+    margin-bottom: 30px;
+}
+
+.address-header h2 {
+    font-size: 26px;
+    margin-bottom: 8px;
+}
+
+.address-header p {
+    color: #777;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #000;
+}
+
+.address-type-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.radio-option {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.radio-option input {
+    width: auto !important;
+}
+
+.address-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.default-address {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 25px 0;
+}
+
+.default-address input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.default-address label {
+    cursor: pointer;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.add-address-btn {
+    border: none;
+    padding: 13px 30px;
+    background: #000;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.add-address-btn:hover {
+    opacity: 0.85;
+}
+
+.cancel-btn {
+    padding: 13px 25px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+@media (max-width: 600px) {
+
+    .address-container {
+        margin: 20px 15px;
+        padding: 20px;
+    }
+
+    .address-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+}

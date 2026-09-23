@@ -1,0 +1,169 @@
+{% extends "user_base.html" %}
+
+{% block content %}
+
+<style>
+    .success-page {
+        min-height: 65vh;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 40px 20px;
+        color: #fff;
+    }
+
+    .success-card {
+        width: 100%;
+        max-width: 520px;
+
+        padding: 40px 30px;
+
+        text-align: center;
+
+        background: linear-gradient(
+            145deg,
+            rgba(73,46,91,0.58),
+            rgba(45,27,61,0.50)
+        );
+
+        border: 1px solid rgba(255,255,255,0.15);
+
+        box-shadow:
+            0 15px 40px rgba(20,12,30,0.28),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+
+        border-radius: 18px;
+    }
+
+    .success-icon {
+        width: 65px;
+        height: 65px;
+
+        margin: 0 auto 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        color: #8ee0ad;
+        background: rgba(80,210,130,0.10);
+
+        border: 1px solid rgba(100,220,150,0.20);
+
+        font-size: 28px;
+    }
+
+    .success-card h1 {
+        margin: 0 0 10px;
+
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .success-card p {
+        margin: 0 auto 25px;
+
+        max-width: 400px;
+
+        color: rgba(255,255,255,0.60);
+
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .order-number {
+        display: inline-block;
+
+        margin-bottom: 25px;
+
+        padding: 8px 13px;
+
+        border-radius: 8px;
+
+        color: rgba(255,255,255,0.75);
+
+        background: rgba(255,255,255,0.045);
+
+        border: 1px solid rgba(255,255,255,0.10);
+
+        font-size: 13px;
+    }
+
+    .view-orders-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 11px 20px;
+
+        border-radius: 9px;
+
+        text-decoration: none;
+
+        color: #fff;
+
+        background: rgba(255,255,255,0.08);
+
+        border: 1px solid rgba(255,255,255,0.16);
+
+        font-size: 13px;
+        font-weight: 650;
+
+        transition: 0.2s ease;
+    }
+
+    .view-orders-btn:hover {
+        background: rgba(255,255,255,0.13);
+        border-color: rgba(255,255,255,0.24);
+    }
+</style>
+
+<div class="success-page">
+
+
+<div class="success-card">
+
+    <div class="success-icon">
+        ✓
+    </div>
+
+
+    <h1>
+        Cancellation Successful
+    </h1>
+
+
+    <p>
+        Your cancellation request has been successfully processed.
+        The selected product(s) have been cancelled from your order.
+    </p>
+
+
+    <div class="order-number">
+        Order #{{ order.id }}
+    </div>
+
+
+    <br>
+
+
+    <a
+        href="{% url 'orders:order_list' %}"
+        class="view-orders-btn"
+    >
+        View Orders
+    </a>
+
+</div>
+
+
+</div>
+
+{% endblock %}

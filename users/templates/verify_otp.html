@@ -1,0 +1,156 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Verify OTP
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/signin.css' %}"
+    >
+
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <div class="login-card">
+
+        {% if verification_type == "signup" %}
+
+            <h3 style="text-align: center; margin-bottom: 25px;">
+                Verify Your Email
+            </h3>
+
+        {% else %}
+
+            <h3 style="text-align: center; margin-bottom: 25px;">
+                Verify Email
+            </h3>
+
+        {% endif %}
+
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="form-group">
+
+                <label>
+                    Enter OTP
+                </label>
+
+                <input
+                    type="text"
+                    name="otp"
+                    maxlength="6"
+                    minlength="6"
+                    inputmode="numeric"
+                    placeholder="Enter 6 digit OTP"
+                    required
+                >
+
+            </div>
+
+            <div
+                id="otp-timer"
+                data-expires-at="{{ expires_at|date:'c' }}"
+                style="
+                    text-align:center;
+                    margin:15px 0;
+                    font-weight:bold;
+                ">
+                OTP expires in
+
+                <span id="countdown">
+                    01:00
+                </span>
+            </div>
+
+
+            <button
+                type="submit"
+                id="verify-button"
+            >
+                Verify OTP
+            </button>
+
+        </form>
+
+        <div
+            id="resend-section"
+            style="
+                text-align:center;
+                margin-top:20px;
+                display:none;
+            "
+        >
+
+            <p>
+                Didn't receive the OTP?
+            </p>
+
+            <a href="{% url 'users:resend_otp' %}"  class="signup-text" style="text-decoration: none;">
+                Resend OTP
+            </a>
+
+        </div>
+
+
+        {% if verification_type == "signup" %}
+
+            <p class="signup-text">
+
+                Already have an account?
+
+                <a href="{% url 'users:signin' %}">
+                    Sign In
+                </a>
+
+            </p>
+
+        {% else %}
+
+            <p class="signup-text">
+
+                <a href="{% url 'users:forgot_password' %}">
+                    Change Email
+                </a>
+
+            </p>
+
+        {% endif %}
+
+
+    </div>
+
+</div>
+<script src="{% static 'js/verify_otp.js' %}"></script>
+</body>
+</html>
