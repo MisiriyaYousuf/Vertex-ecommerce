@@ -487,16 +487,29 @@ def add_product(request):
                 product = form.save()
 
 
-                for position, image_data in enumerate(
-                    product_images
-                ):
+                product_images_objects = []
 
-                    ProductImage.objects.create(
+                for position, image_data in enumerate(product_images):
+                    product_image = ProductImage.objects.create(
                         product=product,
                         image=image_data["image"],
                         image_type=image_data["image_type"],
                         position=position,
                     )
+
+                    product_images_objects.append(product_image)
+                main_image = next(
+                    (
+                        image
+                        for image in product_images_objects
+                        if image.image_type == "main"
+                    ),
+                    None
+                )
+
+                if main_image:
+                    product.main_image = main_image
+                    product.save(update_fields=["main_image"])
 
 
                 for variant_data in validated_variants:
