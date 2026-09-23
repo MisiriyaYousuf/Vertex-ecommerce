@@ -596,8 +596,6 @@ def home(request):
             discount_price__gt=0,
             sale_price__isnull=False,
             discount_price__lt=F("sale_price"),
-            variants__is_active=True,
-            variants__quantity__gt=0,
         )
         .select_related(
             "category",
@@ -1070,7 +1068,12 @@ def change_password(request):
 @login_required
 def address_management(request):
 
-    addresses = Address.objects.filter(user=request.user).order_by('-is_default','-created_at')
+    addresses = Address.objects.filter(
+        user=request.user,
+        is_deleted =False).order_by(
+        "-is_default",
+        "-created_at"
+        )
     context = {'addresses': addresses}
     return render(request,'address.html',context)
 
@@ -1093,7 +1096,8 @@ def add_address(request):
 
     has_default_address = Address.objects.filter(
         user=request.user,
-        is_default=True
+        is_default=True,
+        is_deleted = False
     ).exists()
 
     if request.method == "POST":
@@ -1116,7 +1120,8 @@ def add_address(request):
 
                 Address.objects.filter(
                     user=request.user,
-                    is_default=True
+                    is_default=True,
+                    is_deleted = False
                 ).update(
                     is_default=False
                 )
@@ -1168,11 +1173,18 @@ def select_edit_address(request):
             "address_id"
         )
 
-        address = get_object_or_404(
-            Address,
+        address = Address.objects.filter(
             id=address_id,
-            user=request.user
-        )
+            user=request.user,
+            is_deleted=False
+        ).first()
+
+        if not address:
+            messages.error(
+                request,
+                "Address not found."
+            )
+            return redirect("users:address")
 
         request.session[
             "edit_address_id"
@@ -1221,15 +1233,27 @@ def edit_address(request):
 
         return redirect("users:address")
 
-    address = get_object_or_404(
-        Address,
+    address = Address.objects.filter(
         id=address_id,
-        user=request.user
-    )
+        user=request.user,
+        is_deleted=False
+    ).first()
+
+    if not address:
+        request.session.pop("edit_address_id", None)
+        request.session.pop("edit_address_return", None)
+
+        messages.error(
+            request,
+            "Address not found."
+        )
+
+        return redirect("users:address")
 
     another_default_exists = Address.objects.filter(
         user=request.user,
-        is_default=True
+        is_default=True,
+        is_deleted = False
     ).exclude(
         id=address.id
     ).exists()
@@ -1250,9 +1274,6 @@ def edit_address(request):
                 )
 
                 updated_address.user = request.user
-
-                # If another address is already default,
-                # do not allow this address to become default.
                 if another_default_exists:
 
                     updated_address.is_default = address.is_default
@@ -1335,20 +1356,26 @@ def delete_address(request):
         )
         return redirect("users:address")
 
-    address = get_object_or_404(
-        Address,
-        id=address_id,
-        user=request.user
-    )
-
+    address = Address.objects.filter(
+    id=address_id,
+    user=request.user,
+    is_deleted=False ).first()
     was_default = address.is_default
-
-    address.delete()
+    address.is_deleted = True
+    address.is_default = False
+    address.save(
+        update_fields=[
+            "is_deleted",
+            "is_default",
+            "updated_at"
+        ]
+    )
 
     if was_default:
 
         next_address = Address.objects.filter(
-            user=request.user
+            user=request.user,
+            is_deleted=False
         ).order_by("-created_at").first()
 
         if next_address:
@@ -1363,4 +1390,3 @@ def delete_address(request):
     )
 
     return redirect("users:address")
-

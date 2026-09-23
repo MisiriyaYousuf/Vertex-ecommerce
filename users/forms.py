@@ -535,6 +535,11 @@ class AddressForm(forms.ModelForm):
                 'Pincode must be exactly 6 digits.'
             )
 
+        if pincode == "000000":
+            raise forms.ValidationError(
+                'Enter a valid pincode'
+            )
+
         return pincode
 
 
