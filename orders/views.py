@@ -1666,7 +1666,9 @@ def place_order(request):
             + timedelta(days=4)
         )
 
-    
+    # ========================================================
+    # LOCK CART ROWS
+    # ========================================================
 
     cart_items = list(
         Cart.objects
@@ -2088,7 +2090,6 @@ def place_order(request):
 
             item_total=item["item_total"],
 
-            status="Pending",
         )
 
         # ----------------------------------------------------
