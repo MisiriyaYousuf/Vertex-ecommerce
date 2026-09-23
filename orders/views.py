@@ -40,20 +40,7 @@ MAX_CART_QUANTITY = 5
 # ============================================================
 
 def get_purchase_label(product, variant=None):
-    """
-    Returns the customer-facing option/code label for the item being purchased.
-
-    Variant cart/order item:
-        Uses variant color / size / product_code.
-
-    Base product cart/order item:
-        Uses product color / size / product_code.
-
-    A base product is valid without a variant.
-    """
-
     source = variant if variant is not None else product
-
     if not source:
         return ""
 
@@ -78,26 +65,17 @@ def get_purchase_label(product, variant=None):
 
 
 def get_product_pricing(product, quantity, variant=None):
-
-    # --------------------------------------------------------
-    # If variant exists, use variant pricing.
-    # Otherwise use base product pricing.
-    # --------------------------------------------------------
-
     source = variant if variant else product
-
     if (
         source.discount_price is not None
         and source.discount_price < source.sale_price
     ):
-
         unit_price = source.discount_price
 
         unit_discount = (
             source.sale_price
             - source.discount_price
         )
-
     else:
 
         unit_price = source.sale_price
@@ -153,23 +131,10 @@ def checkout(request):
         )
 
         return redirect("cart:cart")
-
-    # ========================================================
-    # VALIDATE CART ITEMS
-    # Supports both:
-    # 1. Base Product
-    # 2. Product Variant
-    # ========================================================
-
     for item in cart_items:
 
         product = item.product
         variant = item.variant
-
-        # ----------------------------------------------------
-        # Product validation
-        # ----------------------------------------------------
-
         if not product:
 
             messages.error(
@@ -178,11 +143,6 @@ def checkout(request):
             )
 
             return redirect("cart:cart")
-
-        # ----------------------------------------------------
-        # Product active check
-        # ----------------------------------------------------
-
         if not product.is_active:
 
             messages.error(
@@ -191,11 +151,6 @@ def checkout(request):
             )
 
             return redirect("cart:cart")
-
-        # ----------------------------------------------------
-        # Product deleted check
-        # ----------------------------------------------------
-
         if product.is_deleted:
 
             messages.error(
@@ -204,11 +159,6 @@ def checkout(request):
             )
 
             return redirect("cart:cart")
-
-        # ----------------------------------------------------
-        # Category validation
-        # ----------------------------------------------------
-
         if not product.category:
 
             messages.error(
@@ -233,16 +183,8 @@ def checkout(request):
             )
 
             return redirect("cart:cart")
-
-        # ----------------------------------------------------
-        # Determine stock source
-        # ----------------------------------------------------
-
         if variant:
 
-            # ------------------------------------------------
-            # Variant must belong to product
-            # ------------------------------------------------
 
             if variant.product_id != product.id:
 
@@ -349,7 +291,7 @@ def checkout(request):
 
     addresses = (
         Address.objects
-        .filter(user=request.user)
+        .filter(user=request.user,is_deleted = False)
         .order_by(
             "-is_default",
             "-created_at",
@@ -461,8 +403,7 @@ def checkout(request):
             # Address ownership check
             # ------------------------------------------------
 
-            if address.user_id != request.user.id:
-
+            if (address.user_id != request.user.id or address.is_deleted):
                 messages.error(
                     request,
                     "Invalid delivery address selected."
@@ -2379,9 +2320,6 @@ def download_invoice(request, order_id):
             Spacer(1, 10)
         )
 
-    # ========================================================
-    # ITEMS
-    # ========================================================
 
     table_data = [
         [
@@ -2485,10 +2423,6 @@ def download_invoice(request, order_id):
         Spacer(1, 12)
     )
 
-    # ========================================================
-    # TOTALS
-    # ========================================================
-
     totals_data = [
         [
             "Subtotal",
@@ -2569,11 +2503,6 @@ def download_invoice(request, order_id):
 
     return response
 
-
-# ============================================================
-# ORDER LIST
-# ============================================================
-
 @login_required
 @never_cache
 def order_list(request):
@@ -2597,58 +2526,111 @@ def order_list(request):
             | Q(items__product_name__icontains=search)
         ).distinct()
 
-    paginator = Paginator(orders, 5)
+    selected_status = request.GET.get("status", "").strip()
+
+    valid_statuses = [
+        "Pending",
+        "Shipped",
+        "Out for Delivery",
+        "Delivered",
+        "Cancelled",
+        "Returned",
+    ]
+
+    if selected_status in valid_statuses:
+
+        if selected_status == "Cancelled":
+
+            orders = orders.filter(
+                items__is_cancelled=True
+            ).distinct()
+
+        elif selected_status == "Returned":
+
+            orders = orders.filter(
+                items__is_returned=True
+            ).distinct()
+
+        else:
+
+            orders = orders.filter(
+                status=selected_status
+            )
+
+    selected_sort = request.GET.get(
+        "sort",
+        "newest"
+    ).strip()
+
+    if selected_sort == "oldest":
+
+        orders = orders.order_by(
+            "created_at"
+        )
+
+    elif selected_sort == "total_high":
+
+        orders = orders.order_by(
+            "-total_amount",
+            "-created_at",
+        )
+
+    elif selected_sort == "total_low":
+
+        orders = orders.order_by(
+            "total_amount",
+            "-created_at",
+        )
+
+    else:
+
+        selected_sort = "newest"
+
+        orders = orders.order_by(
+            "-created_at"
+        )
+    paginator = Paginator(
+        orders,
+        5
+    )
 
     page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+
+    page_obj = paginator.get_page(
+        page_number
+    )
 
     for order in page_obj:
 
         for item in order.items.all():
 
-            # ------------------------------------------------
-            # STATUS
-            # ------------------------------------------------
-
             if item.is_returned:
+
                 item.display_status = "Returned"
 
             elif item.is_cancelled:
+
                 item.display_status = "Cancelled"
 
             else:
+
                 item.display_status = order.status
-
-
-            # ------------------------------------------------
-            # PURCHASE LABEL
-            # ------------------------------------------------
 
             item.purchase_label = get_purchase_label(
                 item.product,
                 item.variant,
             )
 
-            item.variant_label = item.purchase_label
-
-
-            # ------------------------------------------------
-            # DISPLAY IMAGE
-            # ------------------------------------------------
+            item.variant_label = (
+                item.purchase_label
+            )
 
             display_image = None
-
-            # --------------------------------------------
-            # VARIANT IMAGE
-            # --------------------------------------------
-
             if item.variant_id:
 
                 variant_images = list(
                     item.variant.images.all()
                 )
-
-                # First try MAIN variant image
                 display_image = next(
                     (
                         image
@@ -2657,41 +2639,52 @@ def order_list(request):
                     ),
                     None
                 )
+                if (
+                    not display_image
+                    and variant_images
+                ):
 
-                # If no main image, use first variant image
-                if not display_image and variant_images:
-                    display_image = variant_images[0]
-
-
-            # --------------------------------------------
-            # BASE PRODUCT IMAGE
-            # --------------------------------------------
+                    display_image = (
+                        variant_images[0]
+                    )
 
             if not display_image:
 
                 if item.product.main_image:
-                    display_image = item.product.main_image
+
+                    display_image = (
+                        item.product.main_image
+                    )
 
                 else:
+
                     product_images = list(
                         item.product.images.all()
                     )
 
                     if product_images:
-                        display_image = product_images[0]
 
+                        display_image = (
+                            product_images[0]
+                        )
 
-            item.display_image = display_image
+            item.display_image = (
+                display_image
+            )
+    context = {
 
+        "orders": page_obj,
+        "page_obj": page_obj,
+        "search": search,
+        "selected_status": selected_status,
+        "selected_sort": selected_sort,
+        "status_choices": valid_statuses,
+    }
 
     return render(
         request,
         "order_list.html",
-        {
-            "orders": page_obj,
-            "page_obj": page_obj,
-            "search": search,
-        },
+        context,
     )
 
 @login_required
