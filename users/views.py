@@ -20,7 +20,8 @@ from .forms import AddressForm
 from . import models
 from .models import UserProfile,Address,OTP
 from products.models import Product
-from django.db.models import F,Q, Sum
+from django.db.models import F,Q, Sum,Value
+from django.db.models.functions import Coalesce
 
 
 def custom_404(request):
@@ -607,12 +608,19 @@ def home(request):
         )
         .annotate(
             discount_amount=F("sale_price") - F("discount_price"),
-            total_stock=Sum(
-            "variants__quantity",
-            filter=Q(
-                    variants__is_active=True
-                )
+
+            variant_stock=Coalesce(
+                Sum(
+                    "variants__quantity",
+                    filter=Q(
+                        variants__is_active=True
+                    )
+                ),
+                Value(0)
             ),
+        )
+        .annotate(
+            total_stock=F("quantity") + F("variant_stock")
         )
         .distinct()
         .order_by(
