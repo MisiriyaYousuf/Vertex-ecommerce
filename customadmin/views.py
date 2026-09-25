@@ -2187,30 +2187,33 @@ def update_order_status(request):
         return HttpResponseNotAllowed(["POST"])
 
     order_id = request.POST.get("order_id")
+    item_id = request.POST.get("item_id")
     new_status = request.POST.get("status")
 
-    if not order_id:
-
+    if not order_id or not item_id:
         messages.error(
             request,
-            "Order ID is required."
+            "Order ID and Item ID are required."
         )
-
         return redirect(
             "customadmin:order_management"
         )
 
-    valid_statuses = dict(
-        Order.STATUS_CHOICES
-    )
+    valid_statuses = [
+        "Pending",
+        "Processing",
+        "Shipped",
+        "Out for Delivery",
+        "Delivered",
+        "Cancelled",
+        "Returned",
+    ]
 
     if new_status not in valid_statuses:
-
         messages.error(
             request,
-            "Invalid order status."
+            "Invalid item status."
         )
-
         return redirect(
             "customadmin:order_management"
         )
@@ -2218,155 +2221,172 @@ def update_order_status(request):
     order = (
         Order.objects
         .select_for_update()
-        .filter(
-            id=order_id
-        )
-        .prefetch_related(
-            "items__product",
-            "items__variant"
-        )
+        .filter(id=order_id)
         .first()
     )
 
     if not order:
-
         messages.error(
             request,
             "Order not found."
         )
-
         return redirect(
             "customadmin:order_management"
         )
 
-    old_status = order.status
-
-    if old_status == new_status:
-
-        messages.info(
-            request,
-            f"Order #{order.id} is already {new_status}."
+    item = (
+        OrderItem.objects
+        .select_for_update()
+        .filter(
+            id=item_id,
+            order=order
         )
-
-        return redirect(
-            "customadmin:order_management"
+        .select_related(
+            "product",
+            "variant"
         )
+        .first()
+    )
 
-    if old_status == "Cancelled":
-
+    if not item:
         messages.error(
             request,
-            "A cancelled order cannot be reopened."
+            "Order item not found."
+        )
+        return redirect(
+            "customadmin:order_management"
         )
 
+    old_status = item.status
+
+    if old_status == new_status:
+        messages.info(
+            request,
+            f"Item is already {new_status}."
+        )
+        return redirect(
+            "customadmin:admin_order_detail"
+        )
+
+    # Do not allow changes after final states
+    if old_status in ["Cancelled", "Returned"]:
+        messages.error(
+            request,
+            "A cancelled or returned item cannot be changed."
+        )
         return redirect(
             "customadmin:order_management"
         )
 
     if old_status == "Delivered":
-
         messages.error(
             request,
-            "A delivered order cannot be changed."
+            "A delivered item cannot be changed."
         )
-
         return redirect(
             "customadmin:order_management"
         )
+
+    # -------------------------------------------------
+    # CANCEL ITEM
+    # -------------------------------------------------
 
     if new_status == "Cancelled":
 
-        restocked_count = 0
+        if item.variant:
+            item.variant.quantity += item.quantity
 
-        for item in order.items.all():
-
-            if item.is_cancelled:
-                continue
-
-            if item.is_returned:
-                continue
-
-            # Variant-based inventory restoration
-            if item.variant:
-
-                item.variant.quantity += item.quantity
-
-                item.variant.save(
-                    update_fields=[
-                        "quantity"
-                    ]
-                )
-
-                restocked_count += item.quantity
-
-            item.is_cancelled = True
-
-            item.cancellation_reason = (
-                "Cancelled by admin."
+            item.variant.save(
+                update_fields=["quantity"]
             )
 
-            item.save(
-                update_fields=[
-                    "is_cancelled",
-                    "cancellation_reason"
-                ]
+        else:
+            item.product.quantity += item.quantity
+
+            item.product.save(
+                update_fields=["quantity"]
             )
 
-        order.status = "Cancelled"
+        item.is_cancelled = True
+        item.cancellation_reason = "Cancelled by admin."
+        item.status = "Cancelled"
 
-        order.save(
+        item.save(
             update_fields=[
+                "is_cancelled",
+                "cancellation_reason",
                 "status",
-                "updated_at"
             ]
         )
 
-        messages.success(
-            request,
-            "Order cancelled successfully. "
-            f"{restocked_count} item(s) returned to inventory."
+    # -------------------------------------------------
+    # RETURN ITEM
+    # -------------------------------------------------
+
+    elif new_status == "Returned":
+
+        if item.status != "Delivered":
+            messages.error(
+                request,
+                "Only delivered items can be returned."
+            )
+            return redirect(
+                "customadmin:order_management"
+            )
+
+        if item.variant:
+            item.variant.quantity += item.quantity
+
+            item.variant.save(
+                update_fields=["quantity"]
+            )
+
+        else:
+            item.product.quantity += item.quantity
+
+            item.product.save(
+                update_fields=["quantity"]
+            )
+
+        item.is_returned = True
+        item.return_reason = "Returned by admin."
+        item.status = "Returned"
+
+        item.save(
+            update_fields=[
+                "is_returned",
+                "return_reason",
+                "status",
+            ]
         )
 
-        return redirect(
-            "customadmin:order_management"
+    # -------------------------------------------------
+    # NORMAL STATUS CHANGE
+    # -------------------------------------------------
+
+    else:
+
+        item.status = new_status
+
+        item.save(
+            update_fields=["status"]
         )
 
-    order.status = new_status
+    # -------------------------------------------------
+    # CALCULATE OVERALL ORDER STATUS
+    # -------------------------------------------------
 
-    order.save(
-        update_fields=[
-            "status",
-            "updated_at"
-        ]
-    )
+    update_status(order)
 
     messages.success(
         request,
-        f"Order #{order.id} status changed "
+        f"Item #{item.id} status changed "
         f"from {old_status} to {new_status}."
     )
 
     return redirect(
         "customadmin:order_management"
     )
-
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import (
-    Q,
-    Sum,
-    Prefetch,
-    Case,
-    When,
-    Value,
-    BooleanField,
-)
-from django.db.models.functions import Coalesce
-from django.shortcuts import redirect, render
-from django.views.decorators.cache import never_cache
-
-from products.models import Product, ProductVariant
-
 
 @never_cache
 @login_required

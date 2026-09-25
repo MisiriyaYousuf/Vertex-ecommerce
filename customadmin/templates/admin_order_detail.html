@@ -70,7 +70,9 @@ Order Details
     font-size: 10px;
 }
 
-/* BACK BUTTON */
+/* =========================================================
+   BACK BUTTON
+========================================================= */
 
 .back-btn {
     min-height: 38px;
@@ -221,7 +223,7 @@ Order Details
 }
 
 .products-table {
-    min-width: 760px;
+    min-width: 900px;
     margin: 0;
     vertical-align: middle;
 }
@@ -247,6 +249,7 @@ Order Details
     border-bottom: 1px solid #edf0f3;
     color: #53616e;
     font-size: 11px;
+    vertical-align: middle;
 }
 
 .products-table tbody tr {
@@ -261,7 +264,9 @@ Order Details
     border-bottom: 0;
 }
 
-/* PRODUCT */
+/* =========================================================
+   PRODUCT
+========================================================= */
 
 .product-wrapper {
     display: flex;
@@ -323,7 +328,9 @@ Order Details
     font-size: 8px;
 }
 
-/* TABLE VALUES */
+/* =========================================================
+   TABLE VALUES
+========================================================= */
 
 .product-price,
 .product-total {
@@ -346,40 +353,73 @@ Order Details
     font-weight: 750;
 }
 
-/* ITEM STATUS */
+/* =========================================================
+   ITEM STATUS FORM
+========================================================= */
 
-.item-status {
+.item-status-form {
+    min-width: 145px;
+}
+
+.item-status-select {
+    width: 100%;
+    min-height: 34px;
+    padding: 5px 28px 5px 8px;
+    border: 1px solid #dce2e8;
+    border-radius: 7px;
+    background-color: #ffffff;
+    color: #344454;
+    font-size: 10px;
+    font-weight: 650;
+    box-shadow: none !important;
+}
+
+.item-status-select:focus {
+    border-color: #315170;
+    box-shadow: 0 0 0 3px rgba(49, 81, 112, .08) !important;
+}
+
+.item-status-select:disabled {
+    background: #f5f7f8;
+    color: #8a959f;
+    cursor: not-allowed;
+}
+
+.item-update-btn {
+    width: 100%;
+    min-height: 31px;
+    margin-top: 5px;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: #315170;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    transition: all .18s ease;
+}
+
+.item-update-btn:hover {
+    background: #263f58;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.item-status-locked {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 5px 8px;
+    padding: 6px 8px;
     border-radius: 20px;
+    background: #f3f5f7;
+    color: #7c8791;
     font-size: 9px;
-    font-weight: 750;
+    font-weight: 700;
     white-space: nowrap;
 }
 
-.item-status::before {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: currentColor;
-    content: "";
-}
-
-.item-active {
-    background: #e9f7ef;
-    color: #278653;
-}
-
-.item-cancelled {
-    background: #fcebed;
-    color: #bd3d4b;
-}
-
-.item-returned {
-    background: #fff4dc;
-    color: #a26b00;
+.item-status-locked i {
+    font-size: 8px;
 }
 
 /* =========================================================
@@ -388,7 +428,7 @@ Order Details
 
 .current-status-box {
     padding: 13px;
-    margin-bottom: 17px;
+    margin-bottom: 0;
     border: 1px solid #edf0f3;
     border-radius: 9px;
     background: #fafbfc;
@@ -447,63 +487,9 @@ Order Details
     color: #bd3d4b;
 }
 
-.status-form-label {
-    display: block;
-    margin-bottom: 6px;
-    color: #596674;
-    font-size: 10px;
-    font-weight: 750;
-}
-
-.status-select {
-    width: 100%;
-    min-height: 40px;
-    border: 1px solid #dce2e8;
-    border-radius: 8px;
-    color: #344454;
-    font-size: 11px;
-    box-shadow: none !important;
-}
-
-.status-select:focus {
-    border-color: #315170;
-    box-shadow: 0 0 0 3px rgba(49, 81, 112, .09) !important;
-}
-
-.update-status-btn {
-    min-height: 40px;
-    border: 0;
-    border-radius: 8px;
-    background: #315170;
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 750;
-    transition: all .18s ease;
-}
-
-.update-status-btn:hover {
-    background: #263f58;
-    color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 5px 12px rgba(49, 81, 112, .17);
-}
-
-.status-locked {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    padding: 11px 12px;
-    border: 1px solid #e8ecef;
-    border-radius: 8px;
-    background: #fafbfc;
-    color: #7c8791;
-    font-size: 10px;
-    line-height: 1.5;
-}
-
-.status-locked i {
-    margin-top: 2px;
-    color: #315170;
+.returned {
+    background: #fff4dc;
+    color: #a26b00;
 }
 
 /* =========================================================
@@ -587,7 +573,7 @@ Order Details
 @media (max-width: 1199.98px) {
 
     .products-table {
-        min-width: 760px;
+        min-width: 900px;
     }
 
 }
@@ -647,7 +633,7 @@ Order Details
     }
 
     .products-table {
-        min-width: 760px;
+        min-width: 900px;
     }
 
 }
@@ -688,7 +674,9 @@ Order Details
 
 </style>
 
+
 <div class="container-fluid order-detail-page">
+
 <!-- =====================================================
      PAGE HEADER
 ====================================================== -->
@@ -707,12 +695,14 @@ Order Details
         </h2>
 
         <div class="order-created">
+
             <i class="far fa-calendar-alt"></i>
 
             <span>
                 Placed on
                 {{ order.created_at|date:"d M Y, h:i A" }}
             </span>
+
         </div>
 
     </div>
@@ -729,7 +719,6 @@ Order Details
 </div>
 
 
-
 <div class="row g-4">
 
 
@@ -740,7 +729,9 @@ Order Details
     <div class="col-lg-8">
 
 
-        <!-- CUSTOMER DETAILS -->
+        <!-- =================================================
+             CUSTOMER DETAILS
+        ================================================== -->
 
         <div class="detail-card">
 
@@ -751,11 +742,13 @@ Order Details
                 </div>
 
                 <div class="detail-title-text">
+
                     Customer Details
 
                     <span>
                         Customer account information
                     </span>
+
                 </div>
 
             </div>
@@ -831,7 +824,9 @@ Order Details
 
 
 
-        <!-- DELIVERY ADDRESS -->
+        <!-- =================================================
+             DELIVERY ADDRESS
+        ================================================== -->
 
         <div class="detail-card">
 
@@ -842,11 +837,13 @@ Order Details
                 </div>
 
                 <div class="detail-title-text">
+
                     Delivery Address
 
                     <span>
                         Shipping information
                     </span>
+
                 </div>
 
             </div>
@@ -866,6 +863,7 @@ Order Details
                         <strong>
                             {{ order.address.name }}
                         </strong>
+
                         <br>
 
                     {% endif %}
@@ -874,6 +872,7 @@ Order Details
                     {% if order.address.address %}
 
                         {{ order.address.address }}
+
                         <br>
 
                     {% endif %}
@@ -882,6 +881,7 @@ Order Details
                     {% if order.address.city %}
 
                         {{ order.address.city }}
+
                         <br>
 
                     {% endif %}
@@ -890,6 +890,7 @@ Order Details
                     {% if order.address.state %}
 
                         {{ order.address.state }}
+
                         <br>
 
                     {% endif %}
@@ -898,6 +899,7 @@ Order Details
                     {% if order.address.pincode %}
 
                         {{ order.address.pincode }}
+
                         <br>
 
                     {% endif %}
@@ -917,7 +919,9 @@ Order Details
 
 
 
-        <!-- ORDERED PRODUCTS -->
+        <!-- =================================================
+             ORDERED PRODUCTS
+        ================================================== -->
 
         <div class="detail-card">
 
@@ -928,11 +932,13 @@ Order Details
                 </div>
 
                 <div class="detail-title-text">
+
                     Ordered Products
 
                     <span>
-                        Products included in this order
+                        Update status for each product
                     </span>
+
                 </div>
 
             </div>
@@ -979,11 +985,14 @@ Order Details
                         <tr>
 
 
-                            <!-- PRODUCT -->
+                            <!-- =================================
+                                 PRODUCT
+                            ================================== -->
 
                             <td>
 
                                 <div class="product-wrapper">
+
 
                                     {% if item.display_image %}
 
@@ -996,63 +1005,70 @@ Order Details
                                     {% else %}
 
                                         <div class="product-placeholder">
+
                                             <i class="fas fa-image"></i>
+
                                         </div>
 
                                     {% endif %}
 
-                                        <div class="product-info">
 
-    <div class="product-name">
-        {{ item.product_name }}
-    </div>
+                                    <div class="product-info">
 
-
-    {% if item.variant %}
-
-        <div
-            style="
-                margin-top:4px;
-                color:#7b8794;
-                font-size:9px;
-                font-weight:650;
-            "
-        >
-            Variant
-
-            {% if item.variant.color %}
-                · {{ item.variant.color }}
-            {% endif %}
-
-            {% if item.variant.size %}
-                · {{ item.variant.size }}
-            {% endif %}
-        </div>
-
-    {% endif %}
+                                        <div class="product-name">
+                                            {{ item.product_name }}
+                                        </div>
 
 
-    {% if item.discount > 0 %}
+                                        {% if item.variant %}
 
-        <div class="product-discount">
+                                            <div
+                                                style="
+                                                    margin-top:4px;
+                                                    color:#7b8794;
+                                                    font-size:9px;
+                                                    font-weight:650;
+                                                "
+                                            >
 
-            <i class="fas fa-tag"></i>
+                                                Variant
 
-            Discount:
-            ₹{{ item.discount }}
+                                                {% if item.variant.color %}
+                                                    · {{ item.variant.color }}
+                                                {% endif %}
 
-        </div>
+                                                {% if item.variant.size %}
+                                                    · {{ item.variant.size }}
+                                                {% endif %}
 
-    {% endif %}
+                                            </div>
 
-</div>
+                                        {% endif %}
+
+
+                                        {% if item.discount > 0 %}
+
+                                            <div class="product-discount">
+
+                                                <i class="fas fa-tag"></i>
+
+                                                Discount:
+                                                ₹{{ item.discount }}
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    </div>
 
                                 </div>
 
                             </td>
 
 
-                            <!-- PRICE -->
+                            <!-- =================================
+                                 PRICE
+                            ================================== -->
 
                             <td>
 
@@ -1063,7 +1079,9 @@ Order Details
                             </td>
 
 
-                            <!-- QUANTITY -->
+                            <!-- =================================
+                                 QUANTITY
+                            ================================== -->
 
                             <td>
 
@@ -1074,7 +1092,9 @@ Order Details
                             </td>
 
 
-                            <!-- TOTAL -->
+                            <!-- =================================
+                                 TOTAL
+                            ================================== -->
 
                             <td>
 
@@ -1085,38 +1105,159 @@ Order Details
                             </td>
 
 
-                            <!-- STATUS -->
+                            <!-- =================================
+                                 PRODUCT STATUS
+                            ================================== -->
 
                             <td>
 
+                                <form
+                                    method="POST"
+                                    action="{% url 'customadmin:update_order_item_status' %}"
+                                    class="item-status-form"
+                                >
 
-                                {% if item.is_cancelled %}
-
-                                    <span class="item-status item-cancelled">
-                                        Cancelled
-                                    </span>
-
-
-                                {% elif item.is_returned %}
-
-                                    <span class="item-status item-returned">
-                                        Returned
-                                    </span>
+                                    {% csrf_token %}
 
 
-                                {% else %}
+                                    <input
+                                        type="hidden"
+                                        name="order_id"
+                                        value="{{ order.id }}"
+                                    >
 
-                                    <span class="item-status item-active">
-                                        Active
-                                    </span>
 
-                                {% endif %}
+                                    <input
+                                        type="hidden"
+                                        name="item_id"
+                                        value="{{ item.id }}"
+                                    >
 
+
+                                    <select
+                                        name="status"
+                                        class="form-select item-status-select"
+                                        {% if item.status == "Delivered" or item.status == "Cancelled" or item.status == "Returned" %}
+                                            disabled
+                                        {% endif %}
+                                    >
+
+                                        <option
+                                            value="Pending"
+                                            {% if item.status == "Pending" %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            Pending
+                                        </option>
+
+
+                                        <option
+                                            value="Processing"
+                                            {% if item.status == "Processing" %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            Processing
+                                        </option>
+
+
+                                        <option
+                                            value="Shipped"
+                                            {% if item.status == "Shipped" %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            Shipped
+                                        </option>
+
+
+                                        <option
+                                            value="Out for Delivery"
+                                            {% if item.status == "Out for Delivery" %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            Out for Delivery
+                                        </option>
+
+
+                                        <option
+                                            value="Delivered"
+                                            {% if item.status == "Delivered" %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            Delivered
+                                        </option>
+
+
+                                        <option
+                                            value="Cancelled"
+                                            {% if item.status == "Cancelled" %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            Cancelled
+                                        </option>
+
+
+                                        <option
+                                            value="Returned"
+                                            {% if item.status == "Returned" %}
+                                                selected
+                                            {% endif %}
+                                        >
+                                            Returned
+                                        </option>
+
+                                    </select>
+
+
+                                    {% if item.status != "Delivered" and item.status != "Cancelled" and item.status != "Returned" %}
+
+                                        <button
+                                            type="submit"
+                                            class="btn item-update-btn"
+                                        >
+
+                                            <i class="fas fa-sync-alt"></i>
+
+                                            Update
+
+                                        </button>
+
+                                    {% else %}
+
+                                        <span class="item-status-locked">
+
+                                            <i class="fas fa-lock"></i>
+
+                                            {% if item.status == "Delivered" %}
+
+                                                Delivered
+
+                                            {% elif item.status == "Cancelled" %}
+
+                                                Cancelled
+
+                                            {% else %}
+
+                                                Returned
+
+                                            {% endif %}
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </form>
 
                             </td>
 
 
                         </tr>
+
 
                         {% empty %}
 
@@ -1167,7 +1308,9 @@ Order Details
     <div class="col-lg-4">
 
 
-        <!-- ORDER STATUS -->
+        <!-- =================================================
+             ORDER STATUS
+        ================================================== -->
 
         <div class="detail-card">
 
@@ -1178,11 +1321,13 @@ Order Details
                 </div>
 
                 <div class="detail-title-text">
+
                     Order Status
 
                     <span>
-                        Delivery progress
+                        Automatically calculated from product statuses
                     </span>
+
                 </div>
 
             </div>
@@ -1191,7 +1336,7 @@ Order Details
             <div class="current-status-box">
 
                 <div class="current-status-label">
-                    Current Status
+                    Current Order Status
                 </div>
 
 
@@ -1202,10 +1347,24 @@ Order Details
                     </span>
 
 
+                {% elif order.status == "Processing" %}
+
+                    <span class="status-badge pending">
+                        Processing
+                    </span>
+
+
                 {% elif order.status == "Shipped" %}
 
                     <span class="status-badge shipped">
                         Shipped
+                    </span>
+
+
+                {% elif order.status == "Partially Shipped" %}
+
+                    <span class="status-badge shipped">
+                        Partially Shipped
                     </span>
 
 
@@ -1223,6 +1382,13 @@ Order Details
                     </span>
 
 
+                {% elif order.status == "Partially Delivered" %}
+
+                    <span class="status-badge delivered">
+                        Partially Delivered
+                    </span>
+
+
                 {% elif order.status == "Cancelled" %}
 
                     <span class="status-badge cancelled">
@@ -1230,101 +1396,23 @@ Order Details
                     </span>
 
 
+                {% elif order.status == "Returned" %}
+
+                    <span class="status-badge returned">
+                        Returned
+                    </span>
+
                 {% endif %}
 
             </div>
-
-
-
-            {% if order.status != "Delivered" and order.status != "Cancelled" %}
-
-
-                <form
-                    method="POST"
-                    action="{% url 'customadmin:update_order_status' %}"
-                >
-
-                    {% csrf_token %}
-
-
-                    <input
-                        type="hidden"
-                        name="order_id"
-                        value="{{ order.id }}"
-                    >
-
-
-                    <label class="status-form-label">
-                        Change Status
-                    </label>
-
-
-                    <select
-                        name="status"
-                        class="form-select status-select mb-3"
-                    >
-
-                        {% for value, label in order.STATUS_CHOICES %}
-
-                            <option
-                                value="{{ value }}"
-                                {% if order.status == value %}
-                                    selected
-                                {% endif %}
-                            >
-                                {{ label }}
-                            </option>
-
-                        {% endfor %}
-
-                    </select>
-
-
-                    <button
-                        type="submit"
-                        class="btn update-status-btn w-100"
-                    >
-
-                        <i class="fas fa-sync-alt me-1"></i>
-                        Update Status
-
-                    </button>
-
-
-                </form>
-
-
-            {% else %}
-
-
-                <div class="status-locked">
-
-                    <i class="fas fa-lock"></i>
-
-                    <div>
-
-                        {% if order.status == "Delivered" %}
-
-                            Delivered orders cannot be changed.
-
-                        {% else %}
-
-                            Cancelled orders cannot be reopened.
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-            {% endif %}
 
         </div>
 
 
 
-        <!-- ORDER INFORMATION -->
+        <!-- =================================================
+             ORDER INFORMATION
+        ================================================== -->
 
         <div class="detail-card">
 
@@ -1335,11 +1423,13 @@ Order Details
                 </div>
 
                 <div class="detail-title-text">
+
                     Order Information
 
                     <span>
                         Basic order details
                     </span>
+
                 </div>
 
             </div>
@@ -1405,7 +1495,9 @@ Order Details
 
 
 
-        <!-- ORDER SUMMARY -->
+        <!-- =================================================
+             ORDER SUMMARY
+        ================================================== -->
 
         <div class="detail-card">
 
@@ -1416,11 +1508,13 @@ Order Details
                 </div>
 
                 <div class="detail-title-text">
+
                     Order Summary
 
                     <span>
                         Payment breakdown
                     </span>
+
                 </div>
 
             </div>
