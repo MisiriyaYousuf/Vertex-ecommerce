@@ -1851,7 +1851,7 @@ def place_order(request):
     )
 
 =======
->>>>>>> Stashed changes
+>>>>>>> Stashed change
 
 # ============================================================
 # ORDER SUCCESS
