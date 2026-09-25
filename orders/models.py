@@ -11,12 +11,14 @@ class Order(models.Model):
     ]
 
     STATUS_CHOICES = [
-        ("Pending", "Pending"),
-        ("Shipped", "Shipped"),
-        ("Out for Delivery", "Out for Delivery"),
-        ("Delivered", "Delivered"),
-        ("Cancelled", "Cancelled"),
-        ("Returned","Returned"),
+    ("Pending", "Pending"),
+    ("Processing", "Processing"),
+    ("Partially Shipped", "Partially Shipped"),
+    ("Shipped", "Shipped"),
+    ("Partially Delivered", "Partially Delivered"),
+    ("Delivered", "Delivered"),
+    ("Cancelled", "Cancelled"),
+    ("Returned", "Returned"),
     ]
     
     user = models.ForeignKey(
@@ -83,6 +85,15 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
 
+    ITEM_STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Shipped", "Shipped"),
+        ("Out for Delivery", "Out for Delivery"),
+        ("Delivered", "Delivered"),
+        ("Cancelled", "Cancelled"),
+        ("Returned", "Returned"),
+    ]
+
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
@@ -125,17 +136,15 @@ class OrderItem(models.Model):
         decimal_places=2
     )
 
-    is_cancelled = models.BooleanField(
-        default=False
+    status = models.CharField(
+        max_length=20,
+        choices=ITEM_STATUS_CHOICES,
+        default="Pending"
     )
 
     cancellation_reason = models.TextField(
         blank=True,
         null=True
-    )
-
-    is_returned = models.BooleanField(
-        default=False
     )
 
     return_reason = models.TextField(
