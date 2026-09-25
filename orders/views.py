@@ -1350,6 +1350,7 @@ def order_detail(request, order_id=None):
 # PLACE ORDER
 # ============================================================
 
+<<<<<<< Updated upstream
 @login_required
 @never_cache
 @transaction.atomic
@@ -1849,6 +1850,8 @@ def place_order(request):
         "orders:order_success"
     )
 
+=======
+>>>>>>> Stashed changes
 
 # ============================================================
 # ORDER SUCCESS
