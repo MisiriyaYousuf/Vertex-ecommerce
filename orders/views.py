@@ -28,6 +28,7 @@ from .forms import CheckoutForm
 from .models import Order, OrderItem
 
 
+
 # ============================================================
 # CONSTANTS
 # ============================================================
@@ -2569,11 +2570,6 @@ def download_invoice(request, order_id):
 
     return response
 
-
-# ============================================================
-# ORDER LIST
-# ============================================================
-
 @login_required
 @never_cache
 def order_list(request):
@@ -2597,15 +2593,88 @@ def order_list(request):
             | Q(items__product_name__icontains=search)
         ).distinct()
 
-    paginator = Paginator(orders, 5)
+    valid_statuses = [
+        "Pending",
+        "Processing",
+        "Shipped",
+        "Partially Shipped",
+        "Out for Delivery",
+        "Delivered",
+        "Partially Delivered",
+        "Cancelled",
+        "Returned",
+    ]
 
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    if selected_status in valid_statuses:
+
+        if selected_status == "Cancelled":
+
+            orders = orders.filter(
+                items__status="Cancelled"
+            ).distinct()
+
+        elif selected_status == "Returned":
+
+            orders = orders.filter(
+                items__status="Returned"
+            ).distinct()
+
+        else:
+
+            orders = orders.filter(
+                status=selected_status
+            )
+
+    selected_sort = request.GET.get(
+        "sort",
+        "newest"
+    ).strip()
+
+    if selected_sort == "oldest":
+
+        orders = orders.order_by(
+            "created_at"
+        )
+
+    elif selected_sort == "total_high":
+
+        orders = orders.order_by(
+            "-total_amount",
+            "-created_at",
+        )
+
+    elif selected_sort == "total_low":
+
+        orders = orders.order_by(
+            "total_amount",
+            "-created_at",
+        )
+
+    else:
+
+        selected_sort = "newest"
+
+        orders = orders.order_by(
+            "-created_at"
+        )
+
+    paginator = Paginator(
+        orders,
+        5
+    )
+
+    page_number = request.GET.get(
+        "page"
+    )
+
+    page_obj = paginator.get_page(
+        page_number
+    )
+
 
     for order in page_obj:
 
         for item in order.items.all():
-
             # ------------------------------------------------
             # STATUS
             # ------------------------------------------------
@@ -2617,7 +2686,7 @@ def order_list(request):
                 item.display_status = "Cancelled"
 
             else:
-                item.display_status = order.status
+                item.display_status = item.status or order.status
 
 
             # ------------------------------------------------
@@ -2630,11 +2699,6 @@ def order_list(request):
             )
 
             item.variant_label = item.purchase_label
-
-
-            # ------------------------------------------------
-            # DISPLAY IMAGE
-            # ------------------------------------------------
 
             display_image = None
 
@@ -2693,6 +2757,11 @@ def order_list(request):
             "search": search,
         },
     )
+
+# ============================================================
+# VIEW ORDER
+# ============================================================
+
 
 @login_required
 @never_cache
