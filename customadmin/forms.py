@@ -273,21 +273,21 @@ class ProductForm(forms.ModelForm):
 
         return sale_price
 
-   def clean_discount_price(self):
-   
-       discount_price = self.cleaned_data.get(
-           "discount_price"
-       )
-   
-       if discount_price is None:
-           return None
-   
-       if discount_price <= 0:
-           raise forms.ValidationError(
-               "Discount price must be greater than zero."
-           )
-   
-       return discount_price
+    def clean_discount_price(self):
+
+        discount_price = self.cleaned_data.get(
+            "discount_price"
+        )
+
+        if discount_price is None:
+            return None
+
+        if discount_price <= 0:
+            raise forms.ValidationError(
+                "Discount price must be greater than zero."
+            )
+
+        return discount_price
 
     def clean_color(self):
 
@@ -418,7 +418,7 @@ class ProductForm(forms.ModelForm):
             )
 
         return cleaned_data
-
+    
 class ProductVariantForm(forms.ModelForm):
 
     class Meta:
