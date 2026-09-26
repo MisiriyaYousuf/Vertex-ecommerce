@@ -2786,17 +2786,13 @@ def cancel_order(request):
 
     if cancel_complete_order:
 
-        selected_items = list(
-            order.items
-            .filter(
-                is_cancelled=False,
-                is_returned=False,
-            )
-            .values_list(
-                "id",
-                flat=True
-            )
-        )
+        selected_items = list( 
+            order.items .exclude(
+                 status__in=[ "Cancelled", "Returned", ] 
+                 ) .values_list( 
+                    "id", flat=True
+                     ) 
+                )
 
     if not selected_items:
 
@@ -2874,20 +2870,24 @@ def cancel_order(request):
                 "orders:order_list"
             )
 
-        items = (
-            OrderItem.objects
-            .select_for_update()
-            .filter(
-                order=locked_order,
-                id__in=selected_items,
-                is_cancelled=False,
-                is_returned=False,
-            )
-            .select_related(
-                "product",
-                "variant",
-            )
-        )
+        items = ( 
+            OrderItem.objects 
+            .select_for_update() 
+            .filter( 
+                order=locked_order, 
+                id__in=selected_items, 
+                ) 
+                .exclude( 
+                    status__in=
+                    [ "Cancelled",
+                     "Returned",
+                    ]
+                     ) 
+                     .select_related(
+                         "product",
+                          "variant",
+                          )
+                    )
 
         if not items.exists():
 
@@ -2952,13 +2952,11 @@ def cancel_order(request):
             # Mark item as cancelled
             # ------------------------------------------------
 
-            item.is_cancelled = True
             item.cancellation_reason = reason
             item.status = "Cancelled"
 
             item.save(
                 update_fields=[
-                    "is_cancelled",
                     "cancellation_reason",
                     "status",
                 ]
@@ -3120,22 +3118,17 @@ def return_order(request):
         )
 
     returnable_items = list(
-        OrderItem.objects
-        .filter(
-            order=order,
-            is_cancelled=False,
-            is_returned=False,
-        )
-        .select_related(
-            "product",
-            "product__main_image",
-            "variant",
-        )
-        .prefetch_related(
-            "product__images",
-            "variant__images",
-        )
-    )
+         OrderItem.objects 
+         .filter( order=order,
+          status="Delivered", ) 
+          .select_related(
+             "product",
+             "product__main_image",
+             "variant", ) 
+             .prefetch_related(
+                 "product__images",
+                  "variant__images", )
+         )
 
     if not returnable_items:
 
@@ -3266,21 +3259,11 @@ def return_order(request):
 
     for item_id in selected_items:
 
-        item = (
-            OrderItem.objects
-            .select_for_update()
-            .filter(
-                id=item_id,
-                order=order,
-                is_cancelled=False,
-                is_returned=False,
-            )
-            .select_related(
-                "product",
-                "variant",
-            )
-            .first()
-        )
+        item = ( OrderItem.objects 
+        .select_for_update() 
+        .filter( id=item_id, order=order, status="Delivered", ) 
+        .select_related( "product", "variant", ) 
+        .first() )
 
         if not item:
             continue
@@ -3342,13 +3325,11 @@ def return_order(request):
         # Mark item as returned
         # ----------------------------------------------------
 
-        item.is_returned = True
         item.return_reason = return_reason
         item.status = "Returned"
 
         item.save(
             update_fields=[
-                "is_returned",
                 "return_reason",
                 "status",
             ]
