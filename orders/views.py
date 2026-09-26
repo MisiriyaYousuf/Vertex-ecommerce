@@ -2499,25 +2499,33 @@ def view_order(request):
             "orders:order_list"
         )
 
+    # ========================================================
+    # PREPARE ORDER ITEMS
+    # ========================================================
+
     for item in order.items.all():
 
-        if item.is_returned:
+        # ----------------------------------------------------
+        # ITEM STATUS
+        # ----------------------------------------------------
+
+        if item.status == "Returned":
 
             item.display_status = "Returned"
 
-        elif item.is_cancelled:
+        elif item.status == "Cancelled":
 
             item.display_status = "Cancelled"
 
         else:
 
             item.display_status = (
-                getattr(
-                    item,
-                    "status",
-                    order.status
-                )
+                item.status or order.status
             )
+
+        # ----------------------------------------------------
+        # VARIANT PRODUCT
+        # ----------------------------------------------------
 
         if item.variant_id:
 
@@ -2525,6 +2533,7 @@ def view_order(request):
                 item.variant.images.all()
             )
 
+            # Find variant main image
             main_variant_image = next(
                 (
                     image
@@ -2533,6 +2542,10 @@ def view_order(request):
                 ),
                 None
             )
+
+            # ------------------------------------------------
+            # MAIN DISPLAY IMAGE
+            # ------------------------------------------------
 
             if main_variant_image:
 
@@ -2546,19 +2559,19 @@ def view_order(request):
                     variant_images[0]
                 )
 
+            elif item.product.main_image:
+
+                item.main_display_image = (
+                    item.product.main_image
+                )
+
             else:
 
                 product_images = list(
                     item.product.images.all()
                 )
 
-                if item.product.main_image:
-
-                    item.main_display_image = (
-                        item.product.main_image
-                    )
-
-                elif product_images:
+                if product_images:
 
                     item.main_display_image = (
                         product_images[0]
@@ -2568,9 +2581,15 @@ def view_order(request):
 
                     item.main_display_image = None
 
+            # ------------------------------------------------
+            # DISPLAY IMAGES
+            # ------------------------------------------------
+
             if variant_images:
 
-                item.display_images = variant_images
+                item.display_images = (
+                    variant_images
+                )
 
             else:
 
@@ -2578,8 +2597,21 @@ def view_order(request):
                     item.product.images.all()
                 )
 
-            item.display_size = item.variant.size
-            item.display_color = item.variant.color
+            # ------------------------------------------------
+            # VARIANT DETAILS
+            # ------------------------------------------------
+
+            item.display_size = (
+                item.variant.size
+            )
+
+            item.display_color = (
+                item.variant.color
+            )
+
+        # ----------------------------------------------------
+        # BASE PRODUCT
+        # ----------------------------------------------------
 
         else:
 
@@ -2587,7 +2619,13 @@ def view_order(request):
                 item.product.images.all()
             )
 
-            item.display_images = product_images
+            item.display_images = (
+                product_images
+            )
+
+            # ------------------------------------------------
+            # MAIN DISPLAY IMAGE
+            # ------------------------------------------------
 
             if item.product.main_image:
 
@@ -2605,8 +2643,21 @@ def view_order(request):
 
                 item.main_display_image = None
 
-            item.display_size = item.product.size
-            item.display_color = item.product.color
+            # ------------------------------------------------
+            # BASE PRODUCT DETAILS
+            # ------------------------------------------------
+
+            item.display_size = (
+                item.product.size
+            )
+
+            item.display_color = (
+                item.product.color
+            )
+
+        # ----------------------------------------------------
+        # ORIGINAL PRICE
+        # ----------------------------------------------------
 
         item.original_price = (
             item.price + item.discount
@@ -2617,9 +2668,11 @@ def view_order(request):
     # ========================================================
 
     cancellable_items = (
-        order.items.filter(
-            is_cancelled=False,
-            is_returned=False,
+        order.items.exclude(
+            status__in=[
+                "Cancelled",
+                "Returned",
+            ]
         )
     )
 
@@ -2639,9 +2692,11 @@ def view_order(request):
     # ========================================================
 
     returnable_items = (
-        order.items.filter(
-            is_cancelled=False,
-            is_returned=False,
+        order.items.exclude(
+            status__in=[
+                "Cancelled",
+                "Returned",
+            ]
         )
     )
 
@@ -2650,16 +2705,21 @@ def view_order(request):
         and returnable_items.exists()
     )
 
+    # ========================================================
+    # CONTEXT
+    # ========================================================
+
+    context = {
+        "order": order,
+        "can_cancel_order": can_cancel_order,
+        "can_return_order": can_return_order,
+    }
+
     return render(
         request,
         "view_order.html",
-        {
-            "order": order,
-            "can_cancel_order": can_cancel_order,
-            "can_return_order": can_return_order,
-        }
+        context,
     )
-
 
 # ============================================================
 # CANCEL ORDER ITEMS
