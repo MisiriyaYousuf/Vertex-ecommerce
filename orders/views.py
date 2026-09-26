@@ -2293,13 +2293,13 @@ def order_list(request):
         if selected_status == "Cancelled":
 
             orders = orders.filter(
-                items__is_cancelled=True
+                items__status="Cancelled"
             ).distinct()
 
         elif selected_status == "Returned":
 
             orders = orders.filter(
-                items__is_returned=True
+                items__status="Returned"
             ).distinct()
 
         else:
@@ -2358,23 +2358,9 @@ def order_list(request):
 
         for item in order.items.all():
 
-            if item.is_returned:
-
-                item.display_status = "Returned"
-
-            elif item.is_cancelled:
-
-                item.display_status = "Cancelled"
-
-            else:
-
-                item.display_status = (
-                    getattr(
-                        item,
-                        "status",
-                        order.status
-                    )
-                )
+            item.display_status = (
+                item.status or order.status
+            )
 
             item.purchase_label = get_purchase_label(
                 item.product,
