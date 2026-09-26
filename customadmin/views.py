@@ -17,6 +17,7 @@ from orders.models import Order, OrderItem
 from django.db.models import Q,F,Sum,Value,Prefetch,Count
 from django.db.models.functions import Coalesce
 from django.db.models import Sum
+from orders.views import update_status
 
 @login_required
 @never_cache
@@ -38,7 +39,7 @@ def dashboard(request):
     order_count = Order.objects.count()
 
     return_count = OrderItem.objects.filter(
-        is_returned=True
+        status ="Returned"
     ).count()
 
     total_sales = Order.objects.exclude(
@@ -2307,13 +2308,10 @@ def update_order_status(request):
                 update_fields=["quantity"]
             )
 
-        item.is_cancelled = True
         item.cancellation_reason = "Cancelled by admin."
         item.status = "Cancelled"
-
         item.save(
             update_fields=[
-                "is_cancelled",
                 "cancellation_reason",
                 "status",
             ]
