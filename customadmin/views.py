@@ -879,14 +879,6 @@ def edit_product(request):
         if index.strip()
     ]
 
-
-
-    if len(variant_indexes) < 2:
-
-        custom_errors.append(
-            "Please keep at least 2 product variants."
-        )
-
     # =========================================================
     # GET CURRENT VARIANTS
     # =========================================================
