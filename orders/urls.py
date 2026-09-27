@@ -8,6 +8,7 @@ urlpatterns = [
     path("checkout/",views.checkout,name="checkout"),
     path("order-detail/",views.order_detail,name="order_detail"),
     path("place-order/",views.place_order,name="place_order"),
+    path("razorpay-payment/",views.razorpay_payment,name="razorpay_payment"),
     path("razorpay-create/",views.razorpay_create,name="razorpay_create"),
     path("razorpay-verify/",views.razorpay_verify,name="razorpay_verify"),
     path("order-success/",views.order_success,name="order_success"),

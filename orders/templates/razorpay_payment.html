@@ -1,99 +1,323 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Complete Payment</title>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Secure Payment | Vertex</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 </head>
 
 <body>
 
-<h2>Complete your payment</h2>
+    <h2>Complete your payment</h2>
 
-<p>
-    Order #{{ order.id }}
-</p>
+    <p id="payment-message">
+        Preparing secure payment...
+    </p>
 
-<p>
-    Amount: ₹{{ order.total_amount }}
-</p>
+    <button
+        type="button"
+        id="pay-button"
+        style="display:none;"
+    >
+        Pay Now
+    </button>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
 
-const options = {
+const createUrl =
+    "{% url 'orders:razorpay_create' %}";
 
-    key: "{{ razorpay_key_id }}",
+const verifyUrl =
+    "{% url 'orders:razorpay_verify' %}";
 
-    amount: "{{ razorpay_amount }}",
+const successUrl =
+    "{% url 'orders:order_success' %}";
 
-    currency: "{{ currency }}",
 
-    name: "Vertex",
+function getCookie(name) {
 
-    description: "Order #{{ order.id }}",
+    let cookieValue = null;
 
-    order_id: "{{ razorpay_order_id }}",
+    if (document.cookie &&
+        document.cookie !== "") {
 
-    handler: function (response) {
+        const cookies =
+            document.cookie.split(";");
 
-        fetch("{% url 'orders:razorpay_verify' %}", {
+        for (
+            let i = 0;
+            i < cookies.length;
+            i++
+        ) {
 
-            method: "POST",
+            const cookie =
+                cookies[i].trim();
 
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-            },
+            if (
+                cookie.substring(
+                    0,
+                    name.length + 1
+                ) ===
+                (name + "=")
+            ) {
 
-            body: JSON.stringify({
+                cookieValue =
+                    decodeURIComponent(
+                        cookie.substring(
+                            name.length + 1
+                        )
+                    );
 
-                razorpay_payment_id:
-                    response.razorpay_payment_id,
-
-                razorpay_order_id:
-                    response.razorpay_order_id,
-
-                razorpay_signature:
-                    response.razorpay_signature
-
-            })
-
-        })
-
-        .then(response => response.json())
-
-        .then(data => {
-
-            if (data.success) {
-
-                window.location.href =
-                    data.redirect_url;
-
-            } else {
-
-                window.location.href =
-                    data.failure_url;
-
+                break;
             }
-
-        })
-
-        .catch(function () {
-
-            window.location.href =
-                "{% url 'orders:payment_failure' order.id %}";
-
-        });
-
+        }
     }
 
-};
+    return cookieValue;
+}
 
-const razorpay = new Razorpay(options);
 
-razorpay.open();
+const csrftoken =
+    getCookie("csrftoken");
+
+
+async function createRazorpayOrder() {
+
+    const message =
+        document.getElementById(
+            "payment-message"
+        );
+
+    try {
+
+        const response =
+            await fetch(
+                createUrl,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "X-CSRFToken":
+                            csrftoken,
+                    },
+
+                    credentials: "same-origin",
+
+                    body: JSON.stringify({})
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok ||
+            !data.success) {
+
+            throw new Error(
+                data.message ||
+                "Unable to create payment."
+            );
+        }
+
+        openRazorpayCheckout(data);
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+            error.message ||
+            "Unable to start payment.";
+
+        const button =
+            document.getElementById(
+                "pay-button"
+            );
+
+        button.style.display =
+            "block";
+
+        button.textContent =
+            "Try Again";
+    }
+}
+
+
+function openRazorpayCheckout(data) {
+
+    const options = {
+
+        key: data.key,
+
+        amount: data.amount,
+
+        currency: data.currency,
+
+        name: data.name,
+
+        description:
+            data.description,
+
+        order_id:
+            data.razorpay_order_id,
+
+        handler: async function (
+            response
+        ) {
+
+            await verifyPayment(
+                response
+            );
+        },
+
+        modal: {
+
+            ondismiss: function () {
+
+                document.getElementById(
+                    "payment-message"
+                ).textContent =
+                    "Payment cancelled.";
+            }
+        },
+
+        theme: {
+            color: "#6f42c1"
+        }
+    };
+
+
+    const razorpay =
+        new Razorpay(options);
+
+
+    razorpay.on(
+        "payment.failed",
+        function (response) {
+
+            console.error(
+                "Payment failed:",
+                response
+            );
+
+            document.getElementById(
+                "payment-message"
+            ).textContent =
+                "Payment failed. Please try again.";
+        }
+    );
+
+
+    razorpay.open();
+}
+
+
+async function verifyPayment(
+    paymentResponse
+) {
+
+    const message =
+        document.getElementById(
+            "payment-message"
+        );
+
+    message.textContent =
+        "Verifying payment...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                verifyUrl,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "X-CSRFToken":
+                            csrftoken,
+                    },
+
+                    credentials:
+                        "same-origin",
+
+                    body: JSON.stringify({
+
+                        razorpay_payment_id:
+                            paymentResponse
+                                .razorpay_payment_id,
+
+                        razorpay_order_id:
+                            paymentResponse
+                                .razorpay_order_id,
+
+                        razorpay_signature:
+                            paymentResponse
+                                .razorpay_signature
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok ||
+            !data.success) {
+
+            throw new Error(
+                data.message ||
+                "Payment verification failed."
+            );
+        }
+
+
+        window.location.href =
+            data.redirect_url;
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+            error.message ||
+            "Payment verification failed.";
+    }
+}
+
+
+document
+    .getElementById("pay-button")
+    .addEventListener(
+        "click",
+        createRazorpayOrder
+    );
+
+
+createRazorpayOrder();
 
 </script>
 
 </body>
+
 </html>

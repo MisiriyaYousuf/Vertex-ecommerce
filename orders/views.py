@@ -34,12 +34,6 @@ from razorpay.errors import SignatureVerificationError
 
 
 MAX_CART_QUANTITY = 5
-
-
-# ============================================================
-# ORDER STATUS CALCULATION
-# ============================================================
-
 def update_status(order):
     statuses = list(
         order.items.values_list(
@@ -497,6 +491,20 @@ def checkout(request):
             }
         )
 
+    selected_payment_method = (
+        request.session.get(
+            "checkout_payment_method",
+            "COD"
+        )
+    )
+
+    payment_method_display = dict(
+        Order.PAYMENT_METHOD_CHOICES
+    ).get(
+        selected_payment_method,
+        "Cash on Delivery"
+    )
+
     context = {
 
         "form": form,
@@ -521,9 +529,10 @@ def checkout(request):
 
         "total_items": total_items,
 
-        "payment_method": "COD",
+        "payment_method": selected_payment_method,
 
-        "payment_method_display": "Cash on Delivery",
+        "payment_method_display": payment_method_display,
+
     }
 
     return render(
@@ -531,11 +540,6 @@ def checkout(request):
         "checkout.html",
         context,
     )
-
-
-# ============================================================
-# ORDER DETAIL / ORDER REVIEW
-# ============================================================
 
 @login_required
 @never_cache
@@ -904,9 +908,6 @@ def order_detail(request, order_id=None):
                 "orders:order_detail"
             )
 
-    # ========================================================
-    # ORDER REVIEW PAGE
-    # ========================================================
 
     cart_items = (
         Cart.objects
@@ -1346,14 +1347,8 @@ def order_detail(request, order_id=None):
         context,
     )
 
-
-# ============================================================
-# PLACE ORDER
-# ============================================================
-
 @login_required
 @never_cache
-@transaction.atomic
 def place_order(request):
 
     if request.method != "POST":
@@ -1361,6 +1356,22 @@ def place_order(request):
         return redirect(
             "orders:order_detail"
         )
+
+    payment_method = request.session.get(
+        "checkout_payment_method",
+        "COD",
+    )
+    if payment_method == "RAZORPAY":
+
+        return redirect(
+            "orders:razorpay_payment"
+        )
+    return place_cod_order(request)
+
+@login_required
+@never_cache
+@transaction.atomic
+def place_cod_order(request):
 
     address_id = request.session.get(
         "checkout_address_id"
@@ -1374,6 +1385,12 @@ def place_order(request):
     delivery_date_string = request.session.get(
         "checkout_delivery_date"
     )
+
+    if payment_method != "COD":
+
+        return redirect(
+            "orders:order_detail"
+        )
 
     if not address_id:
 
@@ -1431,6 +1448,10 @@ def place_order(request):
             + timedelta(days=4)
         )
 
+    # =========================================================
+    # Get cart and lock rows
+    # =========================================================
+
     cart_items = list(
         Cart.objects
         .select_for_update()
@@ -1455,15 +1476,25 @@ def place_order(request):
             "cart:cart"
         )
 
+    # =========================================================
+    # Validate cart
+    # =========================================================
+
     validated_items = []
 
     subtotal = Decimal("0.00")
+
     discount_amount = Decimal("0.00")
 
     for cart_item in cart_items:
 
         product = cart_item.product
+
         variant = cart_item.variant
+
+        # -----------------------------------------------------
+        # Product exists
+        # -----------------------------------------------------
 
         if not product:
 
@@ -1476,6 +1507,7 @@ def place_order(request):
                 "cart:cart"
             )
 
+    
         if not product.is_active:
 
             messages.error(
@@ -1563,14 +1595,18 @@ def place_order(request):
                     "cart:cart"
                 )
 
-            available_quantity = variant.quantity
+            available_quantity = (
+                variant.quantity
+            )
 
         else:
 
             product = (
                 Product.objects
                 .select_for_update()
-                .select_related("category")
+                .select_related(
+                    "category"
+                )
                 .filter(
                     id=cart_item.product_id
                 )
@@ -1639,7 +1675,9 @@ def place_order(request):
                     "cart:cart"
                 )
 
-            available_quantity = product.quantity
+            available_quantity = (
+                product.quantity
+            )
 
         if available_quantity <= 0:
 
@@ -1663,7 +1701,10 @@ def place_order(request):
                 "cart:cart"
             )
 
-        if cart_item.quantity > MAX_CART_QUANTITY:
+        if (
+            cart_item.quantity
+            > MAX_CART_QUANTITY
+        ):
 
             messages.error(
                 request,
@@ -1675,7 +1716,10 @@ def place_order(request):
                 "cart:cart"
             )
 
-        if cart_item.quantity > available_quantity:
+        if (
+            cart_item.quantity
+            > available_quantity
+        ):
 
             if variant:
 
@@ -1712,21 +1756,21 @@ def place_order(request):
         )
 
         subtotal += original_total
+
         discount_amount += item_discount
 
-        validated_items.append(
-            {
-                "cart_item": cart_item,
-                "product": product,
-                "variant": variant,
-                "price": unit_price,
-                "discount": unit_discount,
-                "item_total": item_total,
-                "original_total": original_total,
-            }
-        )
+        validated_items.append({
+            "cart_item": cart_item,
+            "product": product,
+            "variant": variant,
+            "price": unit_price,
+            "discount": unit_discount,
+            "item_total": item_total,
+            "original_total": original_total,
+        })
 
     tax = Decimal("0.00")
+
     shipping_charge = Decimal("0.00")
 
     total_amount = (
@@ -1742,13 +1786,9 @@ def place_order(request):
 
         address=address,
 
-        payment_method=payment_method,
+        payment_method="COD",
 
-        payment_status=(
-            "Paid"
-            if payment_method == "COD"
-            else "Pending"
-        ),
+        payment_status="Paid",
 
         status="Pending",
 
@@ -1768,7 +1808,9 @@ def place_order(request):
     for item in validated_items:
 
         cart_item = item["cart_item"]
+
         product = item["product"]
+
         variant = item["variant"]
 
         OrderItem.objects.create(
@@ -1794,13 +1836,18 @@ def place_order(request):
 
         if variant:
 
-            if variant.quantity < cart_item.quantity:
+            if (
+                variant.quantity
+                < cart_item.quantity
+            ):
 
                 raise ValueError(
                     f"Insufficient stock for {variant}"
                 )
 
-            variant.quantity -= cart_item.quantity
+            variant.quantity -= (
+                cart_item.quantity
+            )
 
             variant.save(
                 update_fields=[
@@ -1811,13 +1858,19 @@ def place_order(request):
 
         else:
 
-            if product.quantity < cart_item.quantity:
+            if (
+                product.quantity
+                < cart_item.quantity
+            ):
 
                 raise ValueError(
-                    f"Insufficient stock for {product.name}"
+                    f"Insufficient stock for "
+                    f"{product.name}"
                 )
 
-            product.quantity -= cart_item.quantity
+            product.quantity -= (
+                cart_item.quantity
+            )
 
             product.save(
                 update_fields=[
@@ -1826,7 +1879,6 @@ def place_order(request):
                 ]
             )
 
-    # Synchronize order status from its item statuses.
     update_status(order)
 
     Cart.objects.filter(
@@ -1852,6 +1904,7 @@ def place_order(request):
         None,
     )
 
+    request.session.modified = True
     return redirect(
         "orders:order_success"
     )
@@ -1882,10 +1935,400 @@ def create_razorpay_order(order):
     return razorpay_order
 
 @login_required
+@never_cache
+def razorpay_payment(request):
+
+    payment_method = request.session.get(
+        "checkout_payment_method"
+    )
+
+    if payment_method != "RAZORPAY":
+
+        return redirect(
+            "orders:order_detail"
+        )
+
+    return render(
+        request,
+        "orders/razorpay_payment.html",
+    )
+
+@login_required
+@require_POST
+@transaction.atomic
+def razorpay_create(request):
+
+    payment_method = request.session.get(
+        "checkout_payment_method",
+        "COD",
+    )
+
+    if payment_method != "RAZORPAY":
+
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid payment method.",
+        }, status=400)
+
+    address_id = request.session.get(
+        "checkout_address_id"
+    )
+
+    delivery_date_string = request.session.get(
+        "checkout_delivery_date"
+    )
+
+    if not address_id:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Checkout session expired.",
+        }, status=400)
+
+    address = Address.objects.filter(
+        id=address_id,
+        user=request.user,
+        is_deleted = False
+    ).first()
+
+    if not address:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid address.",
+        }, status=400)
+
+    cart_items = list(
+        Cart.objects.select_related(
+            "product",
+            "product__category",
+            "variant",
+        ).filter(
+            user=request.user
+        )
+    )
+
+    if not cart_items:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Your cart is empty.",
+        }, status=400)
+
+    subtotal = Decimal("0")
+    discount_amount = Decimal("0")
+
+    prepared_items = []
+
+    for cart_item in cart_items:
+
+        product = cart_item.product
+        variant = cart_item.variant
+
+        if (
+            not product.is_active
+            or product.is_deleted
+        ):
+            return JsonResponse({
+                "success": False,
+                "message": (
+                    f"{product.name} is no longer available."
+                ),
+            }, status=400)
+
+        if (
+            not product.category
+            or product.category.is_deleted
+            or not product.category.is_active
+        ):
+            return JsonResponse({
+                "success": False,
+                "message": (
+                    f"{product.name} is unavailable."
+                ),
+            }, status=400)
+
+        if variant:
+
+            if (
+                variant.product_id
+                != product.id
+            ):
+                return JsonResponse({
+                    "success": False,
+                    "message": "Invalid product variant.",
+                }, status=400)
+
+            if not variant.is_active:
+
+                return JsonResponse({
+                    "success": False,
+                    "message": (
+                        f"{product.name} variant "
+                        "is unavailable."
+                    ),
+                }, status=400)
+
+        quantity = cart_item.quantity
+
+        if quantity < 1:
+
+            return JsonResponse({
+                "success": False,
+                "message": "Invalid cart quantity.",
+            }, status=400)
+
+        if quantity > MAX_CART_QUANTITY:
+
+            return JsonResponse({
+                "success": False,
+                "message": (
+                    f"Maximum quantity is "
+                    f"{MAX_CART_QUANTITY}."
+                ),
+            }, status=400)
+
+        if variant:
+
+            stock = variant.quantity
+
+        else:
+
+            stock = product.quantity
+
+        if stock < quantity:
+
+            return JsonResponse({
+                "success": False,
+                "message": (
+                    f"Only {stock} item(s) "
+                    f"available for {product.name}."
+                ),
+            }, status=400)
+
+        (
+            original_total,
+            item_discount,
+            final_total,
+            unit_price,
+            unit_discount,
+        ) = get_product_pricing(
+            product,
+            quantity,
+            variant,
+        )
+
+        subtotal += final_total
+        discount_amount += item_discount
+
+        prepared_items.append({
+            "cart_item": cart_item,
+            "product": product,
+            "variant": variant,
+            "quantity": quantity,
+            "unit_price": unit_price,
+            "unit_discount": unit_discount,
+            "item_total": final_total,
+        })
+
+    tax = Decimal("0")
+    shipping_charge = Decimal("0")
+
+    total_amount = (
+        subtotal
+        - discount_amount
+        + tax
+        + shipping_charge
+    )
+
+    if total_amount <= 0:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid order amount.",
+        }, status=400)
+
+    delivery_date = None
+
+    if delivery_date_string:
+
+        try:
+            from datetime import date
+
+            delivery_date = date.fromisoformat(
+                delivery_date_string
+            )
+
+        except ValueError:
+
+            delivery_date = None
+
+    existing_order_id = request.session.get(
+        "razorpay_django_order_id"
+    )
+
+    order = None
+
+    if existing_order_id:
+
+        order = (
+            Order.objects.select_for_update()
+            .filter(
+                id=existing_order_id,
+                user=request.user,
+                payment_method="RAZORPAY",
+                payment_status="Pending",
+            )
+            .first()
+        )
+
+        if order:
+
+            if order.total_amount != total_amount:
+
+                order.items.all().delete()
+
+                order.subtotal = subtotal
+                order.discount = discount_amount
+                order.tax = tax
+                order.shipping_charge = shipping_charge
+                order.total_amount = total_amount
+                order.address = address
+                order.delivery_date = delivery_date
+
+                order.save(
+                    update_fields=[
+                        "subtotal",
+                        "discount",
+                        "tax",
+                        "shipping_charge",
+                        "total_amount",
+                        "address",
+                        "delivery_date",
+                        "updated_at",
+                    ]
+                )
+
+            else:
+
+                order.address = address
+                order.delivery_date = delivery_date
+
+                order.save(
+                    update_fields=[
+                        "address",
+                        "delivery_date",
+                        "updated_at",
+                    ]
+                )
+
+    if order is None:
+
+        order = Order.objects.create(
+            user=request.user,
+            address=address,
+            payment_method="RAZORPAY",
+            payment_status="Pending",
+            status="Pending",
+            subtotal=subtotal,
+            discount=discount_amount,
+            tax=tax,
+            shipping_charge=shipping_charge,
+            delivery_date=delivery_date,
+            total_amount=total_amount,
+        )
+
+    if not order.items.exists():
+
+        for item in prepared_items:
+
+            cart_item = item["cart_item"]
+            product = item["product"]
+            variant = item["variant"]
+
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                variant=variant,
+                product_name=product.name,
+                discount=item["unit_discount"],
+                price=item["unit_price"],
+                quantity=item["quantity"],
+                item_total=item["item_total"],
+                status="Pending",
+            )
+
+    else:
+
+        existing_items = list(
+            order.items.all()
+        )
+
+        if len(existing_items) != len(
+            prepared_items
+        ):
+
+            order.items.all().delete()
+
+            for item in prepared_items:
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=item["product"],
+                    variant=item["variant"],
+                    product_name=item["product"].name,
+                    discount=item["unit_discount"],
+                    price=item["unit_price"],
+                    quantity=item["quantity"],
+                    item_total=item["item_total"],
+                    status="Pending",
+                )
+
+    razorpay_order = create_razorpay_order(
+        order
+    )
+
+    request.session[
+        "razorpay_django_order_id"
+    ] = order.id
+
+    request.session.modified = True
+
+    return JsonResponse({
+        "success": True,
+        "django_order_id": order.id,
+        "razorpay_order_id": (
+            razorpay_order["id"]
+        ),
+        "amount": razorpay_order["amount"],
+        "currency": razorpay_order["currency"],
+        "key": settings.RAZORPAY_KEY_ID,
+        "name": "Vertex",
+        "description": (
+            f"Order #{order.id}"
+        ),
+        "callback_url": reverse(
+            "orders:razorpay_verify"
+        ),
+    })
+
+@login_required
 @require_POST
 def razorpay_verify(request):
 
-    data = json.loads(request.body)
+    try:
+
+        data = json.loads(
+            request.body
+        )
+
+    except json.JSONDecodeError:
+
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid payment data.",
+        }, status=400)
+
 
     razorpay_payment_id = data.get(
         "razorpay_payment_id"
@@ -1899,31 +2342,379 @@ def razorpay_verify(request):
         "razorpay_signature"
     )
 
+
     if not all([
         razorpay_payment_id,
         razorpay_order_id,
         razorpay_signature,
     ]):
+
         return JsonResponse({
             "success": False,
-            "failure_url": "/"
-        })
+            "message": (
+                "Missing Razorpay payment information."
+            ),
+        }, status=400)
 
-    order = Order.objects.filter(
-        user=request.user,
-        razorpay_order_id=razorpay_order_id,
-    ).first()
+    order = (
+        Order.objects
+        .filter(
+            user=request.user,
+            razorpay_order_id=razorpay_order_id,
+            payment_method="RAZORPAY",
+        )
+        .first()
+    )
+
 
     if not order:
+
         return JsonResponse({
             "success": False,
-            "failure_url": "/"
+            "message": "Order not found.",
+        }, status=404)
+
+    if (
+        order.payment_status == "Paid"
+        and order.razorpay_payment_id
+        == razorpay_payment_id
+    ):
+
+        return JsonResponse({
+            "success": True,
+            "order_id": order.id,
+            "redirect_url": (
+                reverse(
+                    "orders:order_success"
+                )
+            ),
         })
 
 
-# ============================================================
-# ORDER SUCCESS
-# ============================================================
+    client = get_razorpay_client()
+
+    try:
+
+        client.utility.verify_payment_signature({
+
+            "razorpay_order_id":
+                razorpay_order_id,
+
+            "razorpay_payment_id":
+                razorpay_payment_id,
+
+            "razorpay_signature":
+                razorpay_signature,
+        })
+
+    except SignatureVerificationError:
+
+        order.payment_status = "Failed"
+
+        order.save(
+            update_fields=[
+                "payment_status",
+                "updated_at",
+            ]
+        )
+
+        return JsonResponse({
+            "success": False,
+            "message":
+                "Payment signature verification failed.",
+        }, status=400)
+
+    try:
+
+        payment = client.payment.fetch(
+            razorpay_payment_id
+        )
+
+    except Exception:
+
+        return JsonResponse({
+            "success": False,
+            "message":
+                "Unable to verify payment status.",
+        }, status=400)
+
+
+    if payment.get(
+        "order_id"
+    ) != razorpay_order_id:
+
+        return JsonResponse({
+            "success": False,
+            "message":
+                "Payment does not belong to this order.",
+        }, status=400)
+
+    expected_amount = int(
+        order.total_amount * 100
+    )
+
+    received_amount = int(
+        payment.get(
+            "amount",
+            0
+        )
+    )
+
+
+    if received_amount != expected_amount:
+
+        return JsonResponse({
+            "success": False,
+            "message":
+                "Payment amount mismatch.",
+        }, status=400)
+
+    if payment.get(
+        "currency"
+    ) != "INR":
+
+        return JsonResponse({
+            "success": False,
+            "message":
+                "Payment currency mismatch.",
+        }, status=400)
+
+    if payment.get(
+        "status"
+    ) != "captured":
+
+        order.payment_status = "Pending"
+
+        order.save(
+            update_fields=[
+                "payment_status",
+                "updated_at",
+            ]
+        )
+
+        return JsonResponse({
+            "success": False,
+            "message":
+                "Payment has not been captured.",
+        }, status=400)
+
+    try:
+
+        order = finalize_paid_order(
+            order,
+            razorpay_payment_id,
+        )
+
+    except ValueError as exc:
+
+        order.payment_status = "Failed"
+
+        order.save(
+            update_fields=[
+                "payment_status",
+                "updated_at",
+            ]
+        )
+
+        return JsonResponse({
+            "success": False,
+            "message": str(exc),
+        }, status=400)
+
+    request.session.pop(
+        "checkout_address_id",
+        None,
+    )
+
+    request.session.pop(
+        "checkout_payment_method",
+        None,
+    )
+
+    request.session.pop(
+        "checkout_delivery_date",
+        None,
+    )
+
+    request.session.pop(
+        "razorpay_django_order_id",
+        None,
+    )
+
+    request.session["last_order_id"] = (
+        order.id
+    )
+
+    request.session.modified = True
+
+    return JsonResponse({
+        "success": True,
+        "order_id": order.id,
+        "redirect_url": (
+            reverse(
+                "orders:order_success"
+            )
+        ),
+    })
+
+@transaction.atomic
+def finalize_paid_order(
+    order,
+    razorpay_payment_id,
+):
+    order = (
+        Order.objects
+        .select_for_update()
+        .select_related("user")
+        .get(
+            id=order.id
+        )
+    )
+
+    if order.payment_status == "Paid":
+
+        return order
+
+
+    if order.payment_method != "RAZORPAY":
+
+        raise ValueError(
+            "This order is not a Razorpay order."
+        )
+
+    for item in order.items.select_related(
+        "product",
+        "variant",
+    ).all():
+
+        if item.status in [
+            "Cancelled",
+            "Returned",
+        ]:
+            continue
+
+
+        product = item.product
+        variant = item.variant
+
+
+        if variant:
+
+            locked_variant = (
+                ProductVariant.objects
+                .select_for_update()
+                .get(
+                    id=variant.id
+                )
+            )
+
+            if (
+                not locked_variant.is_active
+            ):
+                raise ValueError(
+                    f"{product.name} variant "
+                    "is no longer available."
+                )
+
+            if (
+                locked_variant.quantity
+                < item.quantity
+            ):
+                raise ValueError(
+                    f"Insufficient stock for "
+                    f"{product.name}."
+                )
+
+            locked_variant.quantity -= (
+                item.quantity
+            )
+
+            locked_variant.save(
+                update_fields=[
+                    "quantity",
+                    "updated_at",
+                ]
+            )
+
+        else:
+
+            locked_product = (
+                Product.objects
+                .select_for_update()
+                .get(
+                    id=product.id
+                )
+            )
+
+            if (
+                not locked_product.is_active
+                or locked_product.is_deleted
+            ):
+                raise ValueError(
+                    f"{product.name} "
+                    "is no longer available."
+                )
+
+            if (
+                locked_product.quantity
+                < item.quantity
+            ):
+                raise ValueError(
+                    f"Insufficient stock for "
+                    f"{product.name}."
+                )
+
+            locked_product.quantity -= (
+                item.quantity
+            )
+
+            locked_product.save(
+                update_fields=[
+                    "quantity",
+                    "updated_at",
+                ]
+            )
+
+
+        item.status = "Processing"
+
+        item.save(
+            update_fields=[
+                "status",
+            ]
+        )
+
+    order.razorpay_payment_id = (
+        razorpay_payment_id
+    )
+
+    order.payment_status = "Paid"
+
+    order.status = "Processing"
+
+    order.save(
+        update_fields=[
+            "razorpay_payment_id",
+            "payment_status",
+            "status",
+            "updated_at",
+        ]
+    )
+
+    for item in order.items.select_related(
+        "product",
+        "variant",
+    ).all():
+
+        Cart.objects.filter(
+            user=order.user,
+            product=item.product,
+            variant=item.variant,
+        ).delete()
+
+
+    return order
+
 
 @login_required
 @never_cache
