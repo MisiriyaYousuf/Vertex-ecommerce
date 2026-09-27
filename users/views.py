@@ -594,7 +594,6 @@ def home(request):
             is_deleted=False,
             is_active=True,
             discount_price__isnull=False,
-            discount_price__gt=0,
             sale_price__isnull=False,
             discount_price__lt=F("sale_price"),
         )
