@@ -1,452 +1,178 @@
-{% extends "user_base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}
-Checkout
-{% endblock %}
+{% block title %}Checkout | Vertex{% endblock %}
 
 {% block content %}
 
 <style>
-
-    /* =========================================================
-       CHECKOUT PAGE
-    ========================================================= */
-
-    .checkout-page {
-        background: transparent !important;
-        min-height: 85vh;
-        padding: 40px 0 60px;
-    }
-
-    .checkout-wrapper {
-        width: 92%;
+    .checkout-container {
         max-width: 1200px;
-        margin: 0 auto;
+        margin: 40px auto;
+        padding: 0 20px;
     }
 
     .checkout-title {
-        margin: 0 0 28px;
-        font-size: 30px;
-        font-weight: 750;
-        color: #ffffff;
-        letter-spacing: -0.4px;
+        color: #fff;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 30px;
     }
 
-    .checkout-layout {
+    .checkout-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 360px;
-        gap: 25px;
-        align-items: start;
+        grid-template-columns: 1.5fr 0.8fr;
+        gap: 30px;
     }
-
-
-    /* =========================================================
-       MAIN GLASS CARDS
-    ========================================================= */
 
     .checkout-card {
-        background:
-            linear-gradient(
-                135deg,
-                rgba(73, 46, 91, 0.72),
-                rgba(45, 27, 61, 0.62)
-            ) !important;
-
-        border: 1px solid rgba(255, 255, 255, 0.16) !important;
-        border-radius: 15px;
-
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
         padding: 25px;
-        margin-bottom: 20px;
-
-        box-shadow:
-            0 15px 40px rgba(20, 12, 30, 0.30),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
-
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
     }
 
-    .checkout-card:last-child {
-        margin-bottom: 0;
-    }
-
-
-    /* =========================================================
-       SECTION HEADER
-    ========================================================= */
-
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 22px;
-    }
-
-    .section-number {
-        width: 32px;
-        height: 32px;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        flex-shrink: 0;
-
-        background: rgba(255, 255, 255, 0.10);
-        border: 1px solid rgba(255, 255, 255, 0.20);
-
-        color: #ffffff;
-
-        border-radius: 50%;
-
-        font-size: 14px;
-        font-weight: 700;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.07);
-    }
-
-    .section-header h3 {
-        margin: 0;
-
+    .section-title {
+        color: #fff;
         font-size: 20px;
-        font-weight: 750;
-
-        color: #ffffff;
+        font-weight: 700;
+        margin-bottom: 20px;
     }
 
+    /* ADDRESS */
 
-    /* =========================================================
-       SELECTED ADDRESS
-    ========================================================= */
-
-    .selected-address {
-        position: relative;
-
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        border-radius: 12px;
-
-        padding: 18px;
-
-        background:
-            rgba(255, 255, 255, 0.07);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-
-        transition: all 0.25s ease;
-
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-
-    .selected-address:hover {
-        background: rgba(255, 255, 255, 0.09);
-        border-color: rgba(255, 255, 255, 0.30);
-    }
-
-    .address-top {
+    .address-list {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-
+        flex-direction: column;
         gap: 15px;
     }
 
-    .address-type {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-
-        color: #ffffff;
-
-        font-size: 14px;
-        font-weight: 750;
+    .address-option {
+        position: relative;
+        display: block;
+        padding: 18px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        cursor: pointer;
+        transition: 0.25s ease;
     }
 
-    .default-badge {
-        padding: 4px 9px;
-
-        border-radius: 20px;
-
-        background: rgba(255, 255, 255, 0.11);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-
-        color: #ffffff;
-
-        font-size: 11px;
-        font-weight: 700;
+    .address-option:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.25);
     }
 
-    .address-name {
-        margin-top: 13px;
-
-        color: #ffffff;
-
-        font-size: 15px;
-        font-weight: 700;
+    .address-option.selected {
+        border-color: #9b6cff;
+        background: rgba(155, 108, 255, 0.12);
+        box-shadow: 0 0 0 1px rgba(155, 108, 255, 0.2);
     }
 
-    .address-text {
-        margin-top: 5px;
-
-        color: rgba(255, 255, 255, 0.70);
-
-        font-size: 14px;
-        line-height: 1.65;
+    .address-radio {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
     }
 
-    .address-phone {
-        margin-top: 7px;
-
-        color: rgba(255, 255, 255, 0.65);
-
-        font-size: 13px;
+    .address-content {
+        color: #fff;
     }
 
-
-    /* =========================================================
-       ADDRESS ACTIONS
-    ========================================================= */
-
-    .address-actions {
+    .address-header {
         display: flex;
         align-items: center;
-        gap: 12px;
-
-        margin-top: 17px;
-        padding-top: 15px;
-
-        border-top: 1px solid rgba(255, 255, 255, 0.10);
+        justify-content: space-between;
+        margin-bottom: 8px;
     }
 
-    .change-address-btn,
-    .add-address-btn {
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        background: rgba(255, 255, 255, 0.06);
-
-        color: #ffffff !important;
-
-        padding: 8px 13px;
-        border-radius: 8px;
-
-        font-size: 13px;
+    .address-type {
+        font-size: 14px;
         font-weight: 700;
-
-        cursor: pointer;
-        text-decoration: none !important;
-
-        transition: all 0.25s ease;
-    }
-
-    .change-address-btn:hover,
-    .add-address-btn:hover {
-        color: #ffffff !important;
-
-        background: rgba(255, 255, 255, 0.14);
-        border-color: rgba(255, 255, 255, 0.32);
-
-        transform: translateY(-1px);
-    }
-
-
-    /* =========================================================
-       ADDRESS CHANGE LIST
-    ========================================================= */
-
-    .address-list {
-        display: none;
-
-        margin-top: 15px;
-
-        padding: 15px;
-
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 12px;
-
-        background: rgba(255, 255, 255, 0.045);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-
-    .address-list.show {
-        display: block;
-    }
-
-    .address-list-title {
-        margin-bottom: 12px;
-
-        color: rgba(255, 255, 255, 0.62);
-
-        font-size: 12px;
-        font-weight: 700;
-
+        color: #b994ff;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
-    .address-option {
-        display: block;
-        position: relative;
-
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 10px;
-
-        padding: 15px;
-        margin-bottom: 10px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        color: #ffffff;
-
-        cursor: pointer;
-
-        transition: all 0.25s ease;
+    .default-badge {
+        background: rgba(155, 108, 255, 0.18);
+        color: #c8aaff;
+        padding: 4px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
     }
 
-    .address-option:last-of-type {
-        margin-bottom: 0;
+    .address-name {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 5px;
     }
 
-    .address-option:hover {
-        border-color: rgba(255, 255, 255, 0.30);
-        background: rgba(255, 255, 255, 0.10);
-    }
-
-    .address-option.selected {
-        border-color: rgba(255, 255, 255, 0.40);
-
-        background: rgba(255, 255, 255, 0.11);
-
-        box-shadow:
-            0 0 0 1px rgba(255, 255, 255, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-
-    .address-option input {
-        margin-right: 8px;
-
-        accent-color: #ffffff;
-
-        cursor: pointer;
-    }
-
-    .address-option-content {
-        display: inline-block;
-
-        vertical-align: top;
-
-        width: calc(100% - 30px);
-    }
-
-    .address-option-title {
+    .address-text {
+        color: rgba(255, 255, 255, 0.72);
         font-size: 14px;
-        font-weight: 700;
-
-        color: #ffffff;
-    }
-
-    .address-option-details {
-        margin-top: 6px;
-
-        font-size: 13px;
         line-height: 1.6;
-
-        color: rgba(255, 255, 255, 0.67);
     }
 
-    .address-option-details strong {
-        color: #ffffff;
+    .address-error {
+        color: #ff7676;
+        font-size: 13px;
+        margin-top: 10px;
     }
 
+    /* PAYMENT */
 
-    /* =========================================================
-       PAYMENT METHODS
-    ========================================================= */
-
-    .payment-methods {
-        display: grid;
-        gap: 12px;
+    .payment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
     }
 
     .payment-option {
         position: relative;
-
         display: flex;
         align-items: center;
-        gap: 14px;
-
-        min-height: 68px;
-
-        padding: 14px 16px;
-
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 11px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        color: #ffffff;
-
+        gap: 15px;
+        padding: 18px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
         cursor: pointer;
-
-        transition: all 0.25s ease;
-
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        transition: 0.25s ease;
     }
 
     .payment-option:hover {
-        border-color: rgba(255, 255, 255, 0.30);
-        background: rgba(255, 255, 255, 0.10);
-
-        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.25);
     }
 
     .payment-option.selected {
-        border-color: rgba(255, 255, 255, 0.40);
-
-        background: rgba(255, 255, 255, 0.11);
-
-        box-shadow:
-            0 0 0 1px rgba(255, 255, 255, 0.10),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        border-color: #9b6cff;
+        background: rgba(155, 108, 255, 0.12);
+        box-shadow: 0 0 0 1px rgba(155, 108, 255, 0.2);
     }
 
     .payment-radio {
-        width: 18px;
-        height: 18px;
-
-        flex-shrink: 0;
-
-        accent-color: #ffffff;
-
-        cursor: pointer;
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
     }
 
     .payment-icon {
-        width: 40px;
-        height: 40px;
-
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-
-        flex-shrink: 0;
-
-        border-radius: 9px;
-
-        background: rgba(255, 255, 255, 0.09);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-
-        font-size: 19px;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        background: rgba(155, 108, 255, 0.15);
+        color: #c4a5ff;
+        font-size: 20px;
     }
 
     .payment-content {
@@ -454,1127 +180,387 @@ Checkout
     }
 
     .payment-title {
-        font-size: 14px;
+        color: #fff;
+        font-size: 15px;
         font-weight: 700;
-
-        color: #ffffff;
+        margin-bottom: 4px;
     }
 
     .payment-description {
-        margin-top: 3px;
-
         color: rgba(255, 255, 255, 0.58);
-
-        font-size: 12px;
+        font-size: 13px;
+        line-height: 1.4;
     }
 
     .payment-check {
-        display: none;
-
-        color: #ffffff;
-
-        font-size: 18px;
-        font-weight: 800;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s ease;
     }
 
     .payment-option.selected .payment-check {
-        display: block;
+        border-color: #9b6cff;
+        background: #9b6cff;
     }
 
-    .payment-info {
-        margin-top: 15px;
-
-        padding: 12px 14px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 8px;
-
-        color: rgba(255, 255, 255, 0.62);
-
-        font-size: 12px;
-        line-height: 1.6;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    .payment-option.selected .payment-check::after {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #fff;
     }
 
-
-    /* =========================================================
-       ORDER SUMMARY
-    ========================================================= */
+    /* SUMMARY */
 
     .summary-card {
         position: sticky;
-        top: 20px;
-    }
-
-    .summary-title {
-        margin: 0 0 20px;
-
-        font-size: 20px;
-        font-weight: 750;
-
-        color: #ffffff;
-    }
-
-    .summary-highlight {
-        display: grid;
-
-        grid-template-columns: 1fr 1fr;
-
-        gap: 10px;
-
-        margin-bottom: 20px;
-    }
-
-    .highlight-box {
-        padding: 13px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        border-radius: 9px;
-
-        border: 1px solid rgba(255, 255, 255, 0.12);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-
-    .highlight-label {
-        color: rgba(255, 255, 255, 0.52);
-
-        font-size: 11px;
-
-        text-transform: uppercase;
-
-        letter-spacing: 0.5px;
-
-        font-weight: 650;
-    }
-
-    .highlight-value {
-        margin-top: 5px;
-
-        color: #ffffff;
-
-        font-size: 14px;
-
-        font-weight: 750;
+        top: 25px;
     }
 
     .summary-row {
         display: flex;
-
         justify-content: space-between;
-        align-items: center;
-
         gap: 15px;
-
-        margin-bottom: 15px;
-
-        color: rgba(255, 255, 255, 0.66);
-
+        padding: 10px 0;
+        color: rgba(255, 255, 255, 0.72);
         font-size: 14px;
     }
 
-    .summary-row span:last-child {
-        color: #ffffff;
-
-        font-weight: 650;
-
-        white-space: nowrap;
-    }
-
-    .discount-row span {
-        color: #ffffff !important;
+    .summary-row.total {
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        margin-top: 12px;
+        padding-top: 18px;
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
     }
 
     .free-delivery {
-        color: #ffffff !important;
-
-        font-weight: 700 !important;
-    }
-
-    .summary-total {
-        display: flex;
-
-        justify-content: space-between;
-        align-items: center;
-
-        gap: 15px;
-
-        margin-top: 20px;
-
-        padding-top: 18px;
-
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
-
-        color: #ffffff;
-
-        font-size: 19px;
-
-        font-weight: 800;
-    }
-
-    .summary-total span:last-child {
-        white-space: nowrap;
-    }
-
-
-    /* =========================================================
-       REVIEW BUTTON
-    ========================================================= */
-
-    .review-order-btn {
-        width: 100%;
-
-        margin-top: 22px;
-
-        padding: 14px 18px;
-
-        border: 1px solid rgba(255, 255, 255, 0.22);
-
-        border-radius: 9px;
-
-        background: rgba(255, 255, 255, 0.10);
-
-        color: #ffffff !important;
-
-        font-size: 15px;
-        font-weight: 700;
-
-        cursor: pointer;
-
-        transition: all 0.25s ease;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    }
-
-    .review-order-btn:hover {
-        background: rgba(255, 255, 255, 0.18);
-
-        border-color: rgba(255, 255, 255, 0.38);
-
-        color: #ffffff !important;
-
-        transform: translateY(-1px);
-
-        box-shadow:
-            0 8px 20px rgba(20, 12, 30, 0.20),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-
-    .review-order-btn:active {
-        transform: translateY(0);
-    }
-
-    .secure-note {
-        margin-top: 12px;
-
-        text-align: center;
-
-        color: rgba(255, 255, 255, 0.50);
-
-        font-size: 11px;
-    }
-
-
-    /* =========================================================
-       PRODUCTS
-    ========================================================= */
-
-    .checkout-product {
-        display: flex;
-
-        align-items: center;
-
-        gap: 14px;
-
-        padding: 14px 0;
-
-        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    }
-
-    .checkout-product:last-child {
-        border-bottom: none;
-
-        padding-bottom: 0;
-    }
-
-    .checkout-product-image {
-        width: 72px;
-        height: 72px;
-
-        flex-shrink: 0;
-
-        overflow: hidden;
-
-        border-radius: 9px;
-
-        background: rgba(255, 255, 255, 0.07);
-
-        border: 1px solid rgba(255, 255, 255, 0.13);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-
-    .checkout-product-image img {
-        width: 100%;
-        height: 100%;
-
-        object-fit: contain;
-
-        padding: 5px;
-    }
-
-    .checkout-product-info {
-        flex: 1;
-
-        min-width: 0;
-    }
-
-    .checkout-product-name {
-        color: #ffffff;
-
-        font-size: 14px;
-        font-weight: 700;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-    }
-
-    .checkout-product-variant {
-        margin-top: 5px;
-
-        color: rgba(255, 255, 255, 0.72);
-
-        font-size: 12px;
-
+        color: #72e0a5;
         font-weight: 600;
     }
 
-    .checkout-product-quantity {
-        margin-top: 5px;
-
-        color: rgba(255, 255, 255, 0.56);
-
-        font-size: 12px;
-    }
-
-    .checkout-product-price {
-        color: #ffffff;
-
-        font-size: 14px;
-
+    .place-order-btn {
+        width: 100%;
+        border: none;
+        border-radius: 13px;
+        padding: 15px 20px;
+        margin-top: 22px;
+        background: linear-gradient(135deg, #8b5cf6, #6d3de8);
+        color: #fff;
+        font-size: 15px;
         font-weight: 700;
-
-        white-space: nowrap;
+        cursor: pointer;
+        transition: 0.25s ease;
+        box-shadow: 0 10px 25px rgba(109, 61, 232, 0.25);
     }
 
-    .checkout-product-original-price {
-        display: block;
-
-        margin-top: 3px;
-
-        color: rgba(255, 255, 255, 0.42);
-
-        font-size: 11px;
-
-        text-decoration: line-through;
+    .place-order-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(109, 61, 232, 0.35);
     }
 
-
-    /* =========================================================
-       FORM ERRORS
-    ========================================================= */
-
-    .form-errors {
-        margin-bottom: 20px;
-
-        padding: 14px 16px;
-
-        border: 1px solid rgba(255, 100, 100, 0.30);
-
-        border-radius: 10px;
-
-        background: rgba(255, 80, 80, 0.08);
-
-        color: #ffffff;
-
-        font-size: 13px;
-
-        line-height: 1.6;
-    }
-
-    .field-error {
-        margin-top: 5px;
-
-        color: #ffffff;
-
+    .security-note {
+        text-align: center;
+        margin-top: 14px;
+        color: rgba(255, 255, 255, 0.45);
         font-size: 12px;
     }
 
+    .razorpay-note {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(155, 108, 255, 0.08);
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 12px;
+        line-height: 1.5;
+    }
 
-    /* =========================================================
-       RESPONSIVE
-    ========================================================= */
+    .messages {
+        margin-bottom: 20px;
+    }
+
+    .message {
+        padding: 12px 15px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        margin-bottom: 8px;
+    }
 
     @media (max-width: 900px) {
-
-        .checkout-layout {
+        .checkout-grid {
             grid-template-columns: 1fr;
         }
 
         .summary-card {
             position: static;
         }
-
     }
 
-
     @media (max-width: 600px) {
-
-        .checkout-page {
-            padding: 25px 0 45px;
-        }
-
-        .checkout-wrapper {
-            width: 94%;
+        .checkout-container {
+            margin: 25px auto;
+            padding: 0 14px;
         }
 
         .checkout-title {
             font-size: 26px;
-
-            margin-bottom: 20px;
         }
 
         .checkout-card {
             padding: 18px;
-
-            border-radius: 12px;
         }
-
-        .section-header h3 {
-            font-size: 18px;
-        }
-
-        .summary-highlight {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .payment-option {
-            padding: 13px;
-        }
-
-        .checkout-product-image {
-            width: 62px;
-            height: 62px;
-        }
-
-        .address-option-content {
-            width: calc(100% - 28px);
-        }
-
     }
-
-
-    @media (max-width: 420px) {
-
-        .checkout-wrapper {
-            width: 92%;
-        }
-
-        .checkout-card {
-            padding: 16px;
-        }
-
-        .address-actions {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .change-address-btn,
-        .add-address-btn {
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .payment-option {
-            gap: 10px;
-        }
-
-        .payment-icon {
-            width: 36px;
-            height: 36px;
-            font-size: 17px;
-        }
-
-        .payment-description {
-            line-height: 1.45;
-        }
-
-        .checkout-product-price {
-            font-size: 13px;
-        }
-
-    }
-
 </style>
 
 
-<section class="checkout-page">
+<div class="checkout-container">
 
-    <div class="checkout-wrapper">
+    <h1 class="checkout-title">Checkout</h1>
 
-        <h1 class="checkout-title">
-            Checkout
-        </h1>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
 
-        <!-- =====================================================
-             FORM ERRORS
-        ====================================================== -->
+    <form method="POST">
 
-        {% if form.non_field_errors %}
+        {% csrf_token %}
 
-            <div class="form-errors">
+        <div class="checkout-grid">
 
-                {% for error in form.non_field_errors %}
+            <!-- LEFT SIDE -->
+            <div>
 
-                    <div>
-                        {{ error }}
+                <!-- ADDRESS -->
+                <div class="checkout-card">
+
+                    <div class="section-title">
+                        Delivery Address
                     </div>
 
-                {% endfor %}
-
-            </div>
-
-        {% endif %}
-
-
-        <form method="POST">
-
-            {% csrf_token %}
-
-
-            <div class="checkout-layout">
-
-
-                <!-- =====================================================
-                     LEFT SIDE
-                ====================================================== -->
-
-                <div>
-
-
-                    <!-- =================================================
-                         1. DELIVERY ADDRESS
-                    ================================================== -->
-
-                    <div class="checkout-card">
-
-                        <div class="section-header">
-
-                            <div class="section-number">
-                                1
-                            </div>
-
-                            <h3>
-                                Delivery Address
-                            </h3>
-
+                    {% if form.address.errors %}
+                        <div class="address-error">
+                            {{ form.address.errors }}
                         </div>
+                    {% endif %}
 
+                    <div class="address-list">
 
-                        <!-- =================================================
-                             SELECTED ADDRESS
-                        ================================================== -->
+                        {% for address in addresses %}
 
-                        <div
-                            class="selected-address"
-                            id="selectedAddress"
-                        >
-
-                            <div class="address-top">
-
-                                <div
-                                    class="address-type"
-                                    id="selectedAddressType"
-                                >
-
-                                    📍
-
-                                    <span id="selectedAddressTypeText">
-
-                                        {% if default_address %}
-                                            {{ default_address.address_type }}
-                                        {% elif addresses %}
-                                            {{ addresses.0.address_type }}
-                                        {% endif %}
-
-                                    </span>
-
-
-                                    <span
-                                        class="default-badge"
-                                        id="selectedDefaultBadge"
-                                        {% if not default_address %}
-                                            style="display: none;"
-                                        {% endif %}
-                                    >
-                                        Default
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                class="address-name"
-                                id="selectedAddressName"
+                            <label
+                                class="address-option
+                                {% if selected_address_id == address.id|stringformat:'s' %}
+                                    selected
+                                {% elif not selected_address_id and address.is_default %}
+                                    selected
+                                {% endif %}"
+                                onclick="selectAddress(this)"
                             >
 
-                                {{ request.user.get_full_name }}
-
-                            </div>
-
-
-                            <div
-                                class="address-text"
-                                id="selectedAddressText"
-                            >
-
-                                {% if default_address %}
-
-                                    {{ default_address.building }},
-                                    {{ default_address.area }}
-
-                                    {% if default_address.landmark %}
-                                        <br>
-                                        {{ default_address.landmark }}
+                                <input
+                                    class="address-radio"
+                                    type="radio"
+                                    name="address"
+                                    value="{{ address.id }}"
+                                    {% if selected_address_id == address.id|stringformat:'s' %}
+                                        checked
+                                    {% elif not selected_address_id and address.is_default %}
+                                        checked
                                     {% endif %}
-
-                                    <br>
-
-                                    {{ default_address.city }},
-                                    {{ default_address.state }}
-                                    - {{ default_address.pincode }}
-
-                                    <br>
-
-                                    {{ default_address.country }}
-
-                                {% elif addresses %}
-
-                                    {{ addresses.0.building }},
-                                    {{ addresses.0.area }}
-
-                                    {% if addresses.0.landmark %}
-                                        <br>
-                                        {{ addresses.0.landmark }}
-                                    {% endif %}
-
-                                    <br>
-
-                                    {{ addresses.0.city }},
-                                    {{ addresses.0.state }}
-                                    - {{ addresses.0.pincode }}
-
-                                    <br>
-
-                                    {{ addresses.0.country }}
-
-                                {% else %}
-
-                                    No address selected.
-
-                                {% endif %}
-
-                            </div>
-
-
-                            <div
-                                class="address-phone"
-                                id="selectedAddressPhone"
-                            >
-
-                                {% if default_address and default_address.phone %}
-
-                                    📞 {{ default_address.phone }}
-
-                                {% elif addresses and addresses.0.phone %}
-
-                                    📞 {{ addresses.0.phone }}
-
-                                {% endif %}
-
-                            </div>
-
-
-                            <div class="address-actions">
-
-                                <button
-                                    type="button"
-                                    class="change-address-btn"
-                                    onclick="toggleAddresses()"
-                                >
-                                    Change Address
-                                </button>
-
-
-                                <a
-                                    href="{% url 'users:add_address' %}?from=checkout"
-                                    class="add-address-btn"
-                                >
-                                    Add New Address
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- =================================================
-                             ADDRESS OPTIONS
-                        ================================================== -->
-
-                        <div
-                            class="address-list"
-                            id="addressList"
-                        >
-
-                            <div class="address-list-title">
-                                Select another delivery address
-                            </div>
-
-
-                            {% for address in addresses %}
-
-                                <label
-                                    class="address-option {% if address.id == default_address.id %}selected{% endif %}"
-                                    data-address-id="{{ address.id }}"
+                                    required
                                 >
 
-                                    <input
-                                        type="radio"
-                                        name="address"
-                                        value="{{ address.id }}"
+                                <div class="address-content">
 
-                                        {% if address.id == default_address.id %}
-                                            checked
-                                        {% endif %}
+                                    <div class="address-header">
 
-                                        required
-
-                                        onchange="selectAddress(this)"
-                                    >
-
-
-                                    <span class="address-option-content">
-
-                                        <span class="address-option-title">
-
+                                        <div class="address-type">
                                             {{ address.address_type }}
-
-                                            {% if address.is_default %}
-
-                                                — Default
-
-                                            {% endif %}
-
-                                        </span>
-
-
-                                        <div class="address-option-details">
-
-                                            <strong>
-                                                {{ request.user.get_full_name }}
-                                            </strong>
-
-                                            <br>
-
-                                            {{ address.building }},
-                                            {{ address.area }}
-
-                                            {% if address.landmark %}
-
-                                                <br>
-                                                {{ address.landmark }}
-
-                                            {% endif %}
-
-                                            <br>
-
-                                            {{ address.city }},
-                                            {{ address.state }}
-                                            - {{ address.pincode }}
-
-                                            <br>
-
-                                            {{ address.country }}
-
-                                            {% if address.phone %}
-
-                                                <br>
-                                                📞 {{ address.phone }}
-
-                                            {% endif %}
-
                                         </div>
 
-                                    </span>
-
-                                </label>
-
-                            {% endfor %}
-
-                        </div>
-
-
-                        {% if form.address.errors %}
-
-                            <div class="field-error">
-
-                                {% for error in form.address.errors %}
-
-                                    {{ error }}
-
-                                {% endfor %}
-
-                            </div>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- =================================================
-                         2. PRODUCTS
-                    ================================================== -->
-
-                    <div class="checkout-card">
-
-                        <div class="section-header">
-
-                            <div class="section-number">
-                                2
-                            </div>
-
-                            <h3>
-                                Your Products
-                            </h3>
-
-                        </div>
-
-
-                        {% for item in cart_items %}
-
-                            <div class="checkout-product">
-
-
-                                <!-- PRODUCT / VARIANT IMAGE -->
-
-                                <div class="checkout-product-image">
-
-                                    {% with variant_image=item.variant.images.first %}
-
-                                        {% if variant_image %}
-
-                                            <img
-                                                src="{{ variant_image.image.url }}"
-                                                alt="{{ item.product.name }}"
-                                            >
-
-                                        {% else %}
-
-                                            {% with product_image=item.product.images.first %}
-
-                                                {% if product_image %}
-
-                                                    <img
-                                                        src="{{ product_image.image.url }}"
-                                                        alt="{{ item.product.name }}"
-                                                    >
-
-                                                {% else %}
-
-                                                    {% if item.product.main_image %}
-
-                                                        <img
-                                                            src="{{ item.product.main_image.image.url }}"
-                                                            alt="{{ item.product.name }}"
-                                                        >
-
-                                                    {% else %}
-
-                                                        <img
-                                                            src="{% static 'images/no-image.png' %}"
-                                                            alt="No image"
-                                                        >
-
-                                                    {% endif %}
-
-                                                {% endif %}
-
-                                            {% endwith %}
-
+                                        {% if address.is_default %}
+                                            <span class="default-badge">
+                                                Default
+                                            </span>
                                         {% endif %}
 
-                                    {% endwith %}
-
-                                </div>
-
-
-                                <!-- PRODUCT INFORMATION -->
-
-                                <div class="checkout-product-info">
-
-                                    <div class="checkout-product-name">
-
-                                        {{ item.product.name }}
-
                                     </div>
 
+                                    <div class="address-name">
+                                        {{ request.user.get_full_name|default:request.user.username }}
+                                    </div>
 
-                                    <!-- SELECTED VARIANT -->
+                                    <div class="address-text">
 
-                                    {% if item.variant %}
+                                        {{ address.building }}<br>
 
-                                        <div class="checkout-product-variant">
+                                        {{ address.area }}<br>
 
-                                            {% if item.variant.color %}
+                                        {{ address.city }},
+                                        {{ address.state }}
+                                        - {{ address.pincode }}<br>
 
-                                                Color:
-                                                {{ item.variant.color }}
+                                        {{ address.country }}
 
-                                            {% endif %}
-
-
-                                            {% if item.variant.color and item.variant.size %}
-
-                                                &nbsp; • &nbsp;
-
-                                            {% endif %}
-
-
-                                            {% if item.variant.size %}
-
-                                                Size:
-                                                {{ item.variant.size }}
-
-                                            {% endif %}
-
-                                        </div>
-
-                                    {% endif %}
-
-
-                                    <!-- QUANTITY -->
-
-                                    <div class="checkout-product-quantity">
-
-                                        Item Count:
-                                        {{ item.quantity }}
+                                        {% if address.landmark %}
+                                            <br>
+                                            Landmark: {{ address.landmark }}
+                                        {% endif %}
 
                                     </div>
 
                                 </div>
 
-
-                                <!-- PRICE -->
-
-                                <div class="checkout-product-price">
-
-                                    {% if item.product.discount_price is not None and item.product.discount_price < item.product.sale_price %}
-
-                                        ₹{{ item.product.discount_price|floatformat:2 }}
-
-                                        <span class="checkout-product-original-price">
-
-                                            ₹{{ item.product.sale_price|floatformat:2 }}
-
-                                        </span>
-
-                                    {% else %}
-
-                                        ₹{{ item.product.sale_price|floatformat:2 }}
-
-                                    {% endif %}
-
-                                </div>
-
-                            </div>
+                            </label>
 
                         {% empty %}
 
-                            <div class="checkout-product">
-
-                                <div class="checkout-product-info">
-
-                                    <div class="checkout-product-name">
-
-                                        Your cart is empty.
-
-                                    </div>
-
-                                </div>
-
+                            <div class="address-error">
+                                No delivery address found.
+                                Please add an address before continuing.
                             </div>
 
                         {% endfor %}
 
                     </div>
 
+                </div>
 
-                    <!-- =================================================
-                         3. PAYMENT METHOD
-                    ================================================== -->
 
-                    <div class="checkout-card">
+                <!-- PAYMENT -->
+                <div class="checkout-card" style="margin-top: 25px;">
 
-                        <div class="section-header">
+                    <div class="section-title">
+                        Payment Method
+                    </div>
 
-                            <div class="section-number">
-                                3
-                            </div>
-
-                            <h3>
-                                Payment Method
-                            </h3>
-
+                    {% if form.payment_method.errors %}
+                        <div class="address-error">
+                            {{ form.payment_method.errors }}
                         </div>
+                    {% endif %}
+
+                    <div class="payment-list">
 
 
-                        <div class="payment-methods">
+                        <!-- COD -->
+                        <label
+                            class="payment-option
+                            {% if payment_method == 'COD' or not payment_method %}
+                                selected
+                            {% endif %}"
+                            onclick="selectPayment(this)"
+                        >
 
-
-                            <!-- =================================================
-                                 CASH ON DELIVERY
-                                 Current Order model supports COD only
-                            ================================================== -->
-
-                            <label
-                                class="payment-option selected"
-                                onclick="selectPayment(this)"
+                            <input
+                                class="payment-radio"
+                                type="radio"
+                                name="payment_method"
+                                value="COD"
+                                {% if payment_method == 'COD' or not payment_method %}
+                                    checked
+                                {% endif %}
+                                required
                             >
 
-                                <input
-                                    class="payment-radio"
-                                    type="radio"
-                                    name="payment_method"
-                                    value="COD"
-                                    checked
-                                    required
-                                >
+                            <div class="payment-icon">
+                                💵
+                            </div>
 
+                            <div class="payment-content">
 
-                                <div class="payment-icon">
-                                    💵
+                                <div class="payment-title">
+                                    Cash on Delivery
                                 </div>
 
-
-                                <div class="payment-content">
-
-                                    <div class="payment-title">
-                                        Cash on Delivery
-                                    </div>
-
-                                    <div class="payment-description">
-                                        Pay when your order is delivered
-                                    </div>
-
+                                <div class="payment-description">
+                                    Pay when your order is delivered
                                 </div>
-
-
-                                <div class="payment-check">
-                                    ✓
-                                </div>
-
-                            </label>
-
-                        </div>
-
-
-                        
-
-
-                        {% if form.payment_method.errors %}
-
-                            <div class="field-error">
-
-                                {% for error in form.payment_method.errors %}
-
-                                    {{ error }}
-
-                                {% endfor %}
 
                             </div>
 
-                        {% endif %}
+                            <div class="payment-check"></div>
+
+                        </label>
+
+
+                        <!-- RAZORPAY -->
+                        <label
+                            class="payment-option
+                            {% if payment_method == 'RAZORPAY' %}
+                                selected
+                            {% endif %}"
+                            onclick="selectPayment(this)"
+                        >
+
+                            <input
+                                class="payment-radio"
+                                type="radio"
+                                name="payment_method"
+                                value="RAZORPAY"
+                                {% if payment_method == 'RAZORPAY' %}
+                                    checked
+                                {% endif %}
+                                required
+                            >
+
+                            <div class="payment-icon">
+                                💳
+                            </div>
+
+                            <div class="payment-content">
+
+                                <div class="payment-title">
+                                    Online Payment
+                                </div>
+
+                                <div class="payment-description">
+                                    Pay securely using Razorpay
+                                </div>
+
+                                <div class="razorpay-note">
+                                    You can pay using UPI, cards, net banking
+                                    and other supported payment methods.
+                                </div>
+
+                            </div>
+
+                            <div class="payment-check"></div>
+
+                        </label>
 
                     </div>
 
                 </div>
 
+            </div>
 
-                <!-- =====================================================
-                     RIGHT SIDE — ORDER SUMMARY
-                ====================================================== -->
+
+            <!-- RIGHT SIDE -->
+            <div>
 
                 <div class="checkout-card summary-card">
 
-                    <h3 class="summary-title">
+                    <div class="section-title">
                         Order Summary
-                    </h3>
-
-
-                    <!-- QUICK INFORMATION -->
-
-                    <div class="summary-highlight">
-
-                        <div class="highlight-box">
-
-                            <div class="highlight-label">
-                                Items
-                            </div>
-
-                            <div class="highlight-value">
-
-                                {{ total_items }}
-                                item{{ total_items|pluralize }}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="highlight-box">
-
-                            <div class="highlight-label">
-                                Delivery
-                            </div>
-
-                            <div class="highlight-value">
-
-                                {{ delivery_date|date:"d M Y" }}
-
-                            </div>
-
-                        </div>
-
                     </div>
 
-
-                    <!-- SUBTOTAL -->
 
                     <div class="summary-row">
 
@@ -1589,26 +575,18 @@ Checkout
                     </div>
 
 
-                    <!-- DISCOUNT -->
+                    <div class="summary-row">
 
-                    {% if discount_amount > 0 %}
+                        <span>
+                            Discount
+                        </span>
 
-                        <div class="summary-row discount-row">
+                        <span>
+                            - ₹{{ discount|floatformat:2 }}
+                        </span>
 
-                            <span>
-                                Discount
-                            </span>
+                    </div>
 
-                            <span>
-                                - ₹{{ discount_amount|floatformat:2 }}
-                            </span>
-
-                        </div>
-
-                    {% endif %}
-
-
-                    <!-- TAX -->
 
                     <div class="summary-row">
 
@@ -1623,490 +601,200 @@ Checkout
                     </div>
 
 
-                    <!-- SHIPPING -->
-
                     <div class="summary-row">
 
                         <span>
                             Shipping
                         </span>
 
-                        {% if shipping_charge == 0 %}
-
-                            <span class="free-delivery">
-                                FREE
-                            </span>
-
-                        {% else %}
-
-                            <span>
+                        <span class="free-delivery">
+                            {% if shipping_charge %}
                                 ₹{{ shipping_charge|floatformat:2 }}
-                            </span>
-
-                        {% endif %}
+                            {% else %}
+                                Free
+                            {% endif %}
+                        </span>
 
                     </div>
 
-
-                    <!-- PAYMENT METHOD -->
 
                     <div class="summary-row">
 
                         <span>
-                            Payment Method
+                            Payment
                         </span>
 
-                        <span class="free-delivery">
-                            Cash on Delivery
-                        </span>
+                        <span class="free-delivery" id="paymentSummary">
 
-                    </div>
+                            {% if payment_method == "RAZORPAY" %}
+                                Online Payment
+                            {% else %}
+                                Cash on Delivery
+                            {% endif %}
 
-
-                    <!-- TOTAL -->
-
-                    <div class="summary-total">
-
-                        <span>
-                            Total Amount
-                        </span>
-
-                        <span>
-                            ₹{{ total_amount|floatformat:2 }}
                         </span>
 
                     </div>
 
 
-                    <!-- CONTINUE TO REVIEW -->
+                    <div class="summary-row total">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <span>
+                            ₹{{ grand_total|floatformat:2 }}
+                        </span>
+
+                    </div>
+
 
                     <button
                         type="submit"
-                        class="review-order-btn"
+                        class="place-order-btn"
                     >
-                        Place order
+                        Continue to Order Review
                     </button>
 
 
-                    <div class="secure-note">
-                        🔒 Your order information is securely processed.
+                    <div class="security-note">
+                        🔒 Your checkout information is secure.
                     </div>
 
                 </div>
 
             </div>
 
-        </form>
+        </div>
 
-    </div>
+    </form>
 
-</section>
+</div>
 
 
 <script>
 
-    /* =========================================================
-       ADDRESS DATA
-    ========================================================= */
+    function selectPayment(element) {
 
-    const addressData = {
-
-        {% for address in addresses %}
-
-            "{{ address.id }}": {
-
-                type: "{{ address.address_type|escapejs }}",
-
-                name: "{{ request.user.get_full_name|escapejs }}",
-
-                building: "{{ address.building|escapejs }}",
-
-                area: "{{ address.area|escapejs }}",
-
-                landmark: "{{ address.landmark|default:''|escapejs }}",
-
-                city: "{{ address.city|escapejs }}",
-
-                state: "{{ address.state|escapejs }}",
-
-                pincode: "{{ address.pincode|escapejs }}",
-
-                country: "{{ address.country|escapejs }}",
-
-                phone: "{{ address.phone|default:''|escapejs }}",
-
-                isDefault:
-                    {% if address.is_default %}
-                        true
-                    {% else %}
-                        false
-                    {% endif %}
-
-            }
-
-            {% if not forloop.last %},{% endif %}
-
-        {% endfor %}
-
-    };
-
-
-    /* =========================================================
-       GET SELECTED ADDRESS ID
-    ========================================================= */
-
-    function getSelectedAddressId() {
-
-        const selectedRadio =
-            document.querySelector(
-                'input[name="address"]:checked'
-            );
-
-        if (!selectedRadio) {
-            return null;
-        }
-
-        return selectedRadio.value;
-
-    }
-
-
-    /* =========================================================
-       TOGGLE ADDRESS LIST
-    ========================================================= */
-
-    function toggleAddresses() {
-
-        const addressList =
-            document.getElementById(
-                "addressList"
-            );
-
-        addressList.classList.toggle(
-            "show"
+        const options = document.querySelectorAll(
+            ".payment-option"
         );
 
+        options.forEach(function(option) {
+
+            option.classList.remove("selected");
+
+        });
+
+        element.classList.add("selected");
+
+        const radio = element.querySelector(
+            ".payment-radio"
+        );
+
+        if (radio) {
+
+            radio.checked = true;
+
+            updatePaymentSummary(
+                radio.value
+            );
+
+        }
     }
 
 
-    /* =========================================================
-       SELECT ADDRESS
-    ========================================================= */
+    function updatePaymentSummary(paymentMethod) {
 
-    function selectAddress(radio) {
+        const summary =
+            document.getElementById(
+                "paymentSummary"
+            );
 
-        const addressId =
-            radio.value;
-
-        const address =
-            addressData[addressId];
-
-        if (!address) {
+        if (!summary) {
             return;
         }
 
+        if (paymentMethod === "RAZORPAY") {
 
-        /* -----------------------------------------
-           Address type
-        ----------------------------------------- */
-
-        document.getElementById(
-            "selectedAddressTypeText"
-        ).textContent =
-            address.type;
-
-
-        /* -----------------------------------------
-           Default badge
-        ----------------------------------------- */
-
-        const defaultBadge =
-            document.getElementById(
-                "selectedDefaultBadge"
-            );
-
-        if (address.isDefault) {
-
-            defaultBadge.style.display =
-                "inline-flex";
+            summary.textContent =
+                "Online Payment";
 
         } else {
 
-            defaultBadge.style.display =
-                "none";
+            summary.textContent =
+                "Cash on Delivery";
 
         }
-
-
-        /* -----------------------------------------
-           Name
-        ----------------------------------------- */
-
-        document.getElementById(
-            "selectedAddressName"
-        ).textContent =
-            address.name;
-
-
-        /* -----------------------------------------
-           Address
-        ----------------------------------------- */
-
-        let addressHTML = "";
-
-        addressHTML +=
-            escapeHTML(
-                address.building
-            ) +
-            ", " +
-            escapeHTML(
-                address.area
-            );
-
-
-        if (address.landmark) {
-
-            addressHTML +=
-                "<br>" +
-                escapeHTML(
-                    address.landmark
-                );
-
-        }
-
-
-        addressHTML +=
-            "<br>" +
-            escapeHTML(
-                address.city
-            ) +
-            ", " +
-            escapeHTML(
-                address.state
-            ) +
-            " - " +
-            escapeHTML(
-                address.pincode
-            );
-
-
-        addressHTML +=
-            "<br>" +
-            escapeHTML(
-                address.country
-            );
-
-
-        document.getElementById(
-            "selectedAddressText"
-        ).innerHTML =
-            addressHTML;
-
-
-        /* -----------------------------------------
-           Phone
-        ----------------------------------------- */
-
-        const phoneElement =
-            document.getElementById(
-                "selectedAddressPhone"
-            );
-
-        if (address.phone) {
-
-            phoneElement.textContent =
-                "📞 " +
-                address.phone;
-
-            phoneElement.style.display =
-                "block";
-
-        } else {
-
-            phoneElement.textContent =
-                "";
-
-            phoneElement.style.display =
-                "none";
-
-        }
-
-
-        /* -----------------------------------------
-           Highlight selected address
-        ----------------------------------------- */
-
-        document.querySelectorAll(
-            ".address-option"
-        ).forEach(
-            function(option) {
-
-                option.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
-
-        const selectedOption =
-            radio.closest(
-                ".address-option"
-            );
-
-        if (selectedOption) {
-
-            selectedOption.classList.add(
-                "selected"
-            );
-
-        }
-
-
-        /* -----------------------------------------
-           Close address list
-        ----------------------------------------- */
-
-        document.getElementById(
-            "addressList"
-        ).classList.remove(
-            "show"
-        );
-
     }
 
 
-    /* =========================================================
-       ESCAPE HTML
-    ========================================================= */
-
-    function escapeHTML(value) {
-
-        if (!value) {
-            return "";
-        }
-
-        return value
-            .replace(
-                /&/g,
-                "&amp;"
-            )
-            .replace(
-                /</g,
-                "&lt;"
-            )
-            .replace(
-                />/g,
-                "&gt;"
-            )
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-            .replace(
-                /'/g,
-                "&#039;"
-            );
-
-    }
-
-
-    /* =========================================================
-       PAYMENT SELECTION
-    ========================================================= */
-
-    function selectPayment(element) {
+    function selectAddress(element) {
 
         const options =
             document.querySelectorAll(
-                ".payment-option"
+                ".address-option"
             );
 
+        options.forEach(function(option) {
 
-        options.forEach(
-            function(option) {
+            option.classList.remove(
+                "selected"
+            );
 
-                option.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
+        });
 
         element.classList.add(
             "selected"
         );
 
-    }
-
-
-    /* =========================================================
-       PAYMENT RADIO CHANGE
-    ========================================================= */
-
-    document.querySelectorAll(
-        'input[name="payment_method"]'
-    ).forEach(
-        function(radio) {
-
-            radio.addEventListener(
-                "change",
-                function() {
-
-                    document.querySelectorAll(
-                        ".payment-option"
-                    ).forEach(
-                        function(option) {
-
-                            option.classList.remove(
-                                "selected"
-                            );
-
-                        }
-                    );
-
-
-                    const selectedOption =
-                        this.closest(
-                            ".payment-option"
-                        );
-
-                    if (selectedOption) {
-
-                        selectedOption.classList.add(
-                            "selected"
-                        );
-
-                    }
-
-                }
+        const radio =
+            element.querySelector(
+                ".address-radio"
             );
 
+        if (radio) {
+            radio.checked = true;
         }
-    );
+    }
 
-
-    /* =========================================================
-       INITIALIZE ADDRESS
-    ========================================================= */
 
     document.addEventListener(
         "DOMContentLoaded",
         function() {
 
-            const selectedRadio =
+            const selectedPayment =
                 document.querySelector(
-                    'input[name="address"]:checked'
+                    ".payment-radio:checked"
                 );
 
+            if (selectedPayment) {
 
-            if (selectedRadio) {
+                updatePaymentSummary(
+                    selectedPayment.value
+                );
+            }
 
-                selectAddress(
-                    selectedRadio
+
+            const selectedAddress =
+                document.querySelector(
+                    ".address-radio:checked"
                 );
 
+            if (selectedAddress) {
+
+                const addressOption =
+                    selectedAddress.closest(
+                        ".address-option"
+                    );
+
+                if (addressOption) {
+
+                    addressOption.classList.add(
+                        "selected"
+                    );
+                }
             }
 
         }
