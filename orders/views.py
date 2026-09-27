@@ -540,7 +540,7 @@ def checkout(request):
         "checkout.html",
         context,
     )
-
+    
 @login_required
 @never_cache
 def order_detail(request, order_id=None):
