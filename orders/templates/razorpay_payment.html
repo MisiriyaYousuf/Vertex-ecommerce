@@ -1,0 +1,323 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Secure Payment | Vertex</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+</head>
+
+<body>
+
+    <h2>Complete your payment</h2>
+
+    <p id="payment-message">
+        Preparing secure payment...
+    </p>
+
+    <button
+        type="button"
+        id="pay-button"
+        style="display:none;"
+    >
+        Pay Now
+    </button>
+
+
+<script>
+
+const createUrl =
+    "{% url 'orders:razorpay_create' %}";
+
+const verifyUrl =
+    "{% url 'orders:razorpay_verify' %}";
+
+const successUrl =
+    "{% url 'orders:order_success' %}";
+
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie &&
+        document.cookie !== "") {
+
+        const cookies =
+            document.cookie.split(";");
+
+        for (
+            let i = 0;
+            i < cookies.length;
+            i++
+        ) {
+
+            const cookie =
+                cookies[i].trim();
+
+            if (
+                cookie.substring(
+                    0,
+                    name.length + 1
+                ) ===
+                (name + "=")
+            ) {
+
+                cookieValue =
+                    decodeURIComponent(
+                        cookie.substring(
+                            name.length + 1
+                        )
+                    );
+
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+
+const csrftoken =
+    getCookie("csrftoken");
+
+
+async function createRazorpayOrder() {
+
+    const message =
+        document.getElementById(
+            "payment-message"
+        );
+
+    try {
+
+        const response =
+            await fetch(
+                createUrl,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "X-CSRFToken":
+                            csrftoken,
+                    },
+
+                    credentials: "same-origin",
+
+                    body: JSON.stringify({})
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok ||
+            !data.success) {
+
+            throw new Error(
+                data.message ||
+                "Unable to create payment."
+            );
+        }
+
+        openRazorpayCheckout(data);
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+            error.message ||
+            "Unable to start payment.";
+
+        const button =
+            document.getElementById(
+                "pay-button"
+            );
+
+        button.style.display =
+            "block";
+
+        button.textContent =
+            "Try Again";
+    }
+}
+
+
+function openRazorpayCheckout(data) {
+
+    const options = {
+
+        key: data.key,
+
+        amount: data.amount,
+
+        currency: data.currency,
+
+        name: data.name,
+
+        description:
+            data.description,
+
+        order_id:
+            data.razorpay_order_id,
+
+        handler: async function (
+            response
+        ) {
+
+            await verifyPayment(
+                response
+            );
+        },
+
+        modal: {
+
+            ondismiss: function () {
+
+                document.getElementById(
+                    "payment-message"
+                ).textContent =
+                    "Payment cancelled.";
+            }
+        },
+
+        theme: {
+            color: "#6f42c1"
+        }
+    };
+
+
+    const razorpay =
+        new Razorpay(options);
+
+
+    razorpay.on(
+        "payment.failed",
+        function (response) {
+
+            console.error(
+                "Payment failed:",
+                response
+            );
+
+            document.getElementById(
+                "payment-message"
+            ).textContent =
+                "Payment failed. Please try again.";
+        }
+    );
+
+
+    razorpay.open();
+}
+
+
+async function verifyPayment(
+    paymentResponse
+) {
+
+    const message =
+        document.getElementById(
+            "payment-message"
+        );
+
+    message.textContent =
+        "Verifying payment...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                verifyUrl,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "X-CSRFToken":
+                            csrftoken,
+                    },
+
+                    credentials:
+                        "same-origin",
+
+                    body: JSON.stringify({
+
+                        razorpay_payment_id:
+                            paymentResponse
+                                .razorpay_payment_id,
+
+                        razorpay_order_id:
+                            paymentResponse
+                                .razorpay_order_id,
+
+                        razorpay_signature:
+                            paymentResponse
+                                .razorpay_signature
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok ||
+            !data.success) {
+
+            throw new Error(
+                data.message ||
+                "Payment verification failed."
+            );
+        }
+
+
+        window.location.href =
+            data.redirect_url;
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+            error.message ||
+            "Payment verification failed.";
+    }
+}
+
+
+document
+    .getElementById("pay-button")
+    .addEventListener(
+        "click",
+        createRazorpayOrder
+    );
+
+
+createRazorpayOrder();
+
+</script>
+
+</body>
+
+</html>
