@@ -1,5 +1,4 @@
 from django import forms
-
 from users.models import Address
 
 
@@ -13,7 +12,9 @@ class CheckoutForm(forms.Form):
 
     payment_method = forms.ChoiceField(
         choices=[
-            ("COD", "Cash on Delivery")
+            ("COD", "Cash on Delivery"),
+            ("RAZORPAY", "Online Payment"),
+
         ],
         widget=forms.RadioSelect
     )

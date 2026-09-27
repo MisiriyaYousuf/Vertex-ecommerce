@@ -1,7 +1,6 @@
 from decimal import Decimal
 from datetime import timedelta
 from io import BytesIO
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -11,7 +10,6 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
-
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -23,13 +21,16 @@ from reportlab.platypus import (
     Table,
     TableStyle,
 )
-
 from cart.models import Cart
 from products.models import Product, ProductVariant
 from users.models import Address
-
 from .forms import CheckoutForm
 from .models import Order, OrderItem
+from .razorpay_utils import get_razorpay_client
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from razorpay.errors import SignatureVerificationError
 
 
 MAX_CART_QUANTITY = 5
@@ -1743,6 +1744,12 @@ def place_order(request):
 
         payment_method=payment_method,
 
+        payment_status=(
+            "Paid"
+            if payment_method == "COD"
+            else "Pending"
+        ),
+
         status="Pending",
 
         subtotal=subtotal,
@@ -1848,6 +1855,71 @@ def place_order(request):
     return redirect(
         "orders:order_success"
     )
+
+def create_razorpay_order(order):
+
+    client = get_razorpay_client()
+
+    amount_paise = int(
+        order.total_amount * Decimal("100")
+    )
+
+    razorpay_order = client.order.create({
+        "amount": amount_paise,
+        "currency": "INR",
+        "receipt": f"order_{order.id}",
+        "notes": {
+            "django_order_id": str(order.id),
+            "user_id": str(order.user_id),
+        }
+    })
+
+    order.razorpay_order_id = razorpay_order["id"]
+    order.save(
+        update_fields=["razorpay_order_id", "updated_at"]
+    )
+
+    return razorpay_order
+
+@login_required
+@require_POST
+def razorpay_verify(request):
+
+    data = json.loads(request.body)
+
+    razorpay_payment_id = data.get(
+        "razorpay_payment_id"
+    )
+
+    razorpay_order_id = data.get(
+        "razorpay_order_id"
+    )
+
+    razorpay_signature = data.get(
+        "razorpay_signature"
+    )
+
+    if not all([
+        razorpay_payment_id,
+        razorpay_order_id,
+        razorpay_signature,
+    ]):
+        return JsonResponse({
+            "success": False,
+            "failure_url": "/"
+        })
+
+    order = Order.objects.filter(
+        user=request.user,
+        razorpay_order_id=razorpay_order_id,
+    ).first()
+
+    if not order:
+        return JsonResponse({
+            "success": False,
+            "failure_url": "/"
+        })
+
 
 # ============================================================
 # ORDER SUCCESS

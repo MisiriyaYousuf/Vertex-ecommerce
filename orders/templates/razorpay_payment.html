@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Payment</title>
+</head>
+
+<body>
+
+<h2>Complete your payment</h2>
+
+<p>
+    Order #{{ order.id }}
+</p>
+
+<p>
+    Amount: ₹{{ order.total_amount }}
+</p>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+const options = {
+
+    key: "{{ razorpay_key_id }}",
+
+    amount: "{{ razorpay_amount }}",
+
+    currency: "{{ currency }}",
+
+    name: "Vertex",
+
+    description: "Order #{{ order.id }}",
+
+    order_id: "{{ razorpay_order_id }}",
+
+    handler: function (response) {
+
+        fetch("{% url 'orders:razorpay_verify' %}", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+
+            body: JSON.stringify({
+
+                razorpay_payment_id:
+                    response.razorpay_payment_id,
+
+                razorpay_order_id:
+                    response.razorpay_order_id,
+
+                razorpay_signature:
+                    response.razorpay_signature
+
+            })
+
+        })
+
+        .then(response => response.json())
+
+        .then(data => {
+
+            if (data.success) {
+
+                window.location.href =
+                    data.redirect_url;
+
+            } else {
+
+                window.location.href =
+                    data.failure_url;
+
+            }
+
+        })
+
+        .catch(function () {
+
+            window.location.href =
+                "{% url 'orders:payment_failure' order.id %}";
+
+        });
+
+    }
+
+};
+
+const razorpay = new Razorpay(options);
+
+razorpay.open();
+
+</script>
+
+</body>
+</html>

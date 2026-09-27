@@ -8,6 +8,14 @@ class Order(models.Model):
 
     PAYMENT_METHOD_CHOICES = [
         ("COD", "Cash on Delivery"),
+        ("RAZORPAY", "Online Payment"),
+    ]
+
+    PAYMENT_STATUS_CHOICES = [
+    ("Pending", "Pending"),
+    ("Paid", "Paid"),
+    ("Failed", "Failed"),
+    ("Refunded", "Refunded"),
     ]
 
     STATUS_CHOICES = [
@@ -37,6 +45,26 @@ class Order(models.Model):
         max_length=20,
         choices=PAYMENT_METHOD_CHOICES,
         default="COD"
+    )
+
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default="Pending"
+    )
+
+    razorpay_order_id = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True
+    )
+
+    razorpay_payment_id = models.CharField(
+        max_length=100,
+        unique=True,
+        null=True,
+        blank=True
     )
 
     status = models.CharField(
