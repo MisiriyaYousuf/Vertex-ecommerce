@@ -1950,7 +1950,7 @@ def razorpay_payment(request):
 
     return render(
         request,
-        "orders/razorpay_payment.html",
+        "razorpay_payment.html",
     )
 
 @login_required
