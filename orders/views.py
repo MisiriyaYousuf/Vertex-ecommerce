@@ -31,8 +31,12 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from razorpay.errors import SignatureVerificationError
-
-
+from django.views.decorators.csrf import ensure_csrf_cookie
+import razorpay
+from django.conf import settings
+from django.http import JsonResponse
+from django.urls import reverse
+from django.db import transaction
 
 MAX_CART_QUANTITY = 5
 def update_status(order):
@@ -1939,10 +1943,12 @@ def create_razorpay_order(order):
 
 @login_required
 @never_cache
+@ensure_csrf_cookie
 def razorpay_payment(request):
 
     payment_method = request.session.get(
-        "checkout_payment_method"
+        "checkout_payment_method",
+        "COD",
     )
 
     if payment_method != "RAZORPAY":
@@ -1991,7 +1997,6 @@ def razorpay_create(request):
     address = Address.objects.filter(
         id=address_id,
         user=request.user,
-        is_deleted = False
     ).first()
 
     if not address:

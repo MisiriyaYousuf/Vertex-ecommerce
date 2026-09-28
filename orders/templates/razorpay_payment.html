@@ -20,6 +20,12 @@
 
 <body>
 
+    <!--
+        csrf_token is important.
+        It causes Django to provide the CSRF cookie.
+    -->
+    {% csrf_token %}
+
     <h2>Complete your payment</h2>
 
     <p id="payment-message">
@@ -29,30 +35,41 @@
     <button
         type="button"
         id="pay-button"
-        style="display:none;"
+        disabled
     >
-        Pay Now
+        Preparing Payment...
     </button>
 
 
 <script>
 
+"use strict";
+
+
 const createUrl =
     "{% url 'orders:razorpay_create' %}";
 
+
 const verifyUrl =
     "{% url 'orders:razorpay_verify' %}";
+
 
 const successUrl =
     "{% url 'orders:order_success' %}";
 
 
+/* ============================================================
+   CSRF
+   ============================================================ */
+
 function getCookie(name) {
 
     let cookieValue = null;
 
-    if (document.cookie &&
-        document.cookie !== "") {
+    if (
+        document.cookie &&
+        document.cookie !== ""
+    ) {
 
         const cookies =
             document.cookie.split(";");
@@ -71,7 +88,7 @@ function getCookie(name) {
                     0,
                     name.length + 1
                 ) ===
-                (name + "=")
+                name + "="
             ) {
 
                 cookieValue =
@@ -90,16 +107,72 @@ function getCookie(name) {
 }
 
 
-const csrftoken =
-    getCookie("csrftoken");
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
 
+function setMessage(message) {
 
-async function createRazorpayOrder() {
-
-    const message =
+    const messageElement =
         document.getElementById(
             "payment-message"
         );
+
+    messageElement.textContent =
+        message;
+}
+
+
+function setButton(
+    text,
+    disabled
+) {
+
+    const button =
+        document.getElementById(
+            "pay-button"
+        );
+
+    button.textContent =
+        text;
+
+    button.disabled =
+        disabled;
+}
+
+
+/* ============================================================
+   CREATE RAZORPAY ORDER
+   ============================================================ */
+
+async function createRazorpayOrder() {
+
+    setMessage(
+        "Preparing secure payment..."
+    );
+
+    setButton(
+        "Creating Payment...",
+        true
+    );
+
+    const csrftoken =
+        getCookie("csrftoken");
+
+    if (!csrftoken) {
+
+        setMessage(
+            "Security token missing. Please refresh the page."
+        );
+
+        setButton(
+            "Try Again",
+            false
+        );
+
+        return;
+    }
+
 
     try {
 
@@ -115,19 +188,63 @@ async function createRazorpayOrder() {
 
                         "X-CSRFToken":
                             csrftoken,
+
+                        "X-Requested-With":
+                            "XMLHttpRequest",
                     },
 
-                    credentials: "same-origin",
+                    credentials:
+                        "same-origin",
 
-                    body: JSON.stringify({})
+                    body:
+                        JSON.stringify({})
                 }
             );
 
-        const data =
-            await response.json();
 
-        if (!response.ok ||
-            !data.success) {
+        /*
+         * Do not blindly call response.json().
+         * Django may return HTML for a 403/500 error.
+         */
+
+        const contentType =
+            response.headers.get(
+                "content-type"
+            ) || "";
+
+
+        let data;
+
+
+        if (
+            contentType.includes(
+                "application/json"
+            )
+        ) {
+
+            data =
+                await response.json();
+
+        } else {
+
+            const text =
+                await response.text();
+
+            console.error(
+                "Non-JSON response:",
+                text
+            );
+
+            throw new Error(
+                "Server returned an unexpected response. Check Django console."
+            );
+        }
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
 
             throw new Error(
                 data.message ||
@@ -135,41 +252,74 @@ async function createRazorpayOrder() {
             );
         }
 
-        openRazorpayCheckout(data);
+
+        console.log(
+            "Razorpay order created:",
+            data
+        );
+
+
+        openRazorpayCheckout(
+            data
+        );
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Razorpay create error:",
+            error
+        );
 
-        message.textContent =
+        setMessage(
             error.message ||
-            "Unable to start payment.";
+            "Unable to start payment."
+        );
 
-        const button =
-            document.getElementById(
-                "pay-button"
-            );
-
-        button.style.display =
-            "block";
-
-        button.textContent =
-            "Try Again";
+        setButton(
+            "Try Again",
+            false
+        );
     }
 }
 
 
+/* ============================================================
+   OPEN RAZORPAY CHECKOUT
+   ============================================================ */
+
 function openRazorpayCheckout(data) {
+
+    if (
+        typeof Razorpay ===
+        "undefined"
+    ) {
+
+        setMessage(
+            "Razorpay Checkout failed to load."
+        );
+
+        setButton(
+            "Try Again",
+            false
+        );
+
+        return;
+    }
+
 
     const options = {
 
-        key: data.key,
+        key:
+            data.key,
 
-        amount: data.amount,
+        amount:
+            data.amount,
 
-        currency: data.currency,
+        currency:
+            data.currency,
 
-        name: data.name,
+        name:
+            data.name,
 
         description:
             data.description,
@@ -177,25 +327,34 @@ function openRazorpayCheckout(data) {
         order_id:
             data.razorpay_order_id,
 
-        handler: async function (
-            response
-        ) {
 
-            await verifyPayment(
+        handler:
+            async function(
                 response
-            );
-        },
+            ) {
+
+                await verifyPayment(
+                    response
+                );
+            },
+
 
         modal: {
 
-            ondismiss: function () {
+            ondismiss:
+                function() {
 
-                document.getElementById(
-                    "payment-message"
-                ).textContent =
-                    "Payment cancelled.";
-            }
+                    setMessage(
+                        "Payment cancelled."
+                    );
+
+                    setButton(
+                        "Pay Again",
+                        false
+                    );
+                }
         },
+
 
         theme: {
             color: "#6f42c1"
@@ -203,42 +362,87 @@ function openRazorpayCheckout(data) {
     };
 
 
-    const razorpay =
-        new Razorpay(options);
-
-
-    razorpay.on(
-        "payment.failed",
-        function (response) {
-
-            console.error(
-                "Payment failed:",
-                response
-            );
-
-            document.getElementById(
-                "payment-message"
-            ).textContent =
-                "Payment failed. Please try again.";
-        }
+    console.log(
+        "Opening Razorpay:",
+        options
     );
 
 
-    razorpay.open();
+    try {
+
+        const razorpay =
+            new Razorpay(
+                options
+            );
+
+
+        razorpay.on(
+            "payment.failed",
+            function(response) {
+
+                console.error(
+                    "Payment failed:",
+                    response
+                );
+
+                const description =
+                    response?.error?.description;
+
+                setMessage(
+                    description ||
+                    "Payment failed. Please try again."
+                );
+
+                setButton(
+                    "Pay Again",
+                    false
+                );
+            }
+        );
+
+
+        razorpay.open();
+
+    } catch (error) {
+
+        console.error(
+            "Razorpay open error:",
+            error
+        );
+
+        setMessage(
+            error.message ||
+            "Unable to open Razorpay Checkout."
+        );
+
+        setButton(
+            "Try Again",
+            false
+        );
+    }
 }
 
+
+/* ============================================================
+   VERIFY PAYMENT
+   ============================================================ */
 
 async function verifyPayment(
     paymentResponse
 ) {
 
-    const message =
-        document.getElementById(
-            "payment-message"
-        );
+    setMessage(
+        "Verifying payment..."
+    );
 
-    message.textContent =
-        "Verifying payment...";
+    setButton(
+        "Verifying...",
+        true
+    );
+
+
+    const csrftoken =
+        getCookie("csrftoken");
 
 
     try {
@@ -255,35 +459,71 @@ async function verifyPayment(
 
                         "X-CSRFToken":
                             csrftoken,
+
+                        "X-Requested-With":
+                            "XMLHttpRequest",
                     },
 
                     credentials:
                         "same-origin",
 
-                    body: JSON.stringify({
+                    body:
+                        JSON.stringify({
 
-                        razorpay_payment_id:
-                            paymentResponse
-                                .razorpay_payment_id,
+                            razorpay_payment_id:
+                                paymentResponse
+                                    .razorpay_payment_id,
 
-                        razorpay_order_id:
-                            paymentResponse
-                                .razorpay_order_id,
+                            razorpay_order_id:
+                                paymentResponse
+                                    .razorpay_order_id,
 
-                        razorpay_signature:
-                            paymentResponse
-                                .razorpay_signature
-                    })
+                            razorpay_signature:
+                                paymentResponse
+                                    .razorpay_signature
+                        })
                 }
             );
 
 
-        const data =
-            await response.json();
+        const contentType =
+            response.headers.get(
+                "content-type"
+            ) || "";
 
 
-        if (!response.ok ||
-            !data.success) {
+        let data;
+
+
+        if (
+            contentType.includes(
+                "application/json"
+            )
+        ) {
+
+            data =
+                await response.json();
+
+        } else {
+
+            const text =
+                await response.text();
+
+            console.error(
+                "Verification non-JSON response:",
+                text
+            );
+
+            throw new Error(
+                "Server returned an unexpected response during verification."
+            );
+        }
+
+
+        if (
+            !response.ok ||
+            !data.success
+        ) {
 
             throw new Error(
                 data.message ||
@@ -292,27 +532,52 @@ async function verifyPayment(
         }
 
 
+        setMessage(
+            "Payment successful. Redirecting..."
+        );
+
+
         window.location.href =
             data.redirect_url;
 
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Payment verification error:",
+            error
+        );
 
-        message.textContent =
+        setMessage(
             error.message ||
-            "Payment verification failed.";
+            "Payment verification failed."
+        );
+
+        setButton(
+            "Try Again",
+            false
+        );
     }
 }
 
 
+/* ============================================================
+   BUTTON
+   ============================================================ */
+
 document
-    .getElementById("pay-button")
+    .getElementById(
+        "pay-button"
+    )
     .addEventListener(
         "click",
         createRazorpayOrder
     );
 
+
+/* ============================================================
+   START PAYMENT AUTOMATICALLY
+   ============================================================ */
 
 createRazorpayOrder();
 
