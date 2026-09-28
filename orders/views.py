@@ -2046,8 +2046,7 @@ def razorpay_create(request):
 
         if (
             not product.category
-            or product.category.is_deleted
-            or not product.category.is_active
+            or product.category.is_trashed
         ):
             return JsonResponse({
                 "success": False,
