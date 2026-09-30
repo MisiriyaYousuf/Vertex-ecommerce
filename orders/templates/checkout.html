@@ -9,923 +9,1073 @@ Checkout
 
 <style>
 
-    /* =========================================================
-       CHECKOUT PAGE
-    ========================================================= */
+/* =========================================================
+   CHECKOUT PAGE
+========================================================= */
 
-    .checkout-page {
-        background: transparent !important;
-        min-height: 85vh;
-        padding: 40px 0 60px;
-    }
+.checkout-page {
+    background: transparent !important;
+    min-height: 85vh;
+    padding: 40px 0 60px;
+}
 
-    .checkout-wrapper {
-        width: 92%;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+.checkout-wrapper {
+    width: 92%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-    .checkout-title {
-        margin: 0 0 28px;
-        font-size: 30px;
-        font-weight: 750;
-        color: #ffffff;
-        letter-spacing: -0.4px;
-    }
+.checkout-title {
+    margin: 0 0 28px;
+    font-size: 30px;
+    font-weight: 750;
+    color: #ffffff;
+    letter-spacing: -0.4px;
+}
+
+
+/* =========================================================
+   IMPORTANT:
+   LEFT CONTENT + RIGHT SUMMARY
+========================================================= */
+
+.checkout-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 25px;
+    align-items: start;
+}
+
+
+/* =========================================================
+   LEFT COLUMN
+========================================================= */
+
+.checkout-left {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   RIGHT COLUMN
+========================================================= */
+
+.checkout-right {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   MAIN GLASS CARDS
+========================================================= */
+
+.checkout-card {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(73, 46, 91, 0.72),
+            rgba(45, 27, 61, 0.62)
+        ) !important;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.16) !important;
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    margin-bottom: 20px;
+
+    box-shadow:
+        0 15px 40px
+        rgba(20, 12, 30, 0.30),
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.checkout-left .checkout-card:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 22px;
+}
+
+.section-number {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.20);
+
+    color: #ffffff;
+
+    border-radius: 50%;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.07);
+}
+
+.section-header h3 {
+    margin: 0;
+
+    font-size: 20px;
+    font-weight: 750;
+
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   SELECTED ADDRESS
+========================================================= */
+
+.selected-address {
+    position: relative;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.22);
+
+    border-radius: 12px;
+
+    padding: 18px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.05);
+
+    transition: all 0.25s ease;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.selected-address:hover {
+    background:
+        rgba(255, 255, 255, 0.09);
+
+    border-color:
+        rgba(255, 255, 255, 0.30);
+}
+
+.address-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+}
+
+.address-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.default-badge {
+    padding: 4px 9px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(255, 255, 255, 0.11);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.18);
+
+    color: #ffffff;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.address-name {
+    margin-top: 13px;
+
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.address-text {
+    margin-top: 5px;
+
+    color:
+        rgba(255, 255, 255, 0.70);
+
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.address-phone {
+    margin-top: 7px;
+
+    color:
+        rgba(255, 255, 255, 0.65);
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   ADDRESS ACTIONS
+========================================================= */
+
+.address-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 17px;
+    padding-top: 15px;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.10);
+}
+
+.change-address-btn,
+.add-address-btn {
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.16);
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    color: #ffffff !important;
+
+    padding: 8px 13px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    text-decoration: none !important;
+
+    transition: all 0.25s ease;
+}
+
+.change-address-btn:hover,
+.add-address-btn:hover {
+    color: #ffffff !important;
+
+    background:
+        rgba(255, 255, 255, 0.14);
+
+    border-color:
+        rgba(255, 255, 255, 0.32);
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   ADDRESS CHANGE LIST
+========================================================= */
+
+.address-list {
+    display: none;
+
+    margin-top: 15px;
+
+    padding: 15px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.14);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255, 255, 255, 0.045);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.04);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.address-list.show {
+    display: block;
+}
+
+.address-list-title {
+    margin-bottom: 12px;
+
+    color:
+        rgba(255, 255, 255, 0.62);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.address-option {
+    display: block;
+    position: relative;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.14);
+
+    border-radius: 10px;
+
+    padding: 15px;
+    margin-bottom: 10px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+.address-option:last-of-type {
+    margin-bottom: 0;
+}
+
+.address-option:hover {
+    border-color:
+        rgba(255, 255, 255, 0.30);
+
+    background:
+        rgba(255, 255, 255, 0.10);
+}
+
+.address-option.selected {
+    border-color:
+        rgba(255, 255, 255, 0.40);
+
+    background:
+        rgba(255, 255, 255, 0.11);
+
+    box-shadow:
+        0 0 0 1px
+        rgba(255, 255, 255, 0.12),
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.05);
+}
+
+.address-option input {
+    margin-right: 8px;
+
+    accent-color: #ffffff;
+
+    cursor: pointer;
+}
+
+.address-option-content {
+    display: inline-block;
+
+    vertical-align: top;
+
+    width: calc(100% - 30px);
+}
+
+.address-option-title {
+    font-size: 14px;
+    font-weight: 700;
+
+    color: #ffffff;
+}
+
+.address-option-details {
+    margin-top: 6px;
+
+    font-size: 13px;
+    line-height: 1.6;
+
+    color:
+        rgba(255, 255, 255, 0.67);
+}
+
+.address-option-details strong {
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   PAYMENT METHODS
+========================================================= */
+
+.payment-methods {
+    display: grid;
+    gap: 12px;
+}
+
+.payment-option {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-height: 68px;
+
+    padding: 14px 16px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.14);
+
+    border-radius: 11px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.payment-option:hover {
+    border-color:
+        rgba(255, 255, 255, 0.30);
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    transform: translateY(-1px);
+}
+
+.payment-option.selected {
+    border-color:
+        rgba(255, 255, 255, 0.40);
+
+    background:
+        rgba(255, 255, 255, 0.11);
+
+    box-shadow:
+        0 0 0 1px
+        rgba(255, 255, 255, 0.10),
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.05);
+}
+
+.payment-radio {
+    width: 18px;
+    height: 18px;
+
+    flex-shrink: 0;
+
+    accent-color: #ffffff;
+
+    cursor: pointer;
+}
+
+.payment-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.09);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    font-size: 19px;
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.05);
+}
+
+.payment-content {
+    flex: 1;
+}
+
+.payment-title {
+    font-size: 14px;
+    font-weight: 700;
+
+    color: #ffffff;
+}
+
+.payment-description {
+    margin-top: 3px;
+
+    color:
+        rgba(255, 255, 255, 0.58);
+
+    font-size: 12px;
+}
+
+.payment-check {
+    display: none;
+
+    color: #ffffff;
+
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.payment-option.selected .payment-check {
+    display: block;
+}
+
+.payment-info {
+    margin-top: 15px;
+
+    padding: 12px 14px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    border-radius: 8px;
+
+    color:
+        rgba(255, 255, 255, 0.62);
+
+    font-size: 12px;
+    line-height: 1.6;
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.04);
+}
+
+
+/* =========================================================
+   ORDER SUMMARY
+========================================================= */
+
+.summary-card {
+    position: sticky;
+
+    top: 20px;
+
+    margin-bottom: 0;
+}
+
+.summary-title {
+    margin: 0 0 20px;
+
+    font-size: 20px;
+    font-weight: 750;
+
+    color: #ffffff;
+}
+
+.summary-highlight {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+}
+
+.highlight-box {
+    padding: 13px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    border-radius: 9px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.04);
+}
+
+.highlight-label {
+    color:
+        rgba(255, 255, 255, 0.52);
+
+    font-size: 11px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+
+    font-weight: 650;
+}
+
+.highlight-value {
+    margin-top: 5px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 750;
+}
+
+.summary-row {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+
+    color:
+        rgba(255, 255, 255, 0.66);
+
+    font-size: 14px;
+}
+
+.summary-row span:last-child {
+    color: #ffffff;
+
+    font-weight: 650;
+
+    white-space: nowrap;
+}
+
+.discount-row span {
+    color: #ffffff !important;
+}
+
+.free-delivery {
+    color: #ffffff !important;
+
+    font-weight: 700 !important;
+}
+
+.summary-total {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 20px;
+
+    padding-top: 18px;
+
+    border-top:
+        1px solid
+        rgba(255, 255, 255, 0.14);
+
+    color: #ffffff;
+
+    font-size: 19px;
+
+    font-weight: 800;
+}
+
+.summary-total span:last-child {
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   REVIEW BUTTON
+========================================================= */
+
+.review-order-btn {
+    width: 100%;
+
+    margin-top: 22px;
+
+    padding: 14px 18px;
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.22);
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.10);
+
+    color: #ffffff !important;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.06);
+}
+
+.review-order-btn:hover {
+    background:
+        rgba(255, 255, 255, 0.18);
+
+    border-color:
+        rgba(255, 255, 255, 0.38);
+
+    color: #ffffff !important;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(20, 12, 30, 0.20),
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.08);
+}
+
+.review-order-btn:active {
+    transform: translateY(0);
+}
+
+.secure-note {
+    margin-top: 12px;
+
+    text-align: center;
+
+    color:
+        rgba(255, 255, 255, 0.50);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   PRODUCTS
+========================================================= */
+
+.checkout-product {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 14px 0;
+
+    border-bottom:
+        1px solid
+        rgba(255, 255, 255, 0.10);
+}
+
+.checkout-product:last-child {
+    border-bottom: none;
+
+    padding-bottom: 0;
+}
+
+.checkout-product-image {
+    width: 72px;
+    height: 72px;
+
+    flex-shrink: 0;
+
+    overflow: hidden;
+
+    border-radius: 9px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.13);
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.04);
+}
+
+.checkout-product-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    padding: 5px;
+}
+
+.checkout-product-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.checkout-product-name {
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.checkout-product-variant {
+    margin-top: 5px;
+
+    color:
+        rgba(255, 255, 255, 0.72);
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.checkout-product-quantity {
+    margin-top: 5px;
+
+    color:
+        rgba(255, 255, 255, 0.56);
+
+    font-size: 12px;
+}
+
+.checkout-product-price {
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    text-align: right;
+}
+
+.checkout-product-original-price {
+    display: block;
+
+    margin-top: 3px;
+
+    color:
+        rgba(255, 255, 255, 0.42);
+
+    font-size: 11px;
+
+    text-decoration: line-through;
+}
+
+
+/* =========================================================
+   FORM ERRORS
+========================================================= */
+
+.form-errors {
+    margin-bottom: 20px;
+
+    padding: 14px 16px;
+
+    border:
+        1px solid
+        rgba(255, 100, 100, 0.30);
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 80, 80, 0.08);
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+.field-error {
+    margin-top: 5px;
+
+    color: #ffffff;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
 
     .checkout-layout {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 360px;
-        gap: 25px;
-        align-items: start;
+        grid-template-columns: 1fr;
+
+        gap: 20px;
     }
 
-
-    /* =========================================================
-       MAIN GLASS CARDS
-    ========================================================= */
-
-    .checkout-card {
-        background:
-            linear-gradient(
-                135deg,
-                rgba(73, 46, 91, 0.72),
-                rgba(45, 27, 61, 0.62)
-            ) !important;
-
-        border: 1px solid rgba(255, 255, 255, 0.16) !important;
-        border-radius: 15px;
-
-        padding: 25px;
-        margin-bottom: 20px;
-
-        box-shadow:
-            0 15px 40px rgba(20, 12, 30, 0.30),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
-
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+    .checkout-right {
+        order: 2;
     }
 
-    .checkout-card:last-child {
+    .checkout-left {
+        order: 1;
+    }
+
+    .summary-card {
+        position: static;
+
         margin-bottom: 0;
     }
 
+}
 
-    /* =========================================================
-       SECTION HEADER
-    ========================================================= */
 
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 22px;
+@media (max-width: 600px) {
+
+    .checkout-page {
+        padding: 25px 0 45px;
     }
 
-    .section-number {
-        width: 32px;
-        height: 32px;
+    .checkout-wrapper {
+        width: 94%;
+    }
 
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .checkout-title {
+        font-size: 26px;
 
-        flex-shrink: 0;
+        margin-bottom: 20px;
+    }
 
-        background: rgba(255, 255, 255, 0.10);
-        border: 1px solid rgba(255, 255, 255, 0.20);
+    .checkout-card {
+        padding: 18px;
 
-        color: #ffffff;
-
-        border-radius: 50%;
-
-        font-size: 14px;
-        font-weight: 700;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        border-radius: 12px;
     }
 
     .section-header h3 {
-        margin: 0;
-
-        font-size: 20px;
-        font-weight: 750;
-
-        color: #ffffff;
+        font-size: 18px;
     }
 
-
-    /* =========================================================
-       SELECTED ADDRESS
-    ========================================================= */
-
-    .selected-address {
-        position: relative;
-
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        border-radius: 12px;
-
-        padding: 18px;
-
-        background:
-            rgba(255, 255, 255, 0.07);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-
-        transition: all 0.25s ease;
-
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+    .summary-highlight {
+        grid-template-columns: 1fr 1fr;
     }
 
-    .selected-address:hover {
-        background: rgba(255, 255, 255, 0.09);
-        border-color: rgba(255, 255, 255, 0.30);
+    .payment-option {
+        padding: 13px;
     }
 
-    .address-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        gap: 15px;
+    .checkout-product-image {
+        width: 62px;
+        height: 62px;
     }
 
-    .address-type {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-
-        color: #ffffff;
-
-        font-size: 14px;
-        font-weight: 750;
+    .address-option-content {
+        width: calc(100% - 28px);
     }
 
-    .default-badge {
-        padding: 4px 9px;
+}
 
-        border-radius: 20px;
 
-        background: rgba(255, 255, 255, 0.11);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+@media (max-width: 420px) {
 
-        color: #ffffff;
-
-        font-size: 11px;
-        font-weight: 700;
+    .checkout-wrapper {
+        width: 92%;
     }
 
-    .address-name {
-        margin-top: 13px;
-
-        color: #ffffff;
-
-        font-size: 15px;
-        font-weight: 700;
+    .checkout-card {
+        padding: 16px;
     }
-
-    .address-text {
-        margin-top: 5px;
-
-        color: rgba(255, 255, 255, 0.70);
-
-        font-size: 14px;
-        line-height: 1.65;
-    }
-
-    .address-phone {
-        margin-top: 7px;
-
-        color: rgba(255, 255, 255, 0.65);
-
-        font-size: 13px;
-    }
-
-
-    /* =========================================================
-       ADDRESS ACTIONS
-    ========================================================= */
 
     .address-actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        align-items: stretch;
 
-        margin-top: 17px;
-        padding-top: 15px;
-
-        border-top: 1px solid rgba(255, 255, 255, 0.10);
+        flex-direction: column;
     }
 
     .change-address-btn,
     .add-address-btn {
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        background: rgba(255, 255, 255, 0.06);
+        width: 100%;
 
-        color: #ffffff !important;
+        box-sizing: border-box;
 
-        padding: 8px 13px;
-        border-radius: 8px;
-
-        font-size: 13px;
-        font-weight: 700;
-
-        cursor: pointer;
-        text-decoration: none !important;
-
-        transition: all 0.25s ease;
-    }
-
-    .change-address-btn:hover,
-    .add-address-btn:hover {
-        color: #ffffff !important;
-
-        background: rgba(255, 255, 255, 0.14);
-        border-color: rgba(255, 255, 255, 0.32);
-
-        transform: translateY(-1px);
-    }
-
-
-    /* =========================================================
-       ADDRESS CHANGE LIST
-    ========================================================= */
-
-    .address-list {
-        display: none;
-
-        margin-top: 15px;
-
-        padding: 15px;
-
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 12px;
-
-        background: rgba(255, 255, 255, 0.045);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-
-    .address-list.show {
-        display: block;
-    }
-
-    .address-list-title {
-        margin-bottom: 12px;
-
-        color: rgba(255, 255, 255, 0.62);
-
-        font-size: 12px;
-        font-weight: 700;
-
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .address-option {
-        display: block;
-        position: relative;
-
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 10px;
-
-        padding: 15px;
-        margin-bottom: 10px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        color: #ffffff;
-
-        cursor: pointer;
-
-        transition: all 0.25s ease;
-    }
-
-    .address-option:last-of-type {
-        margin-bottom: 0;
-    }
-
-    .address-option:hover {
-        border-color: rgba(255, 255, 255, 0.30);
-        background: rgba(255, 255, 255, 0.10);
-    }
-
-    .address-option.selected {
-        border-color: rgba(255, 255, 255, 0.40);
-
-        background: rgba(255, 255, 255, 0.11);
-
-        box-shadow:
-            0 0 0 1px rgba(255, 255, 255, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-
-    .address-option input {
-        margin-right: 8px;
-
-        accent-color: #ffffff;
-
-        cursor: pointer;
-    }
-
-    .address-option-content {
-        display: inline-block;
-
-        vertical-align: top;
-
-        width: calc(100% - 30px);
-    }
-
-    .address-option-title {
-        font-size: 14px;
-        font-weight: 700;
-
-        color: #ffffff;
-    }
-
-    .address-option-details {
-        margin-top: 6px;
-
-        font-size: 13px;
-        line-height: 1.6;
-
-        color: rgba(255, 255, 255, 0.67);
-    }
-
-    .address-option-details strong {
-        color: #ffffff;
-    }
-
-
-    /* =========================================================
-       PAYMENT METHODS
-    ========================================================= */
-
-    .payment-methods {
-        display: grid;
-        gap: 12px;
+        text-align: center;
     }
 
     .payment-option {
-        position: relative;
-
-        display: flex;
-        align-items: center;
-        gap: 14px;
-
-        min-height: 68px;
-
-        padding: 14px 16px;
-
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 11px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        color: #ffffff;
-
-        cursor: pointer;
-
-        transition: all 0.25s ease;
-
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-
-    .payment-option:hover {
-        border-color: rgba(255, 255, 255, 0.30);
-        background: rgba(255, 255, 255, 0.10);
-
-        transform: translateY(-1px);
-    }
-
-    .payment-option.selected {
-        border-color: rgba(255, 255, 255, 0.40);
-
-        background: rgba(255, 255, 255, 0.11);
-
-        box-shadow:
-            0 0 0 1px rgba(255, 255, 255, 0.10),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-
-    .payment-radio {
-        width: 18px;
-        height: 18px;
-
-        flex-shrink: 0;
-
-        accent-color: #ffffff;
-
-        cursor: pointer;
+        gap: 10px;
     }
 
     .payment-icon {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        flex-shrink: 0;
-
-        border-radius: 9px;
-
-        background: rgba(255, 255, 255, 0.09);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-
-        font-size: 19px;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
-
-    .payment-content {
-        flex: 1;
-    }
-
-    .payment-title {
-        font-size: 14px;
-        font-weight: 700;
-
-        color: #ffffff;
+        font-size: 17px;
     }
 
     .payment-description {
-        margin-top: 3px;
-
-        color: rgba(255, 255, 255, 0.58);
-
-        font-size: 12px;
-    }
-
-    .payment-check {
-        display: none;
-
-        color: #ffffff;
-
-        font-size: 18px;
-        font-weight: 800;
-    }
-
-    .payment-option.selected .payment-check {
-        display: block;
-    }
-
-    .payment-info {
-        margin-top: 15px;
-
-        padding: 12px 14px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 8px;
-
-        color: rgba(255, 255, 255, 0.62);
-
-        font-size: 12px;
-        line-height: 1.6;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-
-
-    /* =========================================================
-       ORDER SUMMARY
-    ========================================================= */
-
-    .summary-card {
-        position: sticky;
-        top: 20px;
-    }
-
-    .summary-title {
-        margin: 0 0 20px;
-
-        font-size: 20px;
-        font-weight: 750;
-
-        color: #ffffff;
-    }
-
-    .summary-highlight {
-        display: grid;
-
-        grid-template-columns: 1fr 1fr;
-
-        gap: 10px;
-
-        margin-bottom: 20px;
-    }
-
-    .highlight-box {
-        padding: 13px;
-
-        background: rgba(255, 255, 255, 0.055);
-
-        border-radius: 9px;
-
-        border: 1px solid rgba(255, 255, 255, 0.12);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-
-    .highlight-label {
-        color: rgba(255, 255, 255, 0.52);
-
-        font-size: 11px;
-
-        text-transform: uppercase;
-
-        letter-spacing: 0.5px;
-
-        font-weight: 650;
-    }
-
-    .highlight-value {
-        margin-top: 5px;
-
-        color: #ffffff;
-
-        font-size: 14px;
-
-        font-weight: 750;
-    }
-
-    .summary-row {
-        display: flex;
-
-        justify-content: space-between;
-        align-items: center;
-
-        gap: 15px;
-
-        margin-bottom: 15px;
-
-        color: rgba(255, 255, 255, 0.66);
-
-        font-size: 14px;
-    }
-
-    .summary-row span:last-child {
-        color: #ffffff;
-
-        font-weight: 650;
-
-        white-space: nowrap;
-    }
-
-    .discount-row span {
-        color: #ffffff !important;
-    }
-
-    .free-delivery {
-        color: #ffffff !important;
-
-        font-weight: 700 !important;
-    }
-
-    .summary-total {
-        display: flex;
-
-        justify-content: space-between;
-        align-items: center;
-
-        gap: 15px;
-
-        margin-top: 20px;
-
-        padding-top: 18px;
-
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
-
-        color: #ffffff;
-
-        font-size: 19px;
-
-        font-weight: 800;
-    }
-
-    .summary-total span:last-child {
-        white-space: nowrap;
-    }
-
-
-    /* =========================================================
-       REVIEW BUTTON
-    ========================================================= */
-
-    .review-order-btn {
-        width: 100%;
-
-        margin-top: 22px;
-
-        padding: 14px 18px;
-
-        border: 1px solid rgba(255, 255, 255, 0.22);
-
-        border-radius: 9px;
-
-        background: rgba(255, 255, 255, 0.10);
-
-        color: #ffffff !important;
-
-        font-size: 15px;
-        font-weight: 700;
-
-        cursor: pointer;
-
-        transition: all 0.25s ease;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    }
-
-    .review-order-btn:hover {
-        background: rgba(255, 255, 255, 0.18);
-
-        border-color: rgba(255, 255, 255, 0.38);
-
-        color: #ffffff !important;
-
-        transform: translateY(-1px);
-
-        box-shadow:
-            0 8px 20px rgba(20, 12, 30, 0.20),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-
-    .review-order-btn:active {
-        transform: translateY(0);
-    }
-
-    .secure-note {
-        margin-top: 12px;
-
-        text-align: center;
-
-        color: rgba(255, 255, 255, 0.50);
-
-        font-size: 11px;
-    }
-
-
-    /* =========================================================
-       PRODUCTS
-    ========================================================= */
-
-    .checkout-product {
-        display: flex;
-
-        align-items: center;
-
-        gap: 14px;
-
-        padding: 14px 0;
-
-        border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    }
-
-    .checkout-product:last-child {
-        border-bottom: none;
-
-        padding-bottom: 0;
-    }
-
-    .checkout-product-image {
-        width: 72px;
-        height: 72px;
-
-        flex-shrink: 0;
-
-        overflow: hidden;
-
-        border-radius: 9px;
-
-        background: rgba(255, 255, 255, 0.07);
-
-        border: 1px solid rgba(255, 255, 255, 0.13);
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-
-    .checkout-product-image img {
-        width: 100%;
-        height: 100%;
-
-        object-fit: contain;
-
-        padding: 5px;
-    }
-
-    .checkout-product-info {
-        flex: 1;
-
-        min-width: 0;
-    }
-
-    .checkout-product-name {
-        color: #ffffff;
-
-        font-size: 14px;
-        font-weight: 700;
-
-        white-space: nowrap;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-    }
-
-    .checkout-product-variant {
-        margin-top: 5px;
-
-        color: rgba(255, 255, 255, 0.72);
-
-        font-size: 12px;
-
-        font-weight: 600;
-    }
-
-    .checkout-product-quantity {
-        margin-top: 5px;
-
-        color: rgba(255, 255, 255, 0.56);
-
-        font-size: 12px;
+        line-height: 1.45;
     }
 
     .checkout-product-price {
-        color: #ffffff;
-
-        font-size: 14px;
-
-        font-weight: 700;
-
-        white-space: nowrap;
-    }
-
-    .checkout-product-original-price {
-        display: block;
-
-        margin-top: 3px;
-
-        color: rgba(255, 255, 255, 0.42);
-
-        font-size: 11px;
-
-        text-decoration: line-through;
-    }
-
-
-    /* =========================================================
-       FORM ERRORS
-    ========================================================= */
-
-    .form-errors {
-        margin-bottom: 20px;
-
-        padding: 14px 16px;
-
-        border: 1px solid rgba(255, 100, 100, 0.30);
-
-        border-radius: 10px;
-
-        background: rgba(255, 80, 80, 0.08);
-
-        color: #ffffff;
-
         font-size: 13px;
-
-        line-height: 1.6;
     }
 
-    .field-error {
-        margin-top: 5px;
-
-        color: #ffffff;
-
-        font-size: 12px;
-    }
-
-
-    /* =========================================================
-       RESPONSIVE
-    ========================================================= */
-
-    @media (max-width: 900px) {
-
-        .checkout-layout {
-            grid-template-columns: 1fr;
-        }
-
-        .summary-card {
-            position: static;
-        }
-
-    }
-
-
-    @media (max-width: 600px) {
-
-        .checkout-page {
-            padding: 25px 0 45px;
-        }
-
-        .checkout-wrapper {
-            width: 94%;
-        }
-
-        .checkout-title {
-            font-size: 26px;
-
-            margin-bottom: 20px;
-        }
-
-        .checkout-card {
-            padding: 18px;
-
-            border-radius: 12px;
-        }
-
-        .section-header h3 {
-            font-size: 18px;
-        }
-
-        .summary-highlight {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .payment-option {
-            padding: 13px;
-        }
-
-        .checkout-product-image {
-            width: 62px;
-            height: 62px;
-        }
-
-        .address-option-content {
-            width: calc(100% - 28px);
-        }
-
-    }
-
-
-    @media (max-width: 420px) {
-
-        .checkout-wrapper {
-            width: 92%;
-        }
-
-        .checkout-card {
-            padding: 16px;
-        }
-
-        .address-actions {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .change-address-btn,
-        .add-address-btn {
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        .payment-option {
-            gap: 10px;
-        }
-
-        .payment-icon {
-            width: 36px;
-            height: 36px;
-            font-size: 17px;
-        }
-
-        .payment-description {
-            line-height: 1.45;
-        }
-
-        .checkout-product-price {
-            font-size: 13px;
-        }
-
-    }
+}
 
 </style>
 
@@ -960,19 +1110,27 @@ Checkout
         {% endif %}
 
 
+        <!-- =====================================================
+             CHECKOUT FORM
+        ====================================================== -->
+
         <form method="POST">
 
             {% csrf_token %}
 
 
+            <!-- =================================================
+                 MAIN TWO-COLUMN LAYOUT
+            ================================================== -->
+
             <div class="checkout-layout">
 
 
-                <!-- =====================================================
-                     LEFT SIDE
-                ====================================================== -->
+                <!-- =================================================
+                     LEFT COLUMN
+                ================================================== -->
 
-                <div>
+                <div class="checkout-left">
 
 
                     <!-- =================================================
@@ -994,9 +1152,7 @@ Checkout
                         </div>
 
 
-                        <!-- =================================================
-                             SELECTED ADDRESS
-                        ================================================== -->
+                        <!-- SELECTED ADDRESS -->
 
                         <div
                             class="selected-address"
@@ -1012,12 +1168,16 @@ Checkout
 
                                     📍
 
-                                    <span id="selectedAddressTypeText">
+                                    <span
+                                        id="selectedAddressTypeText"
+                                    >
 
                                         {% if default_address %}
                                             {{ default_address.address_type }}
+
                                         {% elif addresses %}
                                             {{ addresses.0.address_type }}
+
                                         {% endif %}
 
                                     </span>
@@ -1026,11 +1186,14 @@ Checkout
                                     <span
                                         class="default-badge"
                                         id="selectedDefaultBadge"
+
                                         {% if not default_address %}
                                             style="display: none;"
                                         {% endif %}
                                     >
+
                                         Default
+
                                     </span>
 
                                 </div>
@@ -1059,8 +1222,11 @@ Checkout
                                     {{ default_address.area }}
 
                                     {% if default_address.landmark %}
+
                                         <br>
+
                                         {{ default_address.landmark }}
+
                                     {% endif %}
 
                                     <br>
@@ -1079,8 +1245,11 @@ Checkout
                                     {{ addresses.0.area }}
 
                                     {% if addresses.0.landmark %}
+
                                         <br>
+
                                         {{ addresses.0.landmark }}
+
                                     {% endif %}
 
                                     <br>
@@ -1127,7 +1296,9 @@ Checkout
                                     class="change-address-btn"
                                     onclick="toggleAddresses()"
                                 >
+
                                     Change Address
+
                                 </button>
 
 
@@ -1135,7 +1306,9 @@ Checkout
                                     href="{% url 'users:add_address' %}?from=checkout"
                                     class="add-address-btn"
                                 >
+
                                     Add New Address
+
                                 </a>
 
                             </div>
@@ -1143,9 +1316,7 @@ Checkout
                         </div>
 
 
-                        <!-- =================================================
-                             ADDRESS OPTIONS
-                        ================================================== -->
+                        <!-- ADDRESS OPTIONS -->
 
                         <div
                             class="address-list"
@@ -1153,14 +1324,19 @@ Checkout
                         >
 
                             <div class="address-list-title">
+
                                 Select another delivery address
+
                             </div>
 
 
                             {% for address in addresses %}
 
                                 <label
-                                    class="address-option {% if address.id == default_address.id %}selected{% endif %}"
+                                    class="address-option
+                                    {% if default_address and address.id == default_address.id %}
+                                        selected
+                                    {% endif %}"
                                     data-address-id="{{ address.id }}"
                                 >
 
@@ -1169,7 +1345,9 @@ Checkout
                                         name="address"
                                         value="{{ address.id }}"
 
-                                        {% if address.id == default_address.id %}
+                                        {% if default_address and address.id == default_address.id %}
+                                            checked
+                                        {% elif not default_address and forloop.first %}
                                             checked
                                         {% endif %}
 
@@ -1225,6 +1403,7 @@ Checkout
                                             {% if address.phone %}
 
                                                 <br>
+
                                                 📞 {{ address.phone }}
 
                                             {% endif %}
@@ -1281,7 +1460,7 @@ Checkout
                             <div class="checkout-product">
 
 
-                                <!-- PRODUCT / VARIANT IMAGE -->
+                                <!-- PRODUCT IMAGE -->
 
                                 <div class="checkout-product-image">
 
@@ -1345,8 +1524,6 @@ Checkout
                                     </div>
 
 
-                                    <!-- SELECTED VARIANT -->
-
                                     {% if item.variant %}
 
                                         <div class="checkout-product-variant">
@@ -1377,8 +1554,6 @@ Checkout
 
                                     {% endif %}
 
-
-                                    <!-- QUANTITY -->
 
                                     <div class="checkout-product-quantity">
 
@@ -1434,339 +1609,367 @@ Checkout
 
                     </div>
 
-                        <!-- =================================================
-                            3. PAYMENT METHOD
-                        ================================================== -->
 
-                        <div class="checkout-card">
+                    <!-- =================================================
+                         3. PAYMENT METHOD
+                    ================================================== -->
 
-                            <div class="section-header">
+                    <div class="checkout-card">
 
-                                <div class="section-number">
-                                    3
-                                </div>
+                        <div class="section-header">
 
-                                <h3>
-                                    Payment Method
-                                </h3>
-
+                            <div class="section-number">
+                                3
                             </div>
 
+                            <h3>
+                                Payment Method
+                            </h3>
 
-                            <div class="payment-methods">
-
-
-                                <!-- =================================================
-                                    CASH ON DELIVERY
-                                ================================================== -->
-
-                                <label
-                                    class="payment-option {% if payment_method == 'COD' %}selected{% endif %}"
-                                    onclick="selectPayment(this)"
-                                >
-
-                                    <input
-                                        class="payment-radio"
-                                        type="radio"
-                                        name="payment_method"
-                                        value="COD"
-
-                                        {% if payment_method == "COD" %}
-                                            checked
-                                        {% endif %}
-
-                                        required
-                                    >
+                        </div>
 
 
-                                    <div class="payment-icon">
-                                        💵
-                                    </div>
+                        <div class="payment-methods">
 
 
-                                    <div class="payment-content">
+                            <!-- CASH ON DELIVERY -->
 
-                                        <div class="payment-title">
-                                            Cash on Delivery
-                                        </div>
+                            <label
+                                class="payment-option
+                                {% if payment_method == 'COD' %}
+                                    selected
+                                {% endif %}"
+                                onclick="selectPayment(this)"
+                            >
 
-                                        <div class="payment-description">
-                                            Pay when your order is delivered
-                                        </div>
+                                <input
+                                    class="payment-radio"
+                                    type="radio"
+                                    name="payment_method"
+                                    value="COD"
 
-                                    </div>
-
-
-                                    <div class="payment-check">
-                                        ✓
-                                    </div>
-
-                                </label>
-
-
-                                <!-- =================================================
-                                    RAZORPAY
-                                ================================================== -->
-
-                                <label
-                                    class="payment-option {% if payment_method == 'RAZORPAY' %}selected{% endif %}"
-                                    onclick="selectPayment(this)"
-                                >
-
-                                    <input
-                                        class="payment-radio"
-                                        type="radio"
-                                        name="payment_method"
-                                        value="RAZORPAY"
-
-                                        {% if payment_method == "RAZORPAY" %}
-                                            checked
-                                        {% endif %}
-                                    >
-
-
-                                    <div class="payment-icon">
-                                        💳
-                                    </div>
-
-
-                                    <div class="payment-content">
-
-                                        <div class="payment-title">
-                                            Online Payment
-                                        </div>
-
-                                        <div class="payment-description">
-                                            Pay securely using Razorpay
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="payment-check">
-                                        ✓
-                                    </div>
-
-                                </label>
-
-                            </div>
-
-
-                            <!-- =================================================
-                                PAYMENT INFORMATION
-                            ================================================== -->
-
-                            <div class="payment-info">
-
-                                <span id="paymentInfoText">
-
-                                    {% if payment_method == "RAZORPAY" %}
-
-                                        You will be redirected to Razorpay
-                                        to complete your payment securely.
-
-                                    {% else %}
-
-                                        Pay the total amount when your order
-                                        is delivered.
-
+                                    {% if payment_method == "COD" %}
+                                        checked
                                     {% endif %}
 
-                                </span>
+                                    required
+                                >
 
-                            </div>
+
+                                <div class="payment-icon">
+                                    💵
+                                </div>
 
 
-                            {% if form.payment_method.errors %}
+                                <div class="payment-content">
 
-                                <div class="field-error">
+                                    <div class="payment-title">
 
-                                    {% for error in form.payment_method.errors %}
+                                        Cash on Delivery
 
-                                        {{ error }}
+                                    </div>
 
-                                    {% endfor %}
+                                    <div class="payment-description">
+
+                                        Pay when your order is delivered
+
+                                    </div>
 
                                 </div>
 
-                            {% endif %}
+
+                                <div class="payment-check">
+                                    ✓
+                                </div>
+
+                            </label>
+
+
+                            <!-- RAZORPAY -->
+
+                            <label
+                                class="payment-option
+                                {% if payment_method == 'RAZORPAY' %}
+                                    selected
+                                {% endif %}"
+                                onclick="selectPayment(this)"
+                            >
+
+                                <input
+                                    class="payment-radio"
+                                    type="radio"
+                                    name="payment_method"
+                                    value="RAZORPAY"
+
+                                    {% if payment_method == "RAZORPAY" %}
+                                        checked
+                                    {% endif %}
+                                >
+
+
+                                <div class="payment-icon">
+                                    💳
+                                </div>
+
+
+                                <div class="payment-content">
+
+                                    <div class="payment-title">
+
+                                        Online Payment
+
+                                    </div>
+
+                                    <div class="payment-description">
+
+                                        Pay securely using Razorpay
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="payment-check">
+                                    ✓
+                                </div>
+
+                            </label>
 
                         </div>
 
 
-                <!-- =====================================================
-                     RIGHT SIDE — ORDER SUMMARY
-                ====================================================== -->
+                        <!-- PAYMENT INFORMATION -->
 
-                <div class="checkout-card summary-card">
+                        <div class="payment-info">
 
-                    <h3 class="summary-title">
-                        Order Summary
-                    </h3>
+                            <span id="paymentInfoText">
 
+                                {% if payment_method == "RAZORPAY" %}
 
-                    <!-- QUICK INFORMATION -->
+                                    You will be redirected to Razorpay
+                                    to complete your payment securely.
 
-                    <div class="summary-highlight">
+                                {% else %}
 
-                        <div class="highlight-box">
+                                    Pay the total amount when your order
+                                    is delivered.
 
-                            <div class="highlight-label">
-                                Items
-                            </div>
+                                {% endif %}
 
-                            <div class="highlight-value">
-
-                                {{ total_items }}
-                                item{{ total_items|pluralize }}
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="highlight-box">
-
-                            <div class="highlight-label">
-                                Delivery
-                            </div>
-
-                            <div class="highlight-value">
-
-                                {{ delivery_date|date:"d M Y" }}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- SUBTOTAL -->
-
-                    <div class="summary-row">
-
-                        <span>
-                            Subtotal
-                        </span>
-
-                        <span>
-                            ₹{{ subtotal|floatformat:2 }}
-                        </span>
-
-                    </div>
-
-
-                    <!-- DISCOUNT -->
-
-                    {% if discount_amount > 0 %}
-
-                        <div class="summary-row discount-row">
-
-                            <span>
-                                Discount
-                            </span>
-
-                            <span>
-                                - ₹{{ discount_amount|floatformat:2 }}
                             </span>
 
                         </div>
 
-                    {% endif %}
 
+                        {% if form.payment_method.errors %}
 
-                    <!-- TAX -->
+                            <div class="field-error">
 
-                    <div class="summary-row">
+                                {% for error in form.payment_method.errors %}
 
-                        <span>
-                            Tax
-                        </span>
+                                    {{ error }}
 
-                        <span>
-                            ₹{{ tax|floatformat:2 }}
-                        </span>
+                                {% endfor %}
 
-                    </div>
-
-
-                    <!-- SHIPPING -->
-
-                    <div class="summary-row">
-
-                        <span>
-                            Shipping
-                        </span>
-
-                        {% if shipping_charge == 0 %}
-
-                            <span class="free-delivery">
-                                FREE
-                            </span>
-
-                        {% else %}
-
-                            <span>
-                                ₹{{ shipping_charge|floatformat:2 }}
-                            </span>
+                            </div>
 
                         {% endif %}
 
                     </div>
 
-
-                    <!-- PAYMENT METHOD -->
-
-                    <div class="summary-row">
-
-                        <span>
-                            Payment Method
-                        </span>
-
-                        <span
-                            class="free-delivery"
-                            id="summaryPaymentMethod"
-                        >
-                            {{ payment_method_display }}
-                        </span>
-
-                    </div>
-
-                    <!-- TOTAL -->
-
-                    <div class="summary-total">
-
-                        <span>
-                            Total Amount
-                        </span>
-
-                        <span>
-                            ₹{{ total_amount|floatformat:2 }}
-                        </span>
-
-                    </div>
+                </div>
 
 
-                    <!-- CONTINUE TO REVIEW -->
+                <!-- =================================================
+                     RIGHT COLUMN — ORDER SUMMARY
+                ================================================== -->
 
-                    <button
-                        type="submit"
-                        class="review-order-btn"
-                        id="continuePaymentButton"
-                    >
-                        <span id="continuePaymentText">
-                            {% if payment_method == "RAZORPAY" %}
-                                Continue to Payment
+                <div class="checkout-right">
+
+                    <div class="checkout-card summary-card">
+
+                        <h3 class="summary-title">
+                            Order Summary
+                        </h3>
+
+
+                        <!-- QUICK INFORMATION -->
+
+                        <div class="summary-highlight">
+
+                            <div class="highlight-box">
+
+                                <div class="highlight-label">
+                                    Items
+                                </div>
+
+                                <div class="highlight-value">
+
+                                    {{ total_items }}
+                                    item{{ total_items|pluralize }}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="highlight-box">
+
+                                <div class="highlight-label">
+                                    Delivery
+                                </div>
+
+                                <div class="highlight-value">
+
+                                    {{ delivery_date|date:"d M Y" }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- SUBTOTAL -->
+
+                        <div class="summary-row">
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <span>
+                                ₹{{ subtotal|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- DISCOUNT -->
+
+                        {% if discount_amount > 0 %}
+
+                            <div class="summary-row discount-row">
+
+                                <span>
+                                    Discount
+                                </span>
+
+                                <span>
+                                    - ₹{{ discount_amount|floatformat:2 }}
+                                </span>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- TAX -->
+
+                        <div class="summary-row">
+
+                            <span>
+                                Tax
+                            </span>
+
+                            <span>
+                                ₹{{ tax|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- SHIPPING -->
+
+                        <div class="summary-row">
+
+                            <span>
+                                Shipping
+                            </span>
+
+                            {% if shipping_charge == 0 %}
+
+                                <span class="free-delivery">
+                                    FREE
+                                </span>
+
                             {% else %}
-                                Place Order
+
+                                <span>
+                                    ₹{{ shipping_charge|floatformat:2 }}
+                                </span>
+
                             {% endif %}
-                        </span>
-                    </button>
+
+                        </div>
 
 
-                    <div class="secure-note">
-                        🔒 Your order information is securely processed.
+                        <!-- PAYMENT METHOD -->
+
+                        <div class="summary-row">
+
+                            <span>
+                                Payment Method
+                            </span>
+
+                            <span
+                                class="free-delivery"
+                                id="summaryPaymentMethod"
+                            >
+
+                                {{ payment_method_display }}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- TOTAL -->
+
+                        <div class="summary-total">
+
+                            <span>
+                                Total Amount
+                            </span>
+
+                            <span>
+                                ₹{{ total_amount|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- CONTINUE -->
+
+                        <button
+                            type="submit"
+                            class="review-order-btn"
+                            id="continuePaymentButton"
+                        >
+
+                            <span id="continuePaymentText">
+
+                                {% if payment_method == "RAZORPAY" %}
+
+                                    Continue to Payment
+
+                                {% else %}
+
+                                    Place Order
+
+                                {% endif %}
+
+                            </span>
+
+                        </button>
+
+
+                        <div class="secure-note">
+
+                            🔒 Your order information is securely processed.
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -1778,726 +1981,648 @@ Checkout
     </div>
 
 </section>
+
+
 <script>
 
-    /* =========================================================
-       ADDRESS DATA
-    ========================================================= */
+/* =========================================================
+   ADDRESS DATA
+========================================================= */
 
-    const addressData = {
+const addressData = {
 
-        {% for address in addresses %}
+    {% for address in addresses %}
 
-            "{{ address.id }}": {
+        "{{ address.id }}": {
 
-                type: "{{ address.address_type|escapejs }}",
+            type:
+                "{{ address.address_type|escapejs }}",
 
-                name: "{{ request.user.get_full_name|escapejs }}",
+            name:
+                "{{ request.user.get_full_name|escapejs }}",
 
-                building: "{{ address.building|escapejs }}",
+            building:
+                "{{ address.building|escapejs }}",
 
-                area: "{{ address.area|escapejs }}",
+            area:
+                "{{ address.area|escapejs }}",
 
-                landmark: "{{ address.landmark|default:''|escapejs }}",
+            landmark:
+                "{{ address.landmark|default:''|escapejs }}",
 
-                city: "{{ address.city|escapejs }}",
+            city:
+                "{{ address.city|escapejs }}",
 
-                state: "{{ address.state|escapejs }}",
+            state:
+                "{{ address.state|escapejs }}",
 
-                pincode: "{{ address.pincode|escapejs }}",
+            pincode:
+                "{{ address.pincode|escapejs }}",
 
-                country: "{{ address.country|escapejs }}",
+            country:
+                "{{ address.country|escapejs }}",
 
-                phone: "{{ address.phone|default:''|escapejs }}",
+            phone:
+                "{{ address.phone|default:''|escapejs }}",
 
-                isDefault:
-                    {% if address.is_default %}
-                        true
-                    {% else %}
-                        false
-                    {% endif %}
+            isDefault:
 
-            }
-
-            {% if not forloop.last %},{% endif %}
-
-        {% endfor %}
-
-    };
-
-
-    /* =========================================================
-       GET SELECTED ADDRESS ID
-    ========================================================= */
-
-    function getSelectedAddressId() {
-
-        const selectedRadio =
-            document.querySelector(
-                'input[name="address"]:checked'
-            );
-
-
-        if (!selectedRadio) {
-
-            return null;
+                {% if address.is_default %}
+                    true
+                {% else %}
+                    false
+                {% endif %}
 
         }
 
+        {% if not forloop.last %},{% endif %}
 
-        return selectedRadio.value;
+    {% endfor %}
+
+};
+
+
+/* =========================================================
+   GET SELECTED ADDRESS ID
+========================================================= */
+
+function getSelectedAddressId() {
+
+    const selectedRadio =
+        document.querySelector(
+            'input[name="address"]:checked'
+        );
+
+    if (!selectedRadio) {
+        return null;
+    }
+
+    return selectedRadio.value;
+}
+
+
+/* =========================================================
+   TOGGLE ADDRESS LIST
+========================================================= */
+
+function toggleAddresses() {
+
+    const addressList =
+        document.getElementById(
+            "addressList"
+        );
+
+    if (!addressList) {
+        return;
+    }
+
+    addressList.classList.toggle(
+        "show"
+    );
+}
+
+
+/* =========================================================
+   SELECT ADDRESS
+========================================================= */
+
+function selectAddress(radio) {
+
+    if (!radio) {
+        return;
+    }
+
+
+    const addressId =
+        radio.value;
+
+    const address =
+        addressData[addressId];
+
+    if (!address) {
+        return;
+    }
+
+
+    /* ADDRESS TYPE */
+
+    const addressTypeText =
+        document.getElementById(
+            "selectedAddressTypeText"
+        );
+
+    if (addressTypeText) {
+
+        addressTypeText.textContent =
+            address.type;
 
     }
 
 
-    /* =========================================================
-       TOGGLE ADDRESS LIST
-    ========================================================= */
+    /* DEFAULT BADGE */
 
-    function toggleAddresses() {
+    const defaultBadge =
+        document.getElementById(
+            "selectedDefaultBadge"
+        );
 
-        const addressList =
-            document.getElementById(
-                "addressList"
-            );
+    if (defaultBadge) {
 
+        if (address.isDefault) {
 
-        if (!addressList) {
+            defaultBadge.style.display =
+                "inline-flex";
 
-            return;
+        } else {
+
+            defaultBadge.style.display =
+                "none";
 
         }
 
+    }
 
-        addressList.classList.toggle(
+
+    /* NAME */
+
+    const selectedAddressName =
+        document.getElementById(
+            "selectedAddressName"
+        );
+
+    if (selectedAddressName) {
+
+        selectedAddressName.textContent =
+            address.name;
+
+    }
+
+
+    /* ADDRESS */
+
+    let addressHTML = "";
+
+    addressHTML +=
+        escapeHTML(
+            address.building
+        ) +
+        ", " +
+        escapeHTML(
+            address.area
+        );
+
+
+    if (address.landmark) {
+
+        addressHTML +=
+            "<br>" +
+            escapeHTML(
+                address.landmark
+            );
+
+    }
+
+
+    addressHTML +=
+        "<br>" +
+        escapeHTML(
+            address.city
+        ) +
+        ", " +
+        escapeHTML(
+            address.state
+        ) +
+        " - " +
+        escapeHTML(
+            address.pincode
+        );
+
+
+    addressHTML +=
+        "<br>" +
+        escapeHTML(
+            address.country
+        );
+
+
+    const selectedAddressText =
+        document.getElementById(
+            "selectedAddressText"
+        );
+
+    if (selectedAddressText) {
+
+        selectedAddressText.innerHTML =
+            addressHTML;
+
+    }
+
+
+    /* PHONE */
+
+    const phoneElement =
+        document.getElementById(
+            "selectedAddressPhone"
+        );
+
+    if (phoneElement) {
+
+        if (address.phone) {
+
+            phoneElement.textContent =
+                "📞 " +
+                address.phone;
+
+            phoneElement.style.display =
+                "block";
+
+        } else {
+
+            phoneElement.textContent =
+                "";
+
+            phoneElement.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    /* HIGHLIGHT SELECTED ADDRESS */
+
+    document.querySelectorAll(
+        ".address-option"
+    ).forEach(
+        function(option) {
+
+            option.classList.remove(
+                "selected"
+            );
+
+        }
+    );
+
+
+    const selectedOption =
+        radio.closest(
+            ".address-option"
+        );
+
+    if (selectedOption) {
+
+        selectedOption.classList.add(
+            "selected"
+        );
+
+    }
+
+
+    /* CLOSE LIST */
+
+    const addressList =
+        document.getElementById(
+            "addressList"
+        );
+
+    if (addressList) {
+
+        addressList.classList.remove(
             "show"
         );
 
     }
 
-
-    /* =========================================================
-       SELECT ADDRESS
-    ========================================================= */
-
-    function selectAddress(radio) {
-
-        if (!radio) {
-
-            return;
-
-        }
-
-
-        const addressId =
-            radio.value;
-
-
-        const address =
-            addressData[addressId];
-
-
-        if (!address) {
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           Address type
-        ----------------------------------------- */
-
-        const addressTypeText =
-            document.getElementById(
-                "selectedAddressTypeText"
-            );
-
-
-        if (addressTypeText) {
-
-            addressTypeText.textContent =
-                address.type;
-
-        }
-
-
-        /* -----------------------------------------
-           Default badge
-        ----------------------------------------- */
-
-        const defaultBadge =
-            document.getElementById(
-                "selectedDefaultBadge"
-            );
-
-
-        if (defaultBadge) {
-
-            if (address.isDefault) {
-
-                defaultBadge.style.display =
-                    "inline-flex";
-
-            } else {
-
-                defaultBadge.style.display =
-                    "none";
-
-            }
-
-        }
-
-
-        /* -----------------------------------------
-           Name
-        ----------------------------------------- */
-
-        const selectedAddressName =
-            document.getElementById(
-                "selectedAddressName"
-            );
-
-
-        if (selectedAddressName) {
-
-            selectedAddressName.textContent =
-                address.name;
-
-        }
-
-
-        /* -----------------------------------------
-           Address
-        ----------------------------------------- */
-
-        let addressHTML = "";
-
-
-        addressHTML +=
-            escapeHTML(
-                address.building
-            ) +
-            ", " +
-            escapeHTML(
-                address.area
-            );
-
-
-        if (address.landmark) {
-
-            addressHTML +=
-                "<br>" +
-                escapeHTML(
-                    address.landmark
-                );
-
-        }
-
-
-        addressHTML +=
-            "<br>" +
-            escapeHTML(
-                address.city
-            ) +
-            ", " +
-            escapeHTML(
-                address.state
-            ) +
-            " - " +
-            escapeHTML(
-                address.pincode
-            );
-
-
-        addressHTML +=
-            "<br>" +
-            escapeHTML(
-                address.country
-            );
-
-
-        const selectedAddressText =
-            document.getElementById(
-                "selectedAddressText"
-            );
-
-
-        if (selectedAddressText) {
-
-            selectedAddressText.innerHTML =
-                addressHTML;
-
-        }
-
-
-        /* -----------------------------------------
-           Phone
-        ----------------------------------------- */
-
-        const phoneElement =
-            document.getElementById(
-                "selectedAddressPhone"
-            );
-
-
-        if (phoneElement) {
-
-            if (address.phone) {
-
-                phoneElement.textContent =
-                    "📞 " +
-                    address.phone;
-
-                phoneElement.style.display =
-                    "block";
-
-            } else {
-
-                phoneElement.textContent =
-                    "";
-
-                phoneElement.style.display =
-                    "none";
-
-            }
-
-        }
-
-
-        /* -----------------------------------------
-           Highlight selected address
-        ----------------------------------------- */
-
-        document.querySelectorAll(
-            ".address-option"
-        ).forEach(
-            function(option) {
-
-                option.classList.remove(
-                    "selected"
-                );
-
-            }
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value) {
+
+    if (!value) {
+        return "";
+    }
+
+    return value
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
         );
 
-
-        const selectedOption =
-            radio.closest(
-                ".address-option"
-            );
+}
 
 
-        if (selectedOption) {
+/* =========================================================
+   PAYMENT SELECTION
+========================================================= */
 
-            selectedOption.classList.add(
+function selectPayment(element) {
+
+    if (!element) {
+        return;
+    }
+
+
+    /* REMOVE SELECTED */
+
+    const options =
+        document.querySelectorAll(
+            ".payment-option"
+        );
+
+    options.forEach(
+        function(option) {
+
+            option.classList.remove(
                 "selected"
             );
 
         }
+    );
 
 
-        /* -----------------------------------------
-           Close address list
-        ----------------------------------------- */
+    /* ADD SELECTED */
 
-        const addressList =
-            document.getElementById(
-                "addressList"
-            );
+    element.classList.add(
+        "selected"
+    );
 
 
-        if (addressList) {
+    /* RADIO */
 
-            addressList.classList.remove(
-                "show"
-            );
+    const radio =
+        element.querySelector(
+            'input[name="payment_method"]'
+        );
 
-        }
-
+    if (!radio) {
+        return;
     }
 
-
-    /* =========================================================
-       ESCAPE HTML
-    ========================================================= */
-
-    function escapeHTML(value) {
-
-        if (!value) {
-
-            return "";
-
-        }
+    radio.checked = true;
 
 
-        return value
-            .replace(
-                /&/g,
-                "&amp;"
-            )
-            .replace(
-                /</g,
-                "&lt;"
-            )
-            .replace(
-                />/g,
-                "&gt;"
-            )
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-            .replace(
-                /'/g,
-                "&#039;"
-            );
-
-    }
+    const paymentMethod =
+        radio.value;
 
 
-    /* =========================================================
-       PAYMENT SELECTION
-    ========================================================= */
+    /* UPDATE UI */
 
-    function selectPayment(element) {
-
-        if (!element) {
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           Remove selected state
-        ----------------------------------------- */
-
-        const options =
-            document.querySelectorAll(
-                ".payment-option"
-            );
-
-
-        options.forEach(
-            function(option) {
-
-                option.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
-
-        /* -----------------------------------------
-           Add selected state
-        ----------------------------------------- */
-
-        element.classList.add(
-            "selected"
-        );
-
-
-        /* -----------------------------------------
-           Check radio
-        ----------------------------------------- */
-
-        const radio =
-            element.querySelector(
-                'input[name="payment_method"]'
-            );
-
-
-        if (!radio) {
-
-            return;
-
-        }
-
-
-        radio.checked = true;
-
-
-        const paymentMethod =
-            radio.value;
-
-
-        /* -----------------------------------------
-           Update UI
-        ----------------------------------------- */
-
-        updatePaymentInformation(
-            paymentMethod
-        );
-
-
-        updatePaymentButton(
-            paymentMethod
-        );
-
-
-        updatePaymentSummary(
-            paymentMethod
-        );
-
-    }
-
-
-    /* =========================================================
-       UPDATE PAYMENT INFORMATION
-    ========================================================= */
-
-    function updatePaymentInformation(
+    updatePaymentInformation(
         paymentMethod
+    );
+
+    updatePaymentButton(
+        paymentMethod
+    );
+
+    updatePaymentSummary(
+        paymentMethod
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE PAYMENT INFORMATION
+========================================================= */
+
+function updatePaymentInformation(
+    paymentMethod
+) {
+
+    const paymentInfoText =
+        document.getElementById(
+            "paymentInfoText"
+        );
+
+    if (!paymentInfoText) {
+        return;
+    }
+
+
+    if (
+        paymentMethod ===
+        "RAZORPAY"
     ) {
 
-        const paymentInfoText =
-            document.getElementById(
-                "paymentInfoText"
-            );
+        paymentInfoText.textContent =
+            "You will be redirected to Razorpay " +
+            "to complete your payment securely.";
 
+    } else {
 
-        if (!paymentInfoText) {
-
-            return;
-
-        }
-
-
-        if (
-            paymentMethod ===
-            "RAZORPAY"
-        ) {
-
-            paymentInfoText.textContent =
-                "You will be redirected to Razorpay " +
-                "to complete your payment securely.";
-
-        } else {
-
-            paymentInfoText.textContent =
-                "Pay the total amount when your order " +
-                "is delivered.";
-
-        }
+        paymentInfoText.textContent =
+            "Pay the total amount when your order " +
+            "is delivered.";
 
     }
 
+}
 
-    /* =========================================================
-       UPDATE PAYMENT BUTTON
-    ========================================================= */
 
-    function updatePaymentButton(
-        paymentMethod
+/* =========================================================
+   UPDATE PAYMENT BUTTON
+========================================================= */
+
+function updatePaymentButton(
+    paymentMethod
+) {
+
+    const buttonText =
+        document.getElementById(
+            "continuePaymentText"
+        );
+
+    if (!buttonText) {
+        return;
+    }
+
+
+    if (
+        paymentMethod ===
+        "RAZORPAY"
     ) {
 
-        const buttonText =
-            document.getElementById(
-                "continuePaymentText"
-            );
+        buttonText.textContent =
+            "Continue to Payment";
 
+    } else {
 
-        if (!buttonText) {
-
-            return;
-
-        }
-
-
-        if (
-            paymentMethod ===
-            "RAZORPAY"
-        ) {
-
-            buttonText.textContent =
-                "Continue to Payment";
-
-        } else {
-
-            buttonText.textContent =
-                "Place Order";
-
-        }
+        buttonText.textContent =
+            "Place Order";
 
     }
 
+}
 
-    /* =========================================================
-       UPDATE PAYMENT SUMMARY
-    ========================================================= */
 
-    function updatePaymentSummary(
-        paymentMethod
+/* =========================================================
+   UPDATE PAYMENT SUMMARY
+========================================================= */
+
+function updatePaymentSummary(
+    paymentMethod
+) {
+
+    const summaryPaymentMethod =
+        document.getElementById(
+            "summaryPaymentMethod"
+        );
+
+    if (!summaryPaymentMethod) {
+        return;
+    }
+
+
+    if (
+        paymentMethod ===
+        "RAZORPAY"
     ) {
 
-        const summaryPaymentMethod =
-            document.getElementById(
-                "summaryPaymentMethod"
-            );
+        summaryPaymentMethod.textContent =
+            "Online Payment";
 
+    } else {
 
-        if (!summaryPaymentMethod) {
-
-            return;
-
-        }
-
-
-        if (
-            paymentMethod ===
-            "RAZORPAY"
-        ) {
-
-            summaryPaymentMethod.textContent =
-                "Online Payment";
-
-        } else {
-
-            summaryPaymentMethod.textContent =
-                "Cash on Delivery";
-
-        }
+        summaryPaymentMethod.textContent =
+            "Cash on Delivery";
 
     }
 
-
-    /* =========================================================
-       PAYMENT RADIO CHANGE
-    ========================================================= */
-
-    document.querySelectorAll(
-        'input[name="payment_method"]'
-    ).forEach(
-        function(radio) {
-
-            radio.addEventListener(
-                "change",
-                function() {
-
-                    /* -----------------------------------------
-                       Find selected payment option
-                    ----------------------------------------- */
-
-                    const selectedOption =
-                        this.closest(
-                            ".payment-option"
-                        );
+}
 
 
-                    /* -----------------------------------------
-                       Remove selected state
-                    ----------------------------------------- */
+/* =========================================================
+   PAYMENT RADIO CHANGE
+========================================================= */
 
-                    document.querySelectorAll(
+document.querySelectorAll(
+    'input[name="payment_method"]'
+).forEach(
+    function(radio) {
+
+        radio.addEventListener(
+            "change",
+            function() {
+
+                const selectedOption =
+                    this.closest(
                         ".payment-option"
-                    ).forEach(
-                        function(option) {
-
-                            option.classList.remove(
-                                "selected"
-                            );
-
-                        }
                     );
 
 
-                    /* -----------------------------------------
-                       Add selected state
-                    ----------------------------------------- */
+                document.querySelectorAll(
+                    ".payment-option"
+                ).forEach(
+                    function(option) {
 
-                    if (selectedOption) {
-
-                        selectedOption.classList.add(
+                        option.classList.remove(
                             "selected"
                         );
 
                     }
+                );
 
 
-                    /* -----------------------------------------
-                       Update payment UI
-                    ----------------------------------------- */
+                if (selectedOption) {
 
-                    updatePaymentInformation(
-                        this.value
-                    );
-
-
-                    updatePaymentButton(
-                        this.value
-                    );
-
-
-                    updatePaymentSummary(
-                        this.value
+                    selectedOption.classList.add(
+                        "selected"
                     );
 
                 }
+
+
+                updatePaymentInformation(
+                    this.value
+                );
+
+                updatePaymentButton(
+                    this.value
+                );
+
+                updatePaymentSummary(
+                    this.value
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   INITIALIZE PAGE
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+
+        /* ADDRESS */
+
+        const selectedAddressRadio =
+            document.querySelector(
+                'input[name="address"]:checked'
+            );
+
+        if (selectedAddressRadio) {
+
+            selectAddress(
+                selectedAddressRadio
             );
 
         }
-    );
 
 
-    /* =========================================================
-       INITIALIZE PAGE
-    ========================================================= */
+        /* PAYMENT */
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
+        const selectedPaymentRadio =
+            document.querySelector(
+                'input[name="payment_method"]:checked'
+            );
 
-            /* -----------------------------------------
-               Initialize selected address
-            ----------------------------------------- */
+        if (selectedPaymentRadio) {
 
-            const selectedAddressRadio =
-                document.querySelector(
-                    'input[name="address"]:checked'
-                );
+            updatePaymentInformation(
+                selectedPaymentRadio.value
+            );
 
+            updatePaymentButton(
+                selectedPaymentRadio.value
+            );
 
-            if (selectedAddressRadio) {
-
-                selectAddress(
-                    selectedAddressRadio
-                );
-
-            }
-
-
-            /* -----------------------------------------
-               Initialize selected payment
-            ----------------------------------------- */
-
-            const selectedPaymentRadio =
-                document.querySelector(
-                    'input[name="payment_method"]:checked'
-                );
-
-
-            if (selectedPaymentRadio) {
-
-                updatePaymentInformation(
-                    selectedPaymentRadio.value
-                );
-
-
-                updatePaymentButton(
-                    selectedPaymentRadio.value
-                );
-
-
-                updatePaymentSummary(
-                    selectedPaymentRadio.value
-                );
-
-            }
+            updatePaymentSummary(
+                selectedPaymentRadio.value
+            );
 
         }
-    );
+
+    }
+);
 
 </script>
+
 {% endblock %}

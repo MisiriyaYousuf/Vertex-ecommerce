@@ -1,0 +1,506 @@
+{% extends "user_base.html" %}
+
+{% block content %}
+
+<style>
+
+    .order-failure-card {
+        width: 100%;
+        max-width: 560px;
+        padding: 38px 38px;
+
+        text-align: center;
+
+        position: relative;
+        z-index: 2;
+
+        background: rgba(255, 255, 255, 0.08);
+
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+
+        border: 1px solid rgba(255, 255, 255, 0.18);
+
+        border-radius: 24px;
+
+        box-shadow:
+            0 22px 55px rgba(0, 0, 0, 0.26),
+            inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
+        overflow: hidden;
+
+        }
+
+        /* Failure illustration */
+
+        .failure-illustration {
+        width: 110px;
+        height: 110px;
+        margin: 0 auto 20px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        position: relative;
+
+        }
+
+        .failure-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+
+        background: rgba(220, 53, 69, 0.12);
+
+        border: 2px solid rgba(255, 130, 140, 0.55);
+
+        color: #ff7b86;
+
+        font-size: 30px;
+        font-weight: 400;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        box-shadow:
+            0 0 0 8px rgba(255, 100, 110, 0.05),
+            0 0 28px rgba(220, 53, 69, 0.16);
+
+
+        }
+
+        /* Heading */
+
+        .order-failure-card h1 {
+        margin: 0 0 10px;
+        color: #ffffff;
+
+        font-size: 30px;
+        font-weight: 700;
+
+        letter-spacing: -0.4px;
+        }
+
+        /* Main message */
+
+        .failure-message {
+        margin: 0 0 8px;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 17px;
+        font-weight: 600;
+
+        }
+
+        /* Description */
+
+        .failure-submessage {
+        max-width: 450px;
+
+
+        margin: 0 auto 22px;
+
+        color: rgba(255, 255, 255, 0.68);
+
+        font-size: 14px;
+        line-height: 1.6;
+
+
+        }
+
+        /* Buttons */
+
+        .failure-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        }
+
+        .failure-actions a {
+        min-width: 165px;
+
+        padding: 11px 20px;
+
+        border-radius: 10px;
+
+        font-size: 14px;
+        font-weight: 600;
+
+
+        }
+
+
+    .order-failure-page {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+
+        /* IMPORTANT:
+           Keep transparent so user_base background remains visible */
+        background: transparent;
+
+        position: relative;
+        overflow: hidden;
+    }
+
+
+    /* =========================================================
+       BACKGROUND GLOW
+       ========================================================= */
+
+    .order-failure-page::before {
+        content: "";
+        position: absolute;
+
+        width: 420px;
+        height: 420px;
+
+        top: 5%;
+        left: 8%;
+
+        background: rgba(126, 87, 194, 0.18);
+
+        border-radius: 50%;
+
+        filter: blur(90px);
+
+        pointer-events: none;
+    }
+
+
+    .order-failure-page::after {
+        content: "";
+        position: absolute;
+
+        width: 350px;
+        height: 350px;
+
+        right: 8%;
+        bottom: 5%;
+
+        background: rgba(91, 42, 134, 0.20);
+
+        border-radius: 50%;
+
+        filter: blur(90px);
+
+        pointer-events: none;
+    }
+
+
+    /* =========================================================
+       GLASS CARD
+       ========================================================= */
+
+    
+
+    /* Subtle glass highlight */
+
+    .order-failure-card::before {
+
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        right: 0;
+
+        height: 1px;
+
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.35),
+            transparent
+        );
+
+        pointer-events: none;
+    }
+
+
+    /* =========================================================
+       FAILURE ILLUSTRATION
+       ========================================================= */
+
+   
+    /* Decorative circles */
+
+    .failure-illustration::before,
+    .failure-illustration::after {
+
+        content: "";
+
+        position: absolute;
+
+        border-radius: 50%;
+
+        background: rgba(255, 130, 140, 0.25);
+
+        box-shadow:
+            0 0 15px rgba(255, 100, 110, 0.12);
+    }
+
+
+    .failure-illustration::before {
+
+        width: 12px;
+        height: 12px;
+
+        top: 8px;
+        left: 10px;
+    }
+
+
+    .failure-illustration::after {
+
+        width: 9px;
+        height: 9px;
+
+        right: 8px;
+        bottom: 12px;
+    }
+
+    /* =========================================================
+       ORDER REFERENCE
+       ========================================================= */
+
+    .order-reference {
+
+        display: inline-block;
+
+        padding: 10px 18px;
+
+        margin-bottom: 30px;
+
+        border-radius: 12px;
+
+        background: rgba(255, 255, 255, 0.07);
+
+        color: rgba(255, 255, 255, 0.80);
+
+        font-size: 14px;
+        font-weight: 600;
+
+        border: 1px solid rgba(255, 255, 255, 0.12);
+
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* =========================================================
+       RETRY BUTTON
+       ========================================================= */
+
+    .retry-payment-btn {
+
+        background: linear-gradient(
+            135deg,
+            #7b3fb2,
+            #5b2a86
+        );
+
+        color: #ffffff;
+
+        border: 1px solid rgba(255, 255, 255, 0.15);
+
+        box-shadow:
+            0 10px 30px rgba(91, 42, 134, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+
+    .retry-payment-btn:hover {
+
+        background: linear-gradient(
+            135deg,
+            #8d4dc7,
+            #69339b
+        );
+
+        color: #ffffff;
+
+        transform: translateY(-3px);
+
+        box-shadow:
+            0 15px 35px rgba(91, 42, 134, 0.45),
+            0 0 20px rgba(139, 70, 190, 0.18);
+    }
+
+
+    /* =========================================================
+       ORDER DETAILS BUTTON
+       ========================================================= */
+
+    .order-details-btn {
+
+        background: rgba(255, 255, 255, 0.06);
+
+        color: rgba(255, 255, 255, 0.88);
+
+        border: 1px solid rgba(255, 255, 255, 0.18);
+
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+
+    .order-details-btn:hover {
+
+        background: rgba(255, 255, 255, 0.12);
+
+        color: #ffffff;
+
+        border-color: rgba(255, 255, 255, 0.30);
+
+        transform: translateY(-3px);
+
+        box-shadow:
+            0 10px 25px rgba(0, 0, 0, 0.18);
+    }
+
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 600px) {
+
+        .order-failure-page {
+
+            min-height: calc(100vh - 100px);
+
+            padding: 35px 15px;
+        }
+
+
+        .order-failure-card {
+
+            padding: 42px 22px;
+
+            border-radius: 22px;
+        }
+
+
+        .order-failure-card h1 {
+
+            font-size: 28px;
+        }
+
+
+        .failure-message {
+
+            font-size: 16px;
+        }
+
+
+        .failure-submessage {
+
+            font-size: 14px;
+
+            line-height: 1.65;
+        }
+
+
+        .failure-actions {
+
+            flex-direction: column;
+
+            width: 100%;
+        }
+
+
+        .failure-actions a {
+
+            width: 100%;
+
+            box-sizing: border-box;
+        }
+    }
+
+</style>
+
+<div class="order-failure-page">
+
+<div class="order-failure-card">
+
+
+    <!-- =====================================================
+         FAILURE ICON
+         ===================================================== -->
+
+    <div class="failure-illustration">
+
+        <div class="failure-circle">
+            ×
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         TITLE
+         ===================================================== -->
+
+    <h1>
+        Order Failed
+    </h1>
+
+
+    <!-- =====================================================
+         MAIN MESSAGE
+         ===================================================== -->
+
+    <p class="failure-message">
+
+        We couldn't complete your payment.
+
+    </p>
+
+
+    <!-- =====================================================
+         DESCRIPTION
+         ===================================================== -->
+
+    <p class="failure-submessage">
+
+        Your payment was not successful, so the order has not
+        been completed. You can try the payment again or return
+        to your order details.
+
+    </p>
+
+
+    <!-- =====================================================
+         ACTION BUTTONS
+         ===================================================== -->
+
+    <div class="failure-actions">
+
+        <a
+            href="{% url 'orders:razorpay_payment' %}"
+            class="retry-payment-btn"
+        >
+            Retry Payment
+        </a>
+
+
+        <a
+            href="{% url 'orders:view_order' %}"
+            class="order-details-btn"
+        >
+            View Order Details
+        </a>
+
+    </div>
+
+
+</div>
+
+</div>
+
+{% endblock %}

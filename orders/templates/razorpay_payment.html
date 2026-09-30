@@ -12,7 +12,9 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Secure Payment | Vertex</title>
+    <title>
+        Secure Payment | Vertex
+    </title>
 
     <style>
 
@@ -48,6 +50,7 @@
             color: #ffffff;
         }
 
+
         .payment-container {
 
             width: min(92%, 500px);
@@ -72,19 +75,28 @@
             text-align: center;
         }
 
+
         h1 {
+
             margin-bottom: 12px;
         }
 
+
         p {
+
             color: #d6d0e5;
+
             line-height: 1.6;
         }
 
+
         .secure-text {
+
             font-size: 14px;
+
             margin-top: 20px;
         }
+
 
         #payButton {
 
@@ -109,12 +121,20 @@
             cursor: pointer;
         }
 
+
+        #payButton:hover {
+
+            opacity: 0.92;
+        }
+
+
         #payButton:disabled {
 
             opacity: 0.6;
 
             cursor: not-allowed;
         }
+
 
         #paymentStatus {
 
@@ -124,6 +144,7 @@
 
             color: #d6d0e5;
         }
+
 
         #paymentError {
 
@@ -145,7 +166,10 @@
             color: #ffb4b4;
 
             text-align: left;
+
+            line-height: 1.5;
         }
+
 
         #retryButton {
 
@@ -170,6 +194,14 @@
             cursor: pointer;
         }
 
+
+        #retryButton:hover {
+
+            background:
+                rgba(255, 255, 255, 0.08);
+        }
+
+
         .small {
 
             font-size: 13px;
@@ -191,14 +223,10 @@
         Secure Payment
     </h1>
 
+
     <p>
         You are being redirected to
         Razorpay's secure payment checkout.
-    </p>
-
-    <p class="small">
-        Your card details are entered directly
-        into Razorpay Checkout.
     </p>
 
 
@@ -237,13 +265,15 @@
     id="csrfForm"
     style="display:none;"
 >
+
     {% csrf_token %}
+
 </form>
 
 
 <script
-    src="https://checkout.razorpay.com/v1/checkout.js">
-</script>
+    src="https://checkout.razorpay.com/v1/checkout.js"
+></script>
 
 
 <script>
@@ -258,6 +288,7 @@
 const createUrl =
     "{% url 'orders:razorpay_create' %}";
 
+
 const verifyUrl =
     "{% url 'orders:razorpay_verify' %}";
 
@@ -271,15 +302,18 @@ const payButton =
         "payButton"
     );
 
+
 const retryButton =
     document.getElementById(
         "retryButton"
     );
 
+
 const paymentStatus =
     document.getElementById(
         "paymentStatus"
     );
+
 
 const paymentError =
     document.getElementById(
@@ -288,37 +322,8 @@ const paymentError =
 
 
 /* ============================================================
-   CSRF
+   ERROR HELPERS
    ============================================================ */
-
-function getCsrfToken() {
-
-    const input =
-        document.querySelector(
-            "#csrfForm input[name='csrfmiddlewaretoken']"
-        );
-
-    if (!input) {
-
-        throw new Error(
-            "CSRF token not found."
-        );
-    }
-
-    return input.value;
-}
-
-
-/* ============================================================
-   STATUS
-   ============================================================ */
-
-function setStatus(message) {
-
-    paymentStatus.textContent =
-        message;
-}
-
 
 function showError(message) {
 
@@ -337,6 +342,17 @@ function hideError() {
 
     paymentError.style.display =
         "none";
+}
+
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+function setStatus(message) {
+
+    paymentStatus.textContent =
+        message;
 }
 
 
@@ -363,6 +379,56 @@ function enablePaymentButton() {
 
 
 /* ============================================================
+   RAZORPAY SDK CHECK
+   ============================================================ */
+
+if (
+    typeof Razorpay ===
+    "undefined"
+) {
+
+    console.error(
+        "Razorpay Checkout SDK was not loaded."
+    );
+
+    setStatus(
+        "Payment service could not be loaded."
+    );
+
+    showError(
+        "Razorpay Checkout could not be loaded. " +
+        "Please check your internet connection and try again."
+    );
+
+    payButton.disabled = true;
+}
+
+
+/* ============================================================
+   CSRF
+   ============================================================ */
+
+function getCsrfToken() {
+
+    const input =
+        document.querySelector(
+            "#csrfForm input[name='csrfmiddlewaretoken']"
+        );
+
+
+    if (!input) {
+
+        throw new Error(
+            "CSRF token not found."
+        );
+    }
+
+
+    return input.value;
+}
+
+
+/* ============================================================
    CREATE RAZORPAY ORDER
    ============================================================ */
 
@@ -370,6 +436,7 @@ async function createRazorpayOrder() {
 
     const csrfToken =
         getCsrfToken();
+
 
     const response =
         await fetch(
@@ -389,19 +456,26 @@ async function createRazorpayOrder() {
                         "XMLHttpRequest"
                 },
 
-                body: JSON.stringify({})
+                body:
+                    JSON.stringify({})
             }
         );
 
 
     let data;
 
+
     try {
 
         data =
             await response.json();
 
-    } catch {
+    } catch (error) {
+
+        console.error(
+            "Create order JSON error:",
+            error
+        );
 
         throw new Error(
             "Invalid response from server."
@@ -409,14 +483,20 @@ async function createRazorpayOrder() {
     }
 
 
+    console.log(
+        "Razorpay create response:",
+        data
+    );
+
+
     if (
-        !response.ok
-        || !data.success
+        !response.ok ||
+        !data.success
     ) {
 
         throw new Error(
-            data.message
-            || "Unable to create Razorpay order."
+            data.message ||
+            "Unable to create Razorpay order."
         );
     }
 
@@ -455,21 +535,28 @@ async function verifyPayment(
                         "XMLHttpRequest"
                 },
 
-                body: JSON.stringify(
-                    razorpayResponse
-                )
+                body:
+                    JSON.stringify(
+                        razorpayResponse
+                    )
             }
         );
 
 
     let data;
 
+
     try {
 
         data =
             await response.json();
 
-    } catch {
+    } catch (error) {
+
+        console.error(
+            "Verify JSON error:",
+            error
+        );
 
         throw new Error(
             "Invalid verification response."
@@ -477,14 +564,20 @@ async function verifyPayment(
     }
 
 
+    console.log(
+        "Razorpay verify response:",
+        data
+    );
+
+
     if (
-        !response.ok
-        || !data.success
+        !response.ok ||
+        !data.success
     ) {
 
         throw new Error(
-            data.message
-            || "Payment verification failed."
+            data.message ||
+            "Payment verification failed."
         );
     }
 
@@ -494,7 +587,7 @@ async function verifyPayment(
 
 
 /* ============================================================
-   OPEN CHECKOUT
+   OPEN RAZORPAY CHECKOUT
    ============================================================ */
 
 async function openRazorpayCheckout() {
@@ -503,6 +596,7 @@ async function openRazorpayCheckout() {
 
     disablePaymentButton();
 
+
     setStatus(
         "Creating secure payment..."
     );
@@ -510,17 +604,27 @@ async function openRazorpayCheckout() {
 
     try {
 
+        /* ----------------------------------------------------
+           CREATE SERVER-SIDE ORDER
+           ---------------------------------------------------- */
+
         const orderData =
             await createRazorpayOrder();
 
 
-        /*
-         * Already paid.
-         */
+        console.log(
+            "Razorpay order data:",
+            orderData
+        );
+
+
+        /* ----------------------------------------------------
+           ALREADY PAID
+           ---------------------------------------------------- */
 
         if (
-            orderData.already_paid
-            && orderData.redirect_url
+            orderData.already_paid &&
+            orderData.redirect_url
         ) {
 
             window.location.href =
@@ -530,20 +634,38 @@ async function openRazorpayCheckout() {
         }
 
 
-        /*
-         * Validate data.
-         */
+        /* ----------------------------------------------------
+           VALIDATE RESPONSE
+           ---------------------------------------------------- */
 
         if (
-            !orderData.key
-            || !orderData.razorpay_order_id
-            || !orderData.amount
+            !orderData.key ||
+            !orderData.razorpay_order_id ||
+            !orderData.amount
         ) {
 
             throw new Error(
                 "Incomplete Razorpay order data."
             );
         }
+
+
+        console.log(
+            "Razorpay Key:",
+            orderData.key
+        );
+
+
+        console.log(
+            "Razorpay Order ID:",
+            orderData.razorpay_order_id
+        );
+
+
+        console.log(
+            "Amount in paise:",
+            orderData.amount
+        );
 
 
         setStatus(
@@ -557,34 +679,92 @@ async function openRazorpayCheckout() {
 
         const options = {
 
-                key: orderData.key,
+            key:
+                orderData.key,
 
-                amount: orderData.amount,
 
-                currency: orderData.currency || "INR",
+            amount:
+                orderData.amount,
 
-                name: orderData.name || "Vertex",
 
-                description:
-                    orderData.description || "Vertex Order",
+            currency:
+                orderData.currency ||
+                "INR",
 
-                order_id: orderData.razorpay_order_id,
 
-                prefill: {
-                    name: orderData.prefill?.name || "",
-                    email: orderData.prefill?.email || ""
-                },
+            name:
+                orderData.name ||
+                "Vertex",
 
-                theme: {
-                    color: "#6f42c1"
-                },
 
-                handler: async function(response) {
+            description:
+                orderData.description ||
+                "Vertex Order",
+
+
+            order_id:
+                orderData.razorpay_order_id,
+
+
+            prefill: {
+
+                name:
+                    orderData.prefill?.name ||
+                    "",
+
+                email:
+                    orderData.prefill?.email ||
+                    ""
+            },
+
+
+            theme: {
+
+                color:
+                    "#6f42c1"
+            },
+
+
+            /* =================================================
+               PAYMENT SUCCESS
+               ================================================= */
+
+            handler:
+                async function(response) {
 
                     console.log(
-                        "Razorpay success:",
+                        "========== RAZORPAY SUCCESS =========="
+                    );
+
+
+                    console.log(
+                        "Full success response:",
                         response
                     );
+
+
+                    console.log(
+                        "Payment ID:",
+                        response?.razorpay_payment_id
+                    );
+
+
+                    console.log(
+                        "Order ID:",
+                        response?.razorpay_order_id
+                    );
+
+
+                    console.log(
+                        "Signature:",
+                        response?.razorpay_signature
+                    );
+
+
+                    console.log(
+                        "========================================"
+                    );
+
 
                     if (
                         !response ||
@@ -594,26 +774,39 @@ async function openRazorpayCheckout() {
                     ) {
 
                         showError(
-                            "Razorpay returned an incomplete response."
+                            "Razorpay returned an incomplete payment response."
                         );
+
 
                         setStatus(
                             "Payment verification failed."
                         );
+
 
                         enablePaymentButton();
 
                         return;
                     }
 
+
                     setStatus(
                         "Payment received. Verifying..."
                     );
 
+
                     try {
 
                         const result =
-                            await verifyPayment(response);
+                            await verifyPayment(
+                                response
+                            );
+
+
+                        console.log(
+                            "Verification result:",
+                            result
+                        );
+
 
                         if (
                             result.success &&
@@ -624,11 +817,13 @@ async function openRazorpayCheckout() {
                                 "Payment verified. Redirecting..."
                             );
 
+
                             window.location.href =
                                 result.redirect_url;
 
                             return;
                         }
+
 
                         throw new Error(
                             result.message ||
@@ -642,79 +837,53 @@ async function openRazorpayCheckout() {
                             error
                         );
 
+
                         showError(
-                            error.message
+                            error.message ||
+                            "Payment verification failed."
                         );
+
 
                         setStatus(
                             "Payment verification failed."
                         );
 
+
                         enablePaymentButton();
                     }
                 },
 
-                modal: {
 
-                    ondismiss: function() {
+            /* =================================================
+               MODAL CLOSE
+               ================================================= */
+
+            modal: {
+
+                ondismiss:
+                    function() {
 
                         console.log(
                             "Razorpay checkout closed."
                         );
 
+
                         setStatus(
                             "Payment window closed."
                         );
 
+
                         showError(
-                            "Payment was not completed. You can try again."
+                            "Payment was not completed. " +
+                            "You can try again."
                         );
+
 
                         enablePaymentButton();
                     }
-                }
-            };
+            }
+        };
 
-
-            const razorpay =
-                new Razorpay(options);
-
-
-            razorpay.on(
-                "payment.failed",
-                function(response) {
-
-                    console.error(
-                        "Razorpay payment failed:",
-                        response
-                    );
-
-                    let message =
-                        "Payment failed. Please try again.";
-
-                    if (
-                        response &&
-                        response.error
-                    ) {
-
-                        message =
-                            response.error.description ||
-                            response.error.reason ||
-                            message;
-                    }
-
-                    showError(message);
-
-                    setStatus(
-                        "Payment failed."
-                    );
-
-                    enablePaymentButton();
-                }
-            );
-
-
-            razorpay.open();
 
         /* ====================================================
            CREATE RAZORPAY INSTANCE
@@ -724,84 +893,77 @@ async function openRazorpayCheckout() {
             new Razorpay(options);
 
 
+            /* ====================================================
+                PAYMENT FAILED
+                ==================================================== */
+
+                razorpay.on(
+                    "payment.failed",
+                    function(response) {
+
+                        console.error(
+                            "========== RAZORPAY PAYMENT FAILED =========="
+                        );
+
+                        console.error(
+                            "Full response:",
+                            response
+                        );
+
+                        console.error(
+                            "Error object:",
+                            response?.error
+                        );
+
+                        console.error(
+                            "Error code:",
+                            response?.error?.code
+                        );
+
+                        console.error(
+                            "Description:",
+                            response?.error?.description
+                        );
+
+                        console.error(
+                            "Source:",
+                            response?.error?.source
+                        );
+
+                        console.error(
+                            "Step:",
+                            response?.error?.step
+                        );
+
+                        console.error(
+                            "Reason:",
+                            response?.error?.reason
+                        );
+
+                        console.error(
+                            "Metadata:",
+                            response?.error?.metadata
+                        );
+
+                        console.error(
+                            "=============================================="
+                        );
+                        window.location.href =
+                            "{% url 'orders:order_failure' %}";
+                    }
+                );
+
         /* ====================================================
-           PAYMENT FAILED
+           OPEN CHECKOUT
            ==================================================== */
 
-        razorpay.on(
-            "payment.failed",
-            function(response) {
-
-                console.error(
-                    "Razorpay payment failed:",
-                    response
-                );
-
-
-                let message =
-                    "Payment failed. Please try again.";
-
-
-                if (
-                    response
-                    && response.error
-                ) {
-
-                    message =
-                        response.error.description
-                        || response.error.reason
-                        || message;
-                }
-
-
-                showError(message);
-
-
-                setStatus(
-                    "Payment failed."
-                );
-
-
-                enablePaymentButton();
-            }
+        console.log(
+            "Opening Razorpay Checkout..."
         );
 
 
-        /* ====================================================
-           MODAL CLOSED
-           ==================================================== */
-
-        options.modal = {
-
-            ondismiss:
-                function() {
-
-                    console.log(
-                        "Razorpay checkout closed."
-                    );
-
-
-                    setStatus(
-                        "Payment window closed."
-                    );
-
-
-                    showError(
-                        "Payment was not completed. "
-                        + "You can try again."
-                    );
-
-
-                    enablePaymentButton();
-                }
-        };
-
-
-        /* ====================================================
-           OPEN
-           ==================================================== */
-
         razorpay.open();
+
 
     } catch (error) {
 
@@ -812,8 +974,8 @@ async function openRazorpayCheckout() {
 
 
         showError(
-            error.message
-            || "Unable to start payment."
+            error.message ||
+            "Unable to start payment."
         );
 
 
@@ -828,7 +990,7 @@ async function openRazorpayCheckout() {
 
 
 /* ============================================================
-   BUTTONS
+   BUTTON EVENTS
    ============================================================ */
 
 payButton.addEventListener(

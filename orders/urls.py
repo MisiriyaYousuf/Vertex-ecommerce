@@ -12,6 +12,7 @@ urlpatterns = [
     path("razorpay-create/",views.razorpay_create,name="razorpay_create"),
     path("razorpay-verify/",views.razorpay_verify,name="razorpay_verify"),
     path("order-success/",views.order_success,name="order_success"),
+    path("order-failure/",views.order_failure,name="order_failure"),
     path("download-invoice/",views.download_invoice,name="download_invoice",),
     path("orders/",views.order_list,name="order_list"),
     path("view-order/", views.view_order, name="view_order"),

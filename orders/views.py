@@ -21,12 +21,13 @@ from reportlab.platypus import (
     Table,
     TableStyle,
 )
+import uuid
 from cart.models import Cart
 from products.models import Product, ProductVariant
 from users.models import Address
 from .forms import CheckoutForm
 from .models import Order, OrderItem
-from .razorpay_utils import get_razorpay_client
+from .razorpay_utils import (get_razorpay_client,create_razorpay_order)
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -1916,46 +1917,6 @@ def place_cod_order(request):
         "orders:order_success"
     )
 
-
-def create_razorpay_order(order):
-
-    client = get_razorpay_client()
-
-    amount_paise = int(
-        Decimal(order.total_amount) * Decimal("100")
-    )
-
-    if amount_paise <= 0:
-        raise ValueError(
-            "Order amount must be greater than zero."
-        )
-
-    receipt = (
-        f"ord_{order.id}_"
-        f"{uuid.uuid4().hex[:8]}"
-    )
-
-    razorpay_order = client.order.create({
-        "amount": amount_paise,
-        "currency": "INR",
-        "receipt": receipt,
-        "notes": {
-            "django_order_id": str(order.id),
-            "user_id": str(order.user_id),
-        },
-    })
-
-    order.razorpay_order_id = razorpay_order["id"]
-
-    order.save(
-        update_fields=[
-            "razorpay_order_id",
-            "updated_at",
-        ]
-    )
-
-    return razorpay_order
-
 @login_required
 @never_cache
 def razorpay_payment(request):
@@ -1972,6 +1933,7 @@ def razorpay_payment(request):
             "user_email": request.user.email,
         },
     )
+
 
 @login_required
 @require_POST
@@ -2015,6 +1977,7 @@ def razorpay_create(request):
     delivery_date = request.session.get(
         "checkout_delivery_date"
     )
+
     try:
 
         address = request.user.addresses.get(
@@ -2069,6 +2032,7 @@ def razorpay_create(request):
         quantity = cart_item.quantity
 
         if not product.is_active:
+
             return JsonResponse(
                 {
                     "success": False,
@@ -2080,6 +2044,7 @@ def razorpay_create(request):
             )
 
         if product.is_deleted:
+
             return JsonResponse(
                 {
                     "success": False,
@@ -2093,8 +2058,8 @@ def razorpay_create(request):
         if (
             not product.category
             or product.category.is_trashed
-            or not product.category.is_active
         ):
+
             return JsonResponse(
                 {
                     "success": False,
@@ -2138,7 +2103,9 @@ def razorpay_create(request):
                 return JsonResponse(
                     {
                         "success": False,
-                        "message": "Invalid product variant.",
+                        "message": (
+                            "Invalid product variant."
+                        ),
                     },
                     status=400,
                 )
@@ -2175,6 +2142,7 @@ def razorpay_create(request):
                 },
                 status=400,
             )
+
         (
             original_total,
             item_discount,
@@ -2187,11 +2155,26 @@ def razorpay_create(request):
             variant,
         )
 
-        original_total = Decimal(original_total)
-        item_discount = Decimal(item_discount)
-        final_total = Decimal(final_total)
-        unit_price = Decimal(unit_price)
-        unit_discount = Decimal(unit_discount)
+        original_total = Decimal(
+            original_total
+        )
+
+        item_discount = Decimal(
+            item_discount
+        )
+
+        final_total = Decimal(
+            final_total
+        )
+
+        unit_price = Decimal(
+            unit_price
+        )
+
+        unit_discount = Decimal(
+            unit_discount
+        )
+
         subtotal += original_total
         discount_amount += item_discount
 
@@ -2251,7 +2234,10 @@ def razorpay_create(request):
 
         if order and order.payment_status == "Paid":
 
-            request.session["last_order_id"] = order.id
+            request.session[
+                "last_order_id"
+            ] = order.id
+
             request.session.modified = True
 
             return JsonResponse(
@@ -2268,6 +2254,7 @@ def razorpay_create(request):
             order
             and order.payment_status != "Pending"
         ):
+
             order = None
 
     if order is None:
@@ -2279,7 +2266,7 @@ def razorpay_create(request):
             payment_status="Pending",
             status="Pending",
             subtotal=subtotal,
-            discount_amount=discount_amount,
+            discount=discount_amount,
             tax=tax,
             shipping_charge=shipping_charge,
             total_amount=total_amount,
@@ -2290,7 +2277,7 @@ def razorpay_create(request):
 
         order.address = address
         order.subtotal = subtotal
-        order.discount_amount = discount_amount
+        order.discount = discount_amount
         order.tax = tax
         order.shipping_charge = shipping_charge
         order.total_amount = total_amount
@@ -2302,7 +2289,7 @@ def razorpay_create(request):
             update_fields=[
                 "address",
                 "subtotal",
-                "discount_amount",
+                "discount",
                 "tax",
                 "shipping_charge",
                 "total_amount",
@@ -2314,6 +2301,7 @@ def razorpay_create(request):
         )
 
         order.items.all().delete()
+
     order_items = []
 
     for item in validated_items:
@@ -2349,11 +2337,29 @@ def razorpay_create(request):
 
     except Exception as exc:
 
+        import traceback
+
+        print(
+            "\n========== RAZORPAY CREATE ERROR =========="
+        )
+
+        print(
+            "Exception:",
+            repr(exc)
+        )
+
+        traceback.print_exc()
+
+        print(
+            "===========================================\n"
+        )
+
         return JsonResponse(
             {
                 "success": False,
                 "message": (
-                    "Unable to create Razorpay order."
+                    "Unable to create Razorpay order: "
+                    f"{str(exc)}"
                 ),
             },
             status=500,
@@ -2364,31 +2370,43 @@ def razorpay_create(request):
     ] = order.id
 
     request.session.modified = True
+
     return JsonResponse(
         {
             "success": True,
+
             "django_order_id": order.id,
-            "razorpay_order_id": (
-                razorpay_order["id"]
-            ),
+
+            "razorpay_order_id":
+                razorpay_order["id"],
+
             "amount": int(
-                total_amount * Decimal("100")
+                total_amount
+                * Decimal("100")
             ),
+
             "currency": "INR",
-            "key": settings.RAZORPAY_KEY_ID,
-            "name": "Vertex",
-            "description": (
-                f"Payment for Order #{order.id}"
-            ),
+
+            "key":
+                settings.RAZORPAY_KEY_ID,
+
+            "name":
+                "Vertex",
+
+            "description":
+                f"Payment for Order #{order.id}",
+
             "prefill": {
                 "name": (
                     request.user.get_full_name()
                     or request.user.username
                 ),
-                "email": request.user.email,
+                "email":
+                    request.user.email,
             },
         }
     )
+
 
 @login_required
 @require_POST
@@ -2511,19 +2529,23 @@ def razorpay_verify(request):
 
         client.utility.verify_payment_signature(
             {
-                "razorpay_order_id": (
-                    razorpay_order_id
-                ),
-                "razorpay_payment_id": (
-                    razorpay_payment_id
-                ),
-                "razorpay_signature": (
-                    razorpay_signature
-                ),
+                "razorpay_order_id":
+                    razorpay_order_id,
+
+                "razorpay_payment_id":
+                    razorpay_payment_id,
+
+                "razorpay_signature":
+                    razorpay_signature,
             }
         )
 
-    except Exception:
+    except Exception as exc:
+
+        print(
+            "Razorpay signature verification error:",
+            repr(exc)
+        )
 
         return JsonResponse(
             {
@@ -2541,7 +2563,12 @@ def razorpay_verify(request):
             razorpay_payment_id
         )
 
-    except Exception:
+    except Exception as exc:
+
+        print(
+            "Razorpay payment fetch error:",
+            repr(exc)
+        )
 
         return JsonResponse(
             {
@@ -2631,7 +2658,12 @@ def razorpay_verify(request):
             status=400,
         )
 
-    except Exception:
+    except Exception as exc:
+
+        print(
+            "Finalize paid order error:",
+            repr(exc)
+        )
 
         return JsonResponse(
             {
@@ -2669,6 +2701,7 @@ def razorpay_verify(request):
     ] = order.id
 
     request.session.modified = True
+
     return JsonResponse(
         {
             "success": True,
@@ -2904,6 +2937,60 @@ def order_success(request):
         },
     )
 
+@login_required
+@never_cache
+def order_failure(request):
+
+    order_id = request.session.get(
+        "razorpay_django_order_id"
+    )
+
+    if not order_id:
+        return redirect(
+            "orders:order_list"
+        )
+
+    order = (
+        Order.objects
+        .filter(
+            id=order_id,
+            user=request.user,
+        )
+        .select_related("address")
+        .prefetch_related(
+            "items__product__images",
+            "items__variant__images",
+        )
+        .first()
+    )
+
+    if not order:
+
+        messages.error(
+            request,
+            "Order not found."
+        )
+
+        return redirect(
+            "orders:order_list"
+        )
+
+    for item in order.items.all():
+
+        item.purchase_label = get_purchase_label(
+            item.product,
+            item.variant,
+        )
+
+        item.variant_label = item.purchase_label
+
+    return render(
+        request,
+        "order_failure.html",
+        {
+            "order": order,
+        },
+    )
 
 # ============================================================
 # DOWNLOAD INVOICE
