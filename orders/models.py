@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from users.models import Address
 from products.models import Product,ProductVariant
 
-
 class Order(models.Model):
 
     PAYMENT_METHOD_CHOICES = [
@@ -183,4 +182,65 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"Order #{self.order.id} - {self.product_name}"
 
+
+class Coupon(models.Model):
+
+    DISCOUNT_TYPE_CHOICES = [
+        ("PERCENTAGE", "Percentage"),
+        ("FIXED", "Fixed Amount"),
+    ]
+
+    code = models.CharField(
+        max_length=50,
+        unique=True
+    )
+
+    discount_type = models.CharField(
+        max_length=20,
+        choices=DISCOUNT_TYPE_CHOICES
+    )
+
+    discount_value = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    minimum_purchase = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
+    maximum_discount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    start_date = models.DateField()
+
+    end_date = models.DateField()
+
+    usage_limit = models.PositiveIntegerField(
+        default=1
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.code
    

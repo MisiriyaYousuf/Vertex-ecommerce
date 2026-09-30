@@ -1,7 +1,6 @@
 from django import forms
 from users.models import Address
 
-
 class CheckoutForm(forms.Form):
 
     address = forms.ModelChoiceField(
