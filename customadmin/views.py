@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from users.models import UserProfile
 from .forms import CategoryForm
 from django.db import transaction
-from products.models import (Product,ProductImage,ProductVariant,ProductVariantImage,)
+from products.models import (Product,ProductImage,ProductVariant,ProductVariantImage,CouponForm)
 from .forms import ProductForm,ProductVariantForm
 from django.http import JsonResponse
 from orders.models import Order, OrderItem
@@ -18,6 +18,7 @@ from django.db.models import Q,F,Sum,Value,Prefetch,Count
 from django.db.models.functions import Coalesce
 from django.db.models import Sum
 from orders.views import update_status
+from orders.models import Coupon
 
 @login_required
 @never_cache
@@ -2784,6 +2785,212 @@ def inventory_management(request):
         "inventory_management.html",
         context,
     )
+
+@never_cache
+@login_required
+def coupon_management(request):
+
+    if not request.user.is_superuser:
+        return redirect("users:home")
+
+    search = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    coupons = Coupon.objects.all()
+
+    if search:
+
+        coupons = coupons.filter(
+            Q(code__icontains=search)
+        )
+
+    coupons = coupons.order_by(
+        "-created_at"
+    )
+
+    if request.method == "POST":
+
+        form = CouponForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            coupon = form.save()
+
+            messages.success(
+                request,
+                f'Coupon "{coupon.code}" created successfully.'
+            )
+
+            return redirect(
+                "customadmin:coupon_management"
+            )
+
+    else:
+
+        form = CouponForm()
+
+    return render(
+        request,
+        "coupon_management.html",
+        {
+            "coupons": coupons,
+            "form": form,
+            "search": search,
+        }
+    )
+
+@never_cache
+@login_required
+def edit_coupon(request):
+
+    if not request.user.is_superuser:
+        return redirect("users:home")
+
+    if request.method != "POST":
+
+        return HttpResponseNotAllowed(
+            ["POST"]
+        )
+
+    coupon_id = request.POST.get(
+        "coupon_id"
+    )
+
+    if not coupon_id:
+
+        messages.error(
+            request,
+            "Coupon ID is required."
+        )
+
+        return redirect(
+            "customadmin:coupon_management"
+        )
+
+    coupon = Coupon.objects.filter(
+        id=coupon_id
+    ).first()
+
+    if not coupon:
+
+        messages.error(
+            request,
+            "Coupon not found."
+        )
+
+        return redirect(
+            "customadmin:coupon_management"
+        )
+
+    form = CouponForm(
+        request.POST,
+        instance=coupon
+    )
+
+    if form.is_valid():
+
+        coupon = form.save()
+
+        messages.success(
+            request,
+            f'Coupon "{coupon.code}" updated successfully.'
+        )
+
+        return redirect(
+            "customadmin:coupon_management"
+        )
+
+    coupons = Coupon.objects.all().order_by(
+        "-created_at"
+    )
+
+    search = request.GET.get(
+        "search",
+        ""
+    ).strip()
+
+    if search:
+
+        coupons = coupons.filter(
+            code__icontains=search
+        )
+
+    return render(
+        request,
+        "coupon_management.html",
+        {
+            "coupons": coupons,
+            "form": form,
+            "search": search,
+            "edit_coupon_id": coupon.id,
+            "coupon": coupon,
+        }
+    )
+
+@never_cache
+@login_required
+def delete_coupon(request):
+
+    if not request.user.is_superuser:
+
+        return redirect(
+            "users:home"
+        )
+
+    if request.method != "POST":
+
+        return HttpResponseNotAllowed(
+            ["POST"]
+        )
+
+    coupon_id = request.POST.get(
+        "coupon_id"
+    )
+
+    if not coupon_id:
+
+        messages.error(
+            request,
+            "Coupon ID is required."
+        )
+
+        return redirect(
+            "customadmin:coupon_management"
+        )
+
+    coupon = Coupon.objects.filter(
+        id=coupon_id
+    ).first()
+
+    if not coupon:
+
+        messages.error(
+            request,
+            "Coupon not found."
+        )
+
+        return redirect(
+            "customadmin:coupon_management"
+        )
+
+    code = coupon.code
+
+    coupon.delete()
+
+    messages.success(
+        request,
+        f'Coupon "{code}" deleted successfully.'
+    )
+
+    return redirect(
+        "customadmin:coupon_management"
+    )
+
+
 
 @never_cache
 @login_required
