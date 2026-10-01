@@ -14,13 +14,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer,
-    Table,
-    TableStyle,
-)
+from reportlab.platypus import ( SimpleDocTemplate,Paragraph,Spacer,Table,TableStyle)
 from cart.models import Cart
 from products.models import Product, ProductVariant
 from users.models import Address
@@ -31,6 +25,9 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from razorpay.errors import SignatureVerificationError
+from decimal import Decimal
+from django.utils import timezone
+from orders.models import Coupon,CouponUsage
 
 
 MAX_CART_QUANTITY = 5
@@ -122,11 +119,6 @@ def update_status(order):
         ]
     )
 
-
-# ============================================================
-# PURCHASE LABEL
-# ============================================================
-
 def get_purchase_label(product, variant=None):
 
     source = variant if variant is not None else product
@@ -152,11 +144,6 @@ def get_purchase_label(product, variant=None):
         return f"Variant #{variant.id}"
 
     return ""
-
-
-# ============================================================
-# PRODUCT PRICING
-# ============================================================
 
 def get_product_pricing(product, quantity, variant=None):
 
@@ -198,9 +185,82 @@ def get_product_pricing(product, quantity, variant=None):
     )
 
 
-# ============================================================
-# CHECKOUT
-# ============================================================
+def calculate_coupon_discount(coupon, amount):
+    amount = Decimal(amount)
+
+    if coupon.discount_type == "PERCENTAGE":
+
+        coupon_discount = (
+            amount
+            * coupon.discount_value
+            / Decimal("100")
+        )
+
+        if coupon.maximum_discount:
+            coupon_discount = min(
+                coupon_discount,
+                coupon.maximum_discount
+            )
+
+    else:
+        coupon_discount = coupon.discount_value
+    coupon_discount = min(
+        coupon_discount,
+        amount
+    )
+
+    return coupon_discount.quantize(
+        Decimal("0.01")
+    )
+
+def get_applied_coupon(request):
+    coupon_id = request.session.get(
+        "checkout_coupon_id"
+    )
+
+    if not coupon_id:
+        return None
+
+    coupon = (
+        Coupon.objects
+        .filter(
+            id=coupon_id,
+            is_active=True,
+        )
+        .first()
+    )
+
+    if not coupon:
+        request.session.pop(
+            "checkout_coupon_id",
+            None
+        )
+        request.session.modified = True
+        return None
+
+    today = timezone.localdate()
+
+    if not (
+        coupon.start_date
+        <= today
+        <= coupon.end_date
+    ):
+        request.session.pop(
+            "checkout_coupon_id",
+            None
+        )
+        request.session.modified = True
+        return None
+
+    return coupon
+
+def coupon_usage_limit_reached(coupon):
+    if coupon.usage_limit is None:
+        return False
+
+    return CouponUsage.objects.filter(
+        coupon=coupon
+    ).count() >= coupon.usage_limit
 
 @login_required
 @never_cache
@@ -413,8 +473,52 @@ def checkout(request):
             item.variant,
         )
 
-        subtotal += original_total
-        discount_amount += item_discount
+        subtotal += Decimal(
+            original_total
+        )
+
+        discount_amount += Decimal(
+            item_discount
+        )
+
+    coupon = get_applied_coupon(request)
+
+    coupon_discount = Decimal("0.00")
+
+    if coupon:
+
+        amount_after_product_discount = (
+            subtotal
+            - discount_amount
+        )
+
+        if (
+            amount_after_product_discount
+            >= coupon.minimum_purchase
+        ):
+
+            coupon_discount = (
+                calculate_coupon_discount(
+                    coupon,
+                    amount_after_product_discount,
+                )
+            )
+
+        else:
+            request.session.pop(
+                "checkout_coupon_id",
+                None
+            )
+
+            request.session.modified = True
+
+            coupon = None
+
+            messages.warning(
+                request,
+                "Coupon removed because your order no longer meets the minimum purchase amount."
+            )
+
 
     tax = Decimal("0.00")
     shipping_charge = Decimal("0.00")
@@ -422,10 +526,10 @@ def checkout(request):
     total_amount = (
         subtotal
         - discount_amount
+        - coupon_discount
         + tax
         + shipping_charge
     )
-
     total_items = sum(
         item.quantity
         for item in cart_items
@@ -518,6 +622,10 @@ def checkout(request):
         "subtotal": subtotal,
 
         "discount_amount": discount_amount,
+
+        "coupon": coupon,
+
+        "coupon_discount": coupon_discount,
 
         "tax": tax,
 
@@ -1295,12 +1403,52 @@ def order_detail(request, order_id=None):
         discount_amount += item_discount
         total_items += item.quantity
 
+    coupon = get_applied_coupon(request)
+    coupon_discount = Decimal("0.00")
+
+    if coupon:
+
+        amount_after_product_discount = (
+            subtotal
+            - discount_amount
+        )
+
+        if (
+            amount_after_product_discount
+            >= coupon.minimum_purchase
+        ):
+
+            coupon_discount = (
+                calculate_coupon_discount(
+                    coupon,
+                    amount_after_product_discount,
+                )
+            )
+
+        else:
+
+            request.session.pop(
+                "checkout_coupon_id",
+                None
+            )
+
+            request.session.modified = True
+
+            coupon = None
+
+            messages.warning(
+                request,
+                "Coupon removed because your order no longer meets the minimum purchase amount."
+            )
+
+
     tax = Decimal("0.00")
     shipping_charge = Decimal("0.00")
 
     grand_total = (
         subtotal
         - discount_amount
+        - coupon_discount
         + tax
         + shipping_charge
     )
@@ -1329,6 +1477,10 @@ def order_detail(request, order_id=None):
         "subtotal": subtotal,
 
         "discount_amount": discount_amount,
+
+        "coupon": coupon,
+
+        "coupon_discount": coupon_discount,
 
         "tax": tax,
 
@@ -1772,10 +1924,51 @@ def place_cod_order(request):
     tax = Decimal("0.00")
 
     shipping_charge = Decimal("0.00")
+    
+    coupon = get_applied_coupon(request)
+
+    coupon_discount = Decimal("0.00")
+
+    if coupon:
+
+        amount_after_product_discount = (
+            subtotal
+            - discount_amount
+        )
+
+        if (
+            amount_after_product_discount
+            < coupon.minimum_purchase
+        ):
+
+            messages.error(
+                request,
+                "The applied coupon is no longer valid for this order."
+            )
+
+            return redirect(
+                "orders:checkout"
+            )
+        coupon_discount = calculate_coupon_discount(
+            coupon,
+            amount_after_product_discount,
+        )
+    
+    if coupon:
+        if coupon_usage_limit_reached(coupon):
+
+            messages.error(
+                request,
+                "This coupon is no longer available because "
+                "its usage limit has been reached."
+            )
+
+            return redirect("orders:checkout")
 
     total_amount = (
         subtotal
         - discount_amount
+        - coupon_discount
         + tax
         + shipping_charge
     )
@@ -1794,7 +1987,10 @@ def place_cod_order(request):
 
         subtotal=subtotal,
 
-        discount=discount_amount,
+        discount=(
+            discount_amount
+            + coupon_discount
+        ),
 
         tax=tax,
 
@@ -1879,6 +2075,13 @@ def place_cod_order(request):
                 ]
             )
 
+    if coupon:
+        CouponUsage.objects.create(
+            coupon=coupon,
+            user=request.user,
+            order=order,
+        )
+
     update_status(order)
 
     Cart.objects.filter(
@@ -1904,6 +2107,11 @@ def place_cod_order(request):
         None,
     )
 
+    request.session.pop(
+    "checkout_coupon_id",
+    None,
+    
+    )
     request.session.modified = True
     return redirect(
         "orders:order_success"
@@ -2133,10 +2341,41 @@ def razorpay_create(request):
 
     tax = Decimal("0")
     shipping_charge = Decimal("0")
+    coupon = get_applied_coupon(request)
+    coupon_discount = Decimal("0.00")
+
+    if coupon:
+
+        amount_after_product_discount = (
+            subtotal
+            - discount_amount
+        )
+
+        if (
+            amount_after_product_discount
+            < coupon.minimum_purchase
+        ):
+
+            return JsonResponse(
+                {
+                    "success": False,
+                    "message": (
+                        "The applied coupon is no longer "
+                        "valid for this order."
+                    ),
+                },
+                status=400,
+            )
+
+        coupon_discount = calculate_coupon_discount(
+            coupon,
+            amount_after_product_discount,
+        )
 
     total_amount = (
         subtotal
         - discount_amount
+        - coupon_discount
         + tax
         + shipping_charge
     )
@@ -2231,7 +2470,10 @@ def razorpay_create(request):
             payment_status="Pending",
             status="Pending",
             subtotal=subtotal,
-            discount=discount_amount,
+            discount=(
+                discount_amount
+                + coupon_discount
+            ),
             tax=tax,
             shipping_charge=shipping_charge,
             delivery_date=delivery_date,
@@ -2520,12 +2762,20 @@ def razorpay_verify(request):
             "success": False,
             "message": str(exc),
         }, status=400)
+    
+    coupon = get_applied_coupon(request)
+
+    if coupon:
+        CouponUsage.objects.create(
+            coupon=coupon,
+            user=request.user,
+            order=order,
+        )
 
     request.session.pop(
         "checkout_address_id",
         None,
     )
-
     request.session.pop(
         "checkout_payment_method",
         None,
@@ -2538,6 +2788,11 @@ def razorpay_verify(request):
 
     request.session.pop(
         "razorpay_django_order_id",
+        None,
+    )
+
+    request.session.pop(
+        "checkout_coupon_id",
         None,
     )
 
@@ -3305,11 +3560,6 @@ def order_list(request):
         context,
     )
 
-
-# ============================================================
-# VIEW ORDER
-# ============================================================
-
 @login_required
 @never_cache
 def view_order(request):
@@ -3362,15 +3612,7 @@ def view_order(request):
             "orders:order_list"
         )
 
-    # ========================================================
-    # PREPARE ORDER ITEMS
-    # ========================================================
-
     for item in order.items.all():
-
-        # ----------------------------------------------------
-        # ITEM STATUS
-        # ----------------------------------------------------
 
         if item.status == "Returned":
 
@@ -3386,17 +3628,13 @@ def view_order(request):
                 item.status or order.status
             )
 
-        # ----------------------------------------------------
-        # VARIANT PRODUCT
-        # ----------------------------------------------------
-
         if item.variant_id:
 
             variant_images = list(
                 item.variant.images.all()
             )
 
-            # Find variant main image
+
             main_variant_image = next(
                 (
                     image
@@ -3405,10 +3643,6 @@ def view_order(request):
                 ),
                 None
             )
-
-            # ------------------------------------------------
-            # MAIN DISPLAY IMAGE
-            # ------------------------------------------------
 
             if main_variant_image:
 
@@ -3444,10 +3678,6 @@ def view_order(request):
 
                     item.main_display_image = None
 
-            # ------------------------------------------------
-            # DISPLAY IMAGES
-            # ------------------------------------------------
-
             if variant_images:
 
                 item.display_images = (
@@ -3460,10 +3690,6 @@ def view_order(request):
                     item.product.images.all()
                 )
 
-            # ------------------------------------------------
-            # VARIANT DETAILS
-            # ------------------------------------------------
-
             item.display_size = (
                 item.variant.size
             )
@@ -3471,10 +3697,6 @@ def view_order(request):
             item.display_color = (
                 item.variant.color
             )
-
-        # ----------------------------------------------------
-        # BASE PRODUCT
-        # ----------------------------------------------------
 
         else:
 
@@ -3485,10 +3707,6 @@ def view_order(request):
             item.display_images = (
                 product_images
             )
-
-            # ------------------------------------------------
-            # MAIN DISPLAY IMAGE
-            # ------------------------------------------------
 
             if item.product.main_image:
 
@@ -3506,10 +3724,6 @@ def view_order(request):
 
                 item.main_display_image = None
 
-            # ------------------------------------------------
-            # BASE PRODUCT DETAILS
-            # ------------------------------------------------
-
             item.display_size = (
                 item.product.size
             )
@@ -3518,17 +3732,9 @@ def view_order(request):
                 item.product.color
             )
 
-        # ----------------------------------------------------
-        # ORIGINAL PRICE
-        # ----------------------------------------------------
-
         item.original_price = (
             item.price + item.discount
         )
-
-    # ========================================================
-    # CANCELLATION
-    # ========================================================
 
     cancellable_items = (
         order.items.exclude(
@@ -3550,10 +3756,6 @@ def view_order(request):
         and cancellable_items.exists()
     )
 
-    # ========================================================
-    # RETURN
-    # ========================================================
-
     returnable_items = (
         order.items.exclude(
             status__in=[
@@ -3568,10 +3770,6 @@ def view_order(request):
         and returnable_items.exists()
     )
 
-    # ========================================================
-    # CONTEXT
-    # ========================================================
-
     context = {
         "order": order,
         "can_cancel_order": can_cancel_order,
@@ -3583,10 +3781,6 @@ def view_order(request):
         "view_order.html",
         context,
     )
-
-# ============================================================
-# CANCEL ORDER ITEMS
-# ============================================================
 
 @login_required
 @never_cache
@@ -3689,10 +3883,6 @@ def cancel_order(request):
             }
         )
 
-    # ========================================================
-    # ATOMIC CANCELLATION
-    # ========================================================
-
     with transaction.atomic():
 
         locked_order = (
@@ -3765,10 +3955,6 @@ def cancel_order(request):
 
         for item in items:
 
-            # ------------------------------------------------
-            # Restore variant stock
-            # ------------------------------------------------
-
             if item.variant:
 
                 variant = (
@@ -3787,10 +3973,6 @@ def cancel_order(request):
                         "updated_at",
                     ]
                 )
-
-            # ------------------------------------------------
-            # Restore base product stock
-            # ------------------------------------------------
 
             else:
 
@@ -3811,10 +3993,6 @@ def cancel_order(request):
                     ]
                 )
 
-            # ------------------------------------------------
-            # Mark item as cancelled
-            # ------------------------------------------------
-
             item.cancellation_reason = reason
             item.status = "Cancelled"
 
@@ -3825,10 +4003,6 @@ def cancel_order(request):
                 ]
             )
 
-        # ----------------------------------------------------
-        # Automatically calculate order status
-        # ----------------------------------------------------
-
         update_status(locked_order)
 
     request.session[
@@ -3838,11 +4012,6 @@ def cancel_order(request):
     return redirect(
         "orders:cancellation_success"
     )
-
-
-# ============================================================
-# CANCEL SUCCESS
-# ============================================================
 
 @login_required
 @never_cache
@@ -3905,11 +4074,6 @@ def cancellation_success(request):
         },
     )
 
-
-# ============================================================
-# RETURN ORDER ITEMS
-# ============================================================
-
 @login_required
 @never_cache
 @transaction.atomic
@@ -3965,10 +4129,6 @@ def return_order(request):
             "orders:order_list"
         )
 
-    # ========================================================
-    # ONLY DELIVERED ORDER CAN HAVE RETURNS
-    # ========================================================
-
     if order.status != "Delivered":
 
         messages.error(
@@ -4003,10 +4163,6 @@ def return_order(request):
         return redirect(
             "orders:order_list"
         )
-
-    # ========================================================
-    # PREPARE DISPLAY IMAGES
-    # ========================================================
 
     for item in returnable_items:
 
@@ -4131,10 +4287,6 @@ def return_order(request):
         if not item:
             continue
 
-        # ----------------------------------------------------
-        # Restore variant stock
-        # ----------------------------------------------------
-
         if item.variant_id:
 
             variant = (
@@ -4158,10 +4310,6 @@ def return_order(request):
                     ]
                 )
 
-        # ----------------------------------------------------
-        # Restore base product stock
-        # ----------------------------------------------------
-
         else:
 
             product = (
@@ -4183,10 +4331,6 @@ def return_order(request):
                         "updated_at",
                     ]
                 )
-
-        # ----------------------------------------------------
-        # Mark item as returned
-        # ----------------------------------------------------
 
         item.return_reason = return_reason
         item.status = "Returned"
@@ -4216,10 +4360,6 @@ def return_order(request):
             },
         )
 
-    # ========================================================
-    # AUTOMATICALLY CALCULATE ORDER STATUS
-    # ========================================================
-
     update_status(order)
 
     request.session[
@@ -4234,11 +4374,6 @@ def return_order(request):
     return redirect(
         "orders:return_success"
     )
-
-
-# ============================================================
-# RETURN SUCCESS
-# ============================================================
 
 @login_required
 @never_cache
@@ -4291,3 +4426,236 @@ def return_success(request):
             "order": order,
         },
     )
+
+@login_required
+@require_POST
+@never_cache
+def apply_coupon(request):
+
+    coupon_code = request.POST.get(
+        "coupon_code",
+        ""
+    ).strip().upper()
+
+    if not coupon_code:
+
+        messages.error(
+            request,
+            "Please enter a coupon code."
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+
+    existing_coupon_id = request.session.get(
+        "checkout_coupon_id"
+    )
+
+    if existing_coupon_id:
+
+        messages.warning(
+            request,
+            "A coupon is already applied to this checkout."
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+
+    coupon = (
+        Coupon.objects
+        .filter(
+            code=coupon_code,
+            is_active=True,
+        )
+        .first()
+    )
+
+    if not coupon:
+
+        messages.error(
+            request,
+            "Invalid coupon code."
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+    
+    if CouponUsage.objects.filter(
+        coupon=coupon,
+        user=request.user).exists():
+        messages.error(
+            request,
+            "You have already used this coupon."
+        )
+        return redirect("orders:checkout")
+    
+    if coupon_usage_limit_reached(coupon):
+        messages.error(
+            request,
+            "This coupon has reached its usage limit."
+        )
+        return redirect("orders:checkout")
+    
+    today = timezone.localdate()
+
+    if today < coupon.start_date:
+
+        messages.error(
+            request,
+            "This coupon is not active yet."
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+
+    if today > coupon.end_date:
+
+        messages.error(
+            request,
+            "This coupon has expired."
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+
+    cart_items = (
+        Cart.objects
+        .filter(
+            user=request.user
+        )
+        .select_related(
+            "product",
+            "variant",
+        )
+    )
+
+    if not cart_items.exists():
+
+        messages.error(
+            request,
+            "Your cart is empty."
+        )
+
+        return redirect(
+            "cart:cart"
+        )
+
+    subtotal = Decimal("0.00")
+    product_discount = Decimal("0.00")
+
+    for item in cart_items:
+
+        if not item.product:
+            continue
+
+        (
+            original_total,
+            item_discount,
+            item_total,
+            unit_price,
+            unit_discount,
+        ) = get_product_pricing(
+            item.product,
+            item.quantity,
+            item.variant,
+        )
+
+        subtotal += Decimal(
+            original_total
+        )
+
+        product_discount += Decimal(
+            item_discount
+        )
+
+    amount_after_product_discount = (
+        subtotal
+        - product_discount
+    )
+
+    if (
+        amount_after_product_discount
+        < coupon.minimum_purchase
+    ):
+
+        messages.error(
+            request,
+            (
+                f"Minimum purchase of "
+                f"₹{coupon.minimum_purchase} "
+                f"is required to use this coupon."
+            )
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+
+    coupon_discount = calculate_coupon_discount(
+        coupon,
+        amount_after_product_discount,
+    )
+
+    if coupon_discount <= Decimal("0.00"):
+
+        messages.error(
+            request,
+            "This coupon cannot be applied to your order."
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+
+    request.session[
+        "checkout_coupon_id"
+    ] = coupon.id
+
+    request.session.modified = True
+
+    messages.success(
+        request,
+        f"Coupon {coupon.code} applied successfully."
+    )
+
+    return redirect(
+        "orders:checkout"
+    )
+
+@login_required
+@require_POST
+@never_cache
+def remove_coupon(request):
+
+    if "checkout_coupon_id" not in request.session:
+
+        messages.warning(
+            request,
+            "No coupon is currently applied."
+        )
+
+        return redirect(
+            "orders:checkout"
+        )
+
+    request.session.pop(
+        "checkout_coupon_id",
+        None
+    )
+
+    request.session.modified = True
+
+    messages.success(
+        request,
+        "Coupon removed successfully."
+    )
+
+    return redirect(
+        "orders:checkout"
+    )
+

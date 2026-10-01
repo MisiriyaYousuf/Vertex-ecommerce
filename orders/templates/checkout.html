@@ -790,6 +790,78 @@ Checkout
         text-decoration: line-through;
     }
 
+    .coupon-section {
+        margin: 18px 0;
+        padding: 16px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .coupon-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .coupon-form {
+        display: flex;
+        gap: 8px;
+    }
+
+    .coupon-form input {
+        flex: 1;
+        min-width: 0;
+        padding: 10px 12px;
+        border-radius: 9px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.06);
+        color: inherit;
+        outline: none;
+    }
+
+    .coupon-form button,
+    .remove-coupon-btn {
+        border: none;
+        border-radius: 9px;
+        padding: 9px 15px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .applied-coupon {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .coupon-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .coupon-code {
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .coupon-applied {
+        font-size: 12px;
+        opacity: 0.7;
+    }
+
+    .remove-coupon-btn {
+        background: transparent;
+        border: 1px solid rgba(255, 100, 100, 0.4);
+    }
+
+    .coupon-discount-row {
+        font-weight: 600;
+    }
+
+
 
     /* =========================================================
        FORM ERRORS
@@ -1641,80 +1713,118 @@ Checkout
 
                     </div>
 
+                    <div class="coupon-section">
 
-                    <!-- SUBTOTAL -->
+                            <div class="coupon-title">
+                                <i class="fas fa-tag"></i>
+                                Have a coupon?
+                            </div>
 
-                    <div class="summary-row">
+                            {% if coupon %}
 
-                        <span>
-                            Subtotal
-                        </span>
+                                <div class="applied-coupon">
 
-                        <span>
-                            ₹{{ subtotal|floatformat:2 }}
-                        </span>
+                                    <div class="coupon-info">
 
-                    </div>
+                                        <span class="coupon-code">
+                                            {{ coupon.code }}
+                                        </span>
 
+                                        <span class="coupon-applied">
+                                            Coupon applied
+                                        </span>
 
-                    <!-- DISCOUNT -->
+                                    </div>
 
-                    {% if discount_amount > 0 %}
+                                    <form
+                                        method="POST"
+                                        action="{% url 'orders:remove_coupon' %}"
+                                    >
+                                        {% csrf_token %}
 
-                        <div class="summary-row discount-row">
+                                        <button
+                                            type="submit"
+                                            class="remove-coupon-btn"
+                                        >
+                                            Remove
+                                        </button>
 
-                            <span>
-                                Discount
-                            </span>
+                                    </form>
 
-                            <span>
-                                - ₹{{ discount_amount|floatformat:2 }}
-                            </span>
+                                </div>
+
+                            {% else %}
+
+                                <form
+                                    method="POST"
+                                    action="{% url 'orders:apply_coupon' %}"
+                                    class="coupon-form"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <input
+                                        type="text"
+                                        name="coupon_code"
+                                        placeholder="Enter coupon code"
+                                        maxlength="50"
+                                        required
+                                    >
+
+                                    <button type="submit">
+                                        Apply
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
 
                         </div>
 
-                    {% endif %}
+                        <div class="price-row">
+                            <span>Subtotal</span>
+                            <span>₹{{ subtotal|floatformat:2 }}</span>
+                        </div>
 
-
-                    <!-- TAX -->
-
-                    <div class="summary-row">
-
-                        <span>
-                            Tax
-                        </span>
-
-                        <span>
-                            ₹{{ tax|floatformat:2 }}
-                        </span>
-
-                    </div>
-
-
-                    <!-- SHIPPING -->
-
-                    <div class="summary-row">
-
-                        <span>
-                            Shipping
-                        </span>
-
-                        {% if shipping_charge == 0 %}
-
-                            <span class="free-delivery">
-                                FREE
+                        <div class="price-row">
+                            <span>Product Discount</span>
+                            <span>
+                                - ₹{{ discount_amount|floatformat:2 }}
                             </span>
+                        </div>
 
-                        {% else %}
+                        {% if coupon_discount > 0 %}
+
+                        <div class="price-row coupon-discount-row">
+                            <span>
+                                Coupon Discount
+                                {% if coupon %}
+                                    ({{ coupon.code }})
+                                {% endif %}
+                            </span>
 
                             <span>
-                                ₹{{ shipping_charge|floatformat:2 }}
+                                - ₹{{ coupon_discount|floatformat:2 }}
                             </span>
+                        </div>
 
                         {% endif %}
 
-                    </div>
+                        <div class="price-row">
+                            <span>Tax</span>
+                            <span>₹{{ tax|floatformat:2 }}</span>
+                        </div>
 
+                        <div class="price-row">
+                            <span>Shipping</span>
+                            <span>
+                                {% if shipping_charge > 0 %}
+                                    ₹{{ shipping_charge|floatformat:2 }}
+                                {% else %}
+                                    Free
+                                {% endif %}
+                            </span>
+                        </div>
 
                     <!-- PAYMENT METHOD -->
 

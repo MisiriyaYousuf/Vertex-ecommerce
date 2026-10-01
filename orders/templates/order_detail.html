@@ -1659,6 +1659,25 @@ Order Review
 
                 {% endif %}
 
+                {% if coupon_discount > 0 %}
+
+                    <div class="summary-row">
+
+                        <span>
+                            Coupon Discount
+                            {% if coupon %}
+                                ({{ coupon.code }})
+                            {% endif %}
+                        </span>
+
+                        <span>
+                            - ₹{{ coupon_discount|floatformat:2 }}
+                        </span>
+
+                    </div>
+
+                    {% endif %}
+
 
                 <div class="summary-row">
 

@@ -6,6 +6,8 @@ app_name = "orders"
 urlpatterns = [
 
     path("checkout/",views.checkout,name="checkout"),
+    path("coupon/apply/",views.apply_coupon,name="apply_coupon"),
+    path("coupon/remove/",views.remove_coupon,name="remove_coupon"),
     path("order-detail/",views.order_detail,name="order_detail"),
     path("place-order/",views.place_order,name="place_order"),
     path("razorpay-payment/",views.razorpay_payment,name="razorpay_payment"),
