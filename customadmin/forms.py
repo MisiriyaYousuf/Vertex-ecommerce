@@ -500,17 +500,12 @@ class ProductVariantForm(forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        # Required fields
         self.fields["sale_price"].required = True
         self.fields["discount_price"].required = False
         self.fields["color"].required = True
         self.fields["size"].required = True
         self.fields["product_code"].required = True
         self.fields["quantity"].required = True
-
-    # =====================================================
-    # SALE PRICE
-    # =====================================================
 
     def clean_sale_price(self):
 
@@ -528,9 +523,6 @@ class ProductVariantForm(forms.ModelForm):
 
         return sale_price
 
-    # =====================================================
-    # DISCOUNT PRICE
-    # =====================================================
 
     def clean_discount_price(self):
 
@@ -546,9 +538,6 @@ class ProductVariantForm(forms.ModelForm):
 
         return discount_price
 
-    # =====================================================
-    # COLOR
-    # =====================================================
 
     def clean_color(self):
 
@@ -576,9 +565,6 @@ class ProductVariantForm(forms.ModelForm):
 
         return color
 
-    # =====================================================
-    # SIZE
-    # =====================================================
 
     def clean_size(self):
 
@@ -602,10 +588,6 @@ class ProductVariantForm(forms.ModelForm):
 
         return size
 
-    # =====================================================
-    # PRODUCT CODE
-    # =====================================================
-
     def clean_product_code(self):
 
         product_code = self.cleaned_data.get("product_code")
@@ -625,10 +607,7 @@ class ProductVariantForm(forms.ModelForm):
                 "Product code can contain only letters, numbers and hyphens."
             )
 
-        # ---------------------------------------------
-        # Check other variants
-        # ---------------------------------------------
-
+       
         existing_variant = ProductVariant.objects.filter(
             product_code__iexact=product_code
         )
@@ -643,10 +622,6 @@ class ProductVariantForm(forms.ModelForm):
                 "This product code already exists for another variant."
             )
 
-        # ---------------------------------------------
-        # Check base products
-        # ---------------------------------------------
-
         existing_product = Product.objects.filter(
             product_code__iexact=product_code
         )
@@ -657,10 +632,6 @@ class ProductVariantForm(forms.ModelForm):
             )
 
         return product_code
-
-    # =====================================================
-    # QUANTITY
-    # =====================================================
 
     def clean_quantity(self):
 
@@ -677,11 +648,7 @@ class ProductVariantForm(forms.ModelForm):
             )
 
         return quantity
-
-    # =====================================================
-    # FINAL VARIANT VALIDATION
-    # =====================================================
-
+        
     def clean(self):
 
         cleaned_data = super().clean()
@@ -698,5 +665,189 @@ class ProductVariantForm(forms.ModelForm):
                 "discount_price",
                 "Discount price must be less than the sale price."
             )
+
+        return cleaned_data
+
+class CouponForm(forms.ModelForm):
+
+    class Meta:
+        model = Coupon
+
+        fields = [
+            "code",
+            "discount_type",
+            "discount_value",
+            "minimum_purchase",
+            "maximum_discount",
+            "start_date",
+            "end_date",
+            "usage_limit",
+            "is_active",
+        ]
+
+        widgets = {
+            "code": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter coupon code",
+                }
+            ),
+
+            "discount_type": forms.Select(
+                attrs={
+                    "class": "form-control",
+                }
+            ),
+
+            "discount_value": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.01",
+                }
+            ),
+
+            "minimum_purchase": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0",
+                }
+            ),
+
+            "maximum_discount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "step": "0.01",
+                    "min": "0.01",
+                }
+            ),
+
+            "start_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+
+            "end_date": forms.DateInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "date",
+                }
+            ),
+
+            "usage_limit": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "1",
+                }
+            ),
+
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "form-check-input",
+                }
+            ),
+        }
+
+    def clean_code(self):
+        code = self.cleaned_data.get("code")
+
+        if not code:
+            raise ValidationError("Coupon code is required.")
+
+        return code.strip().upper()
+
+    def clean_discount_value(self):
+        discount_value = self.cleaned_data.get("discount_value")
+        discount_type = self.cleaned_data.get("discount_type")
+
+        if discount_value is None:
+            raise ValidationError("Discount value is required.")
+
+        if discount_value <= Decimal("0"):
+            raise ValidationError(
+                "Discount value must be greater than 0."
+            )
+
+        if (
+            discount_type == "PERCENTAGE"
+            and discount_value > Decimal("100")
+        ):
+            raise ValidationError(
+                "Percentage discount cannot exceed 100%."
+            )
+
+        return discount_value
+
+    def clean_minimum_purchase(self):
+        minimum_purchase = self.cleaned_data.get(
+            "minimum_purchase"
+        )
+
+        if minimum_purchase is None:
+            return Decimal("0.00")
+
+        if minimum_purchase < Decimal("0"):
+            raise ValidationError(
+                "Minimum purchase cannot be negative."
+            )
+
+        return minimum_purchase
+
+    def clean_maximum_discount(self):
+        maximum_discount = self.cleaned_data.get(
+            "maximum_discount"
+        )
+
+        if maximum_discount is not None:
+            if maximum_discount <= Decimal("0"):
+                raise ValidationError(
+                    "Maximum discount must be greater than 0."
+                )
+
+        return maximum_discount
+
+    def clean_usage_limit(self):
+        usage_limit = self.cleaned_data.get("usage_limit")
+
+        if usage_limit is None:
+            raise ValidationError(
+                "Usage limit is required."
+            )
+
+        if usage_limit < 1:
+            raise ValidationError(
+                "Usage limit must be at least 1."
+            )
+
+        return usage_limit
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        discount_type = cleaned_data.get("discount_type")
+        maximum_discount = cleaned_data.get("maximum_discount")
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+
+
+        if (
+            discount_type == "FIXED"
+            and maximum_discount is not None
+        ):
+            self.add_error(
+                "maximum_discount",
+                "Maximum discount is only applicable to percentage coupons."
+            )
+
+        if start_date and end_date:
+
+            if end_date < start_date:
+                self.add_error(
+                    "end_date",
+                    "End date cannot be before the start date."
+                )
 
         return cleaned_data
