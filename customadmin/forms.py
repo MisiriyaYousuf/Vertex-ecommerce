@@ -2,6 +2,8 @@ import re
 from django import forms
 from .models import Category
 from products.models import Product, ProductVariant
+from orders.models import Coupon
+from decimal import Decimal
 
 class CategoryForm(forms.ModelForm):
 
@@ -671,6 +673,7 @@ class ProductVariantForm(forms.ModelForm):
 class CouponForm(forms.ModelForm):
 
     class Meta:
+
         model = Coupon
 
         fields = [
@@ -686,40 +689,46 @@ class CouponForm(forms.ModelForm):
         ]
 
         widgets = {
+
             "code": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Enter coupon code",
+                    "placeholder": "Example: SAVE10",
+                    "maxlength": "50",
+                    "autocomplete": "off",
                 }
             ),
 
             "discount_type": forms.Select(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-select",
                 }
             ),
 
             "discount_value": forms.NumberInput(
                 attrs={
                     "class": "form-control",
-                    "step": "0.01",
+                    "placeholder": "Enter discount",
                     "min": "0.01",
+                    "step": "0.01",
                 }
             ),
 
             "minimum_purchase": forms.NumberInput(
                 attrs={
                     "class": "form-control",
-                    "step": "0.01",
+                    "placeholder": "Example: 1000",
                     "min": "0",
+                    "step": "0.01",
                 }
             ),
 
             "maximum_discount": forms.NumberInput(
                 attrs={
                     "class": "form-control",
-                    "step": "0.01",
+                    "placeholder": "Optional maximum discount",
                     "min": "0.01",
+                    "step": "0.01",
                 }
             ),
 
@@ -740,7 +749,9 @@ class CouponForm(forms.ModelForm):
             "usage_limit": forms.NumberInput(
                 attrs={
                     "class": "form-control",
+                    "placeholder": "Example: 100",
                     "min": "1",
+                    "step": "1",
                 }
             ),
 
@@ -752,36 +763,69 @@ class CouponForm(forms.ModelForm):
         }
 
     def clean_code(self):
+
         code = self.cleaned_data.get("code")
 
         if not code:
-            raise ValidationError("Coupon code is required.")
+            raise forms.ValidationError(
+                "Coupon code is required."
+            )
 
-        return code.strip().upper()
+        code = code.strip().upper()
+
+        if not code.replace("-", "").replace("_", "").isalnum():
+            raise forms.ValidationError(
+                "Coupon code can contain only letters, numbers, "
+                "hyphens and underscores."
+            )
+
+        query = Coupon.objects.filter(
+            code__iexact=code
+        )
+
+        if self.instance.pk:
+            query = query.exclude(
+                pk=self.instance.pk
+            )
+
+        if query.exists():
+            raise forms.ValidationError(
+                "A coupon with this code already exists."
+            )
+
+        return code
 
     def clean_discount_value(self):
-        discount_value = self.cleaned_data.get("discount_value")
-        discount_type = self.cleaned_data.get("discount_type")
+
+        discount_type = self.cleaned_data.get(
+            "discount_type"
+        )
+
+        discount_value = self.cleaned_data.get(
+            "discount_value"
+        )
 
         if discount_value is None:
-            raise ValidationError("Discount value is required.")
-
-        if discount_value <= Decimal("0"):
-            raise ValidationError(
-                "Discount value must be greater than 0."
+            raise forms.ValidationError(
+                "Discount value is required."
             )
 
-        if (
-            discount_type == "PERCENTAGE"
-            and discount_value > Decimal("100")
-        ):
-            raise ValidationError(
-                "Percentage discount cannot exceed 100%."
+        if discount_value <= 0:
+            raise forms.ValidationError(
+                "Discount value must be greater than zero."
             )
+
+        if discount_type == "PERCENTAGE":
+
+            if discount_value > 100:
+                raise forms.ValidationError(
+                    "Percentage discount cannot exceed 100%."
+                )
 
         return discount_value
 
     def clean_minimum_purchase(self):
+
         minimum_purchase = self.cleaned_data.get(
             "minimum_purchase"
         )
@@ -789,65 +833,109 @@ class CouponForm(forms.ModelForm):
         if minimum_purchase is None:
             return Decimal("0.00")
 
-        if minimum_purchase < Decimal("0"):
-            raise ValidationError(
+        if minimum_purchase < 0:
+            raise forms.ValidationError(
                 "Minimum purchase cannot be negative."
             )
 
         return minimum_purchase
 
     def clean_maximum_discount(self):
+
         maximum_discount = self.cleaned_data.get(
             "maximum_discount"
         )
 
         if maximum_discount is not None:
-            if maximum_discount <= Decimal("0"):
-                raise ValidationError(
-                    "Maximum discount must be greater than 0."
+
+            if maximum_discount <= 0:
+                raise forms.ValidationError(
+                    "Maximum discount must be greater than zero."
                 )
 
         return maximum_discount
 
     def clean_usage_limit(self):
-        usage_limit = self.cleaned_data.get("usage_limit")
+
+        usage_limit = self.cleaned_data.get(
+            "usage_limit"
+        )
 
         if usage_limit is None:
-            raise ValidationError(
+            raise forms.ValidationError(
                 "Usage limit is required."
             )
 
-        if usage_limit < 1:
-            raise ValidationError(
-                "Usage limit must be at least 1."
+        if usage_limit <= 0:
+            raise forms.ValidationError(
+                "Usage limit must be greater than zero."
             )
 
         return usage_limit
 
     def clean(self):
+
         cleaned_data = super().clean()
 
-        discount_type = cleaned_data.get("discount_type")
-        maximum_discount = cleaned_data.get("maximum_discount")
-        start_date = cleaned_data.get("start_date")
-        end_date = cleaned_data.get("end_date")
+        discount_type = cleaned_data.get(
+            "discount_type"
+        )
 
+        discount_value = cleaned_data.get(
+            "discount_value"
+        )
 
-        if (
-            discount_type == "FIXED"
-            and maximum_discount is not None
-        ):
-            self.add_error(
-                "maximum_discount",
-                "Maximum discount is only applicable to percentage coupons."
-            )
+        maximum_discount = cleaned_data.get(
+            "maximum_discount"
+        )
+
+        start_date = cleaned_data.get(
+            "start_date"
+        )
+
+        end_date = cleaned_data.get(
+            "end_date"
+        )
+
+        minimum_purchase = cleaned_data.get(
+            "minimum_purchase"
+        )
 
         if start_date and end_date:
 
-            if end_date < start_date:
+            if end_date <= start_date:
+
                 self.add_error(
                     "end_date",
-                    "End date cannot be before the start date."
+                    "End date must be after the start date."
+                )
+    
+        if (
+            discount_type == "FIXED"
+            and discount_value is not None
+            and minimum_purchase is not None
+        ):
+
+            if discount_value > minimum_purchase:
+                self.add_error(
+                    "discount_value",
+                    "Fixed discount cannot be greater than "
+                    "the minimum purchase amount."
+                )
+
+        if discount_type == "FIXED":
+
+            cleaned_data["maximum_discount"] = None
+
+        elif discount_type == "PERCENTAGE":
+
+            if (
+                maximum_discount is not None
+                and maximum_discount <= 0
+            ):
+                self.add_error(
+                    "maximum_discount",
+                    "Maximum discount must be greater than zero."
                 )
 
         return cleaned_data

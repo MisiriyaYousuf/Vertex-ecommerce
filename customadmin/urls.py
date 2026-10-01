@@ -21,5 +21,8 @@ urlpatterns = [
     path("orders/",views.order_management,name="order_management"),
     path("orders/detail/",views.admin_order_detail,name="admin_order_detail"),
     path("orders/update-status/",views.update_order_status,name="update_order_status"),
+    path("coupons/",views.coupon_management,name="coupon_management"),
+    path("coupons/edit/",views.edit_coupon,name="edit_coupon"),
+    path("coupons/delete/",views.delete_coupon,name="delete_coupon"),
     path("inventory/",views.inventory_management,name="inventory_management"),
 ]
