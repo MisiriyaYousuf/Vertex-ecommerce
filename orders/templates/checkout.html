@@ -1318,7 +1318,6 @@ Checkout
 
 <section class="checkout-page">
 
-```
 <div class="checkout-wrapper">
 
     <h1 class="checkout-title">
@@ -1351,7 +1350,7 @@ Checkout
          CHECKOUT FORM
     ====================================================== -->
 
-    <form method="POST">
+    <form method="POST" id="checkoutForm">
 
         {% csrf_token %}
 
@@ -2020,6 +2019,8 @@ Checkout
                  RIGHT COLUMN — ORDER SUMMARY
             ================================================== -->
 
+            </form>
+
             <div class="checkout-right">
 
                 <div class="checkout-card summary-card">
@@ -2294,6 +2295,7 @@ Checkout
                         type="submit"
                         class="review-order-btn"
                         id="continuePaymentButton"
+                        form="checkoutForm"
                     >
 
                         <span id="continuePaymentText">
@@ -2325,10 +2327,8 @@ Checkout
 
         </div>
 
-    </form>
-
 </div>
-```
+
 
 </section>
 
@@ -2977,3 +2977,4 @@ document.addEventListener(
 </script>
 
 {% endblock %}
+
