@@ -3,7 +3,12 @@ from decimal import Decimal, ROUND_DOWN
 from django.db import transaction
 from django.utils import timezone
 
-from .models import ReturnRequest, Wallet, WalletTransaction
+from .models import (
+    CancellationRequest,
+    ReturnRequest,
+    Wallet,
+    WalletTransaction,
+)
 
 CENT = Decimal("0.01")
 
@@ -83,6 +88,15 @@ def credit_item_refund(item, transaction_type, description):
     )
 
 
+def restock_item(item):
+    if item.variant_id:
+        item.variant.quantity += item.quantity
+        item.variant.save(update_fields=["quantity", "updated_at"])
+    else:
+        item.product.quantity += item.quantity
+        item.product.save(update_fields=["quantity", "updated_at"])
+
+
 @transaction.atomic
 def approve_return_request(return_request_id, admin_user):
     request = (
@@ -102,12 +116,7 @@ def approve_return_request(return_request_id, admin_user):
     item.status = "Returned"
     item.return_reason = request.reason
     item.save(update_fields=["status", "return_reason"])
-    if item.variant_id:
-        item.variant.quantity += item.quantity
-        item.variant.save(update_fields=["quantity", "updated_at"])
-    else:
-        item.product.quantity += item.quantity
-        item.product.save(update_fields=["quantity", "updated_at"])
+    restock_item(item)
 
     from orders.views import update_status
     update_status(order)
@@ -135,3 +144,71 @@ def reject_return_request(return_request_id, admin_user, note=""):
     request.review_note = note
     request.save(update_fields=["status", "reviewed_by", "reviewed_at", "review_note"])
     return True, f"Return request for order item #{request.order_item_id} rejected."
+
+
+@transaction.atomic
+def approve_cancellation_request(cancellation_request_id, admin_user):
+    request = (
+        CancellationRequest.objects.select_for_update()
+        .select_related(
+            "order_item__order",
+            "order_item__product",
+            "order_item__variant",
+        )
+        .get(pk=cancellation_request_id)
+    )
+    if request.status != CancellationRequest.PENDING:
+        return False, "This cancellation request has already been reviewed."
+
+    item = request.order_item
+    order = item.order
+    if item.status == "Delivered":
+        request.status = CancellationRequest.REJECTED
+        request.reviewed_by = admin_user
+        request.reviewed_at = timezone.now()
+        request.review_note = "A delivered item cannot be cancelled or refunded."
+        request.save(
+            update_fields=["status", "reviewed_by", "reviewed_at", "review_note"]
+        )
+        return False, "Cancellation rejected: delivered items cannot be refunded."
+
+    if item.status in ["Cancelled", "Returned"]:
+        return False, "This order item has already reached a final status."
+
+    item.status = "Cancelled"
+    item.cancellation_reason = request.reason
+    item.save(update_fields=["status", "cancellation_reason"])
+    restock_item(item)
+
+    from orders.views import update_status
+
+    update_status(order)
+    if order.payment_status == "Paid":
+        credit_item_refund(
+            item,
+            WalletTransaction.CANCEL_REFUND,
+            f"Approved cancellation refund for order #{order.pk}",
+        )
+        mark_fully_refunded(order)
+
+    request.status = CancellationRequest.APPROVED
+    request.reviewed_by = admin_user
+    request.reviewed_at = timezone.now()
+    request.save(update_fields=["status", "reviewed_by", "reviewed_at"])
+    return True, f"Cancellation for order #{order.pk} approved and refunded to wallet."
+
+
+@transaction.atomic
+def reject_cancellation_request(cancellation_request_id, admin_user, note=""):
+    request = CancellationRequest.objects.select_for_update().get(
+        pk=cancellation_request_id
+    )
+    if request.status != CancellationRequest.PENDING:
+        return False, "This cancellation request has already been reviewed."
+
+    request.status = CancellationRequest.REJECTED
+    request.reviewed_by = admin_user
+    request.reviewed_at = timezone.now()
+    request.review_note = note
+    request.save(update_fields=["status", "reviewed_by", "reviewed_at", "review_note"])
+    return True, f"Cancellation request for order item #{request.order_item_id} rejected."

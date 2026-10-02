@@ -99,3 +99,42 @@ class ReturnRequest(models.Model):
 
     def __str__(self):
         return f"Return for order item #{self.order_item_id} ({self.status})"
+
+
+class CancellationRequest(models.Model):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    STATUS_CHOICES = [
+        (PENDING, "Pending review"),
+        (APPROVED, "Approved"),
+        (REJECTED, "Rejected"),
+    ]
+
+    order_item = models.OneToOneField(
+        "orders.OrderItem",
+        on_delete=models.CASCADE,
+        related_name="cancellation_request",
+    )
+    reason = models.TextField()
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default=PENDING,
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_cancellation_requests",
+    )
+    review_note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-requested_at"]
+
+    def __str__(self):
+        return f"Cancellation for order item #{self.order_item_id} ({self.status})"
