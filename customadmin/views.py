@@ -2798,10 +2798,11 @@ def coupon_management(request):
         ""
     ).strip()
 
+    edit_id = request.GET.get("edit")
+
     coupons = Coupon.objects.all()
 
     if search:
-
         coupons = coupons.filter(
             Q(code__icontains=search)
         )
@@ -2809,6 +2810,13 @@ def coupon_management(request):
     coupons = coupons.order_by(
         "-created_at"
     )
+
+    edit_coupon = None
+
+    if edit_id:
+        edit_coupon = Coupon.objects.filter(
+            id=edit_id
+        ).first()
 
     if request.method == "POST":
 
@@ -2831,7 +2839,12 @@ def coupon_management(request):
 
     else:
 
-        form = CouponForm()
+        if edit_coupon:
+            form = CouponForm(
+                instance=edit_coupon
+            )
+        else:
+            form = CouponForm()
 
     return render(
         request,
@@ -2840,6 +2853,8 @@ def coupon_management(request):
             "coupons": coupons,
             "form": form,
             "search": search,
+            "edit_coupon_id": edit_coupon.id if edit_coupon else None,
+            "coupon": edit_coupon,
         }
     )
 
@@ -2851,17 +2866,13 @@ def edit_coupon(request):
         return redirect("users:home")
 
     if request.method != "POST":
-
-        return HttpResponseNotAllowed(
-            ["POST"]
-        )
+        return HttpResponseNotAllowed(["POST"])
 
     coupon_id = request.POST.get(
         "coupon_id"
     )
 
     if not coupon_id:
-
         messages.error(
             request,
             "Coupon ID is required."
@@ -2876,7 +2887,6 @@ def edit_coupon(request):
     ).first()
 
     if not coupon:
-
         messages.error(
             request,
             "Coupon not found."
@@ -2908,24 +2918,13 @@ def edit_coupon(request):
         "-created_at"
     )
 
-    search = request.GET.get(
-        "search",
-        ""
-    ).strip()
-
-    if search:
-
-        coupons = coupons.filter(
-            code__icontains=search
-        )
-
     return render(
         request,
         "coupon_management.html",
         {
             "coupons": coupons,
             "form": form,
-            "search": search,
+            "search": "",
             "edit_coupon_id": coupon.id,
             "coupon": coupon,
         }
