@@ -37,14 +37,9 @@ import razorpay
 from django.conf import settings
 from django.urls import reverse
 from orders.models import Coupon,CouponUsage
-from wallet.models import ReturnRequest, Wallet, WalletTransaction
+from wallet.models import CancellationRequest, ReturnRequest, Wallet
 from wallet.forms import ReturnRequestForm
-from wallet.services import (
-    credit_item_refund,
-    debit_wallet_for_order,
-    get_wallet,
-    mark_fully_refunded,
-)
+from wallet.services import debit_wallet_for_order, get_wallet
 
 
 MAX_CART_QUANTITY = 5
@@ -3993,13 +3988,15 @@ def view_order(request):
             item.price + item.discount
         )
 
-    cancellable_items = (
-        order.items.exclude(
-            status__in=[
-                "Cancelled",
-                "Returned",
-            ]
-        )
+    cancellable_items = order.items.filter(
+        status__in=[
+            "Pending",
+            "Processing",
+            "Shipped",
+            "Out for Delivery",
+        ]
+    ).exclude(
+        cancellation_request__status=CancellationRequest.PENDING
     )
 
     can_cancel_order = (
@@ -4042,126 +4039,61 @@ def view_order(request):
 @login_required
 @never_cache
 def cancel_order(request):
-
     if request.method != "POST":
+        return redirect("orders:order_list")
 
-        return redirect(
-            "orders:order_list"
-        )
-
-    order_id = request.POST.get(
-        "order_id"
-    )
-
+    order_id = request.POST.get("order_id")
     if not order_id:
-
-        messages.error(
-            request,
-            "Order not found."
-        )
-
-        return redirect(
-            "orders:order_list"
-        )
+        messages.error(request, "Order not found.")
+        return redirect("orders:order_list")
 
     order = (
-        Order.objects
-        .filter(
-            id=order_id,
-            user=request.user
-        )
+        Order.objects.filter(id=order_id, user=request.user)
         .prefetch_related(
             "items__product__images",
             "items__variant__images",
+            "items__cancellation_request",
         )
         .first()
     )
-
     if not order:
+        messages.error(request, "Order not found.")
+        return redirect("orders:order_list")
 
-        messages.error(
-            request,
-            "Order not found."
-        )
+    cancellable_items = order.items.filter(
+        status__in=["Pending", "Processing", "Shipped", "Out for Delivery"]
+    ).exclude(cancellation_request__status=CancellationRequest.PENDING)
 
-        return redirect(
-            "orders:order_list"
-        )
-
-    cancel_complete_order = (
-        request.POST.get(
-            "cancel_complete_order"
-        ) == "yes"
-    )
-
-    selected_items = request.POST.getlist(
-        "selected_items"
-    )
-
+    cancel_complete_order = request.POST.get("cancel_complete_order") == "yes"
+    selected_items = request.POST.getlist("selected_items")
     if cancel_complete_order:
-
-        selected_items = list( 
-            order.items .exclude(
-                 status__in=[ "Cancelled", "Returned", ] 
-                 ) .values_list( 
-                    "id", flat=True
-                     ) 
-                )
+        selected_items = list(cancellable_items.values_list("id", flat=True))
 
     if not selected_items:
-
         return render(
             request,
             "cancel.html",
-            {
-                "order": order,
-                "items": order.items.all(),
-            }
+            {"order": order, "items": cancellable_items},
         )
 
-    reason = request.POST.get(
-        "cancellation_reason",
-        ""
-    ).strip()
-
+    reason = request.POST.get("cancellation_reason", "").strip()
     if not reason:
-
-        messages.error(
-            request,
-            "Please select a cancellation reason."
-        )
-
+        messages.error(request, "Please select a cancellation reason.")
         return render(
             request,
             "cancel.html",
-            {
-                "order": order,
-                "items": order.items.all(),
-            }
+            {"order": order, "items": cancellable_items},
         )
 
     with transaction.atomic():
-
         locked_order = (
-            Order.objects
-            .select_for_update()
-            .filter(
-                id=order_id,
-                user=request.user
-            )
+            Order.objects.select_for_update()
+            .filter(id=order_id, user=request.user)
             .first()
         )
-
         if not locked_order:
-
-            messages.error(
-                request,
-                "Order not found."
-            )
-
-            return redirect(
-                "orders:order_list"
-            )
+            messages.error(request, "Order not found.")
+            return redirect("orders:order_list")
 
         if locked_order.status not in [
             "Pending",
@@ -4169,114 +4101,59 @@ def cancel_order(request):
             "Shipped",
             "Partially Shipped",
             "Out for Delivery",
+            "Partially Delivered",
         ]:
+            messages.error(request, "This order cannot be cancelled.")
+            return redirect("orders:order_list")
 
-            messages.error(
-                request,
-                "This order cannot be cancelled."
+        items = (
+            OrderItem.objects.select_for_update()
+            .filter(
+                order=locked_order,
+                id__in=selected_items,
+                status__in=["Pending", "Processing", "Shipped", "Out for Delivery"],
             )
+            .exclude(cancellation_request__status=CancellationRequest.PENDING)
+        )
 
-            return redirect(
-                "orders:order_list"
-            )
-
-        items = ( 
-            OrderItem.objects 
-            .select_for_update() 
-            .filter( 
-                order=locked_order, 
-                id__in=selected_items, 
-                ) 
-                .exclude( 
-                    status__in=
-                    [ "Cancelled",
-                     "Returned",
-                    ]
-                     ) 
-                     .select_related(
-                         "product",
-                          "variant",
-                          )
-                    )
-
-        if not items.exists():
-
-            messages.error(
-                request,
-                "No valid items were selected."
-            )
-
-            return redirect(
-                "orders:order_list"
-            )
-
+        requested_any = False
         for item in items:
-
-            if item.variant:
-
-                variant = (
-                    ProductVariant.objects
-                    .select_for_update()
-                    .get(
-                        id=item.variant_id
-                    )
-                )
-
-                variant.quantity += item.quantity
-
-                variant.save(
-                    update_fields=[
-                        "quantity",
-                        "updated_at",
-                    ]
-                )
-
-            else:
-
-                product = (
-                    Product.objects
-                    .select_for_update()
-                    .get(
-                        id=item.product_id
-                    )
-                )
-
-                product.quantity += item.quantity
-
-                product.save(
-                    update_fields=[
-                        "quantity",
-                        "updated_at",
-                    ]
-                )
-
-            item.cancellation_reason = reason
-            item.status = "Cancelled"
-
-            item.save(
-                update_fields=[
-                    "cancellation_reason",
-                    "status",
-                ]
+            cancellation_request, created = CancellationRequest.objects.get_or_create(
+                order_item=item,
+                defaults={"reason": reason},
             )
-
-            if locked_order.payment_status == "Paid":
-                credit_item_refund(
-                    item,
-                    WalletTransaction.CANCEL_REFUND,
-                    f"Cancellation refund for order #{locked_order.pk}",
+            if not created and cancellation_request.status == CancellationRequest.REJECTED:
+                cancellation_request.reason = reason
+                cancellation_request.status = CancellationRequest.PENDING
+                cancellation_request.reviewed_by = None
+                cancellation_request.reviewed_at = None
+                cancellation_request.review_note = ""
+                cancellation_request.save(
+                    update_fields=[
+                        "reason",
+                        "status",
+                        "reviewed_by",
+                        "reviewed_at",
+                        "review_note",
+                    ]
                 )
+            elif not created:
+                continue
+            requested_any = True
 
-        update_status(locked_order)
-        mark_fully_refunded(locked_order)
+    if not requested_any:
+        messages.error(
+            request,
+            "No eligible items were selected. Delivered items cannot be cancelled.",
+        )
+        return redirect("orders:order_list")
 
-    request.session[
-        "last_cancelled_order_id"
-    ] = locked_order.id
-
-    return redirect(
-        "orders:cancellation_success"
+    request.session["last_cancelled_order_id"] = order.id
+    messages.success(
+        request,
+        "Cancellation request submitted. Your wallet refund will be processed after admin approval.",
     )
+    return redirect("orders:cancellation_success")
 
 @login_required
 @never_cache
