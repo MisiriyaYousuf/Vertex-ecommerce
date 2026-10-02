@@ -19,8 +19,16 @@ from django.db.models.functions import Coalesce
 from django.db.models import Sum
 from orders.views import update_status
 from orders.models import Coupon
-from wallet.models import WalletTransaction
-from wallet.services import credit_item_refund, mark_fully_refunded
+from wallet.models import CancellationRequest, ReturnRequest, WalletTransaction
+from wallet.services import (
+    approve_cancellation_request,
+    approve_return_request,
+    credit_item_refund,
+    mark_fully_refunded,
+    refund_amount_for_item,
+    reject_cancellation_request,
+    reject_return_request,
+)
 
 @login_required
 @never_cache
@@ -2019,6 +2027,95 @@ def order_management(request):
         context
     )
 
+
+@never_cache
+@login_required
+def refund_request_management(request):
+    if not request.user.is_superuser:
+        return redirect("users:home")
+
+    return_requests = list(
+        ReturnRequest.objects.filter(status=ReturnRequest.PENDING)
+        .select_related(
+            "order_item__order__user",
+            "order_item__product",
+            "order_item__variant",
+        )
+        .order_by("requested_at")
+    )
+    cancellation_requests = list(
+        CancellationRequest.objects.filter(status=CancellationRequest.PENDING)
+        .select_related(
+            "order_item__order__user",
+            "order_item__product",
+            "order_item__variant",
+        )
+        .order_by("requested_at")
+    )
+
+    for refund_request in return_requests + cancellation_requests:
+        refund_request.refund_amount = refund_amount_for_item(
+            refund_request.order_item
+        )
+
+    return render(
+        request,
+        "refund_request_management.html",
+        {
+            "return_requests": return_requests,
+            "cancellation_requests": cancellation_requests,
+        },
+    )
+
+
+@never_cache
+@login_required
+def review_refund_request(request):
+    if not request.user.is_superuser:
+        return redirect("users:home")
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    request_type = request.POST.get("request_type")
+    request_id = request.POST.get("request_id")
+    review_action = request.POST.get("review_action")
+    review_note = request.POST.get("review_note", "").strip()
+
+    if request_type not in ["return", "cancellation"]:
+        messages.error(request, "Invalid refund request type.")
+        return redirect("customadmin:refund_request_management")
+    if review_action not in ["approve", "reject"]:
+        messages.error(request, "Invalid review action.")
+        return redirect("customadmin:refund_request_management")
+
+    try:
+        if request_type == "return":
+            if review_action == "approve":
+                success, message = approve_return_request(request_id, request.user)
+            else:
+                success, message = reject_return_request(
+                    request_id,
+                    request.user,
+                    review_note,
+                )
+        elif review_action == "approve":
+            success, message = approve_cancellation_request(request_id, request.user)
+        else:
+            success, message = reject_cancellation_request(
+                request_id,
+                request.user,
+                review_note,
+            )
+    except (ReturnRequest.DoesNotExist, CancellationRequest.DoesNotExist):
+        success, message = False, "The refund request no longer exists."
+
+    if success:
+        messages.success(request, message)
+    else:
+        messages.error(request, message)
+
+    return redirect("customadmin:refund_request_management")
+
 @never_cache
 @login_required
 def admin_order_detail(request):
@@ -2215,7 +2312,7 @@ def update_order_status(request):
     if new_status == "Returned":
         messages.error(
             request,
-            "Create a customer return request and approve it in Django Admin → Wallet → Return requests so the refund is recorded.",
+            "Use Order Management → Refund Requests to review a customer return and issue its wallet refund.",
         )
         return redirect("customadmin:order_management")
 
@@ -2257,6 +2354,19 @@ def update_order_status(request):
         return redirect(
             "customadmin:order_management"
         )
+
+    if (
+        new_status == "Cancelled"
+        and CancellationRequest.objects.filter(
+            order_item=item,
+            status=CancellationRequest.PENDING,
+        ).exists()
+    ):
+        messages.error(
+            request,
+            "Use Order Management → Refund Requests to approve or reject this customer cancellation request.",
+        )
+        return redirect("customadmin:refund_request_management")
 
     old_status = item.status
 
