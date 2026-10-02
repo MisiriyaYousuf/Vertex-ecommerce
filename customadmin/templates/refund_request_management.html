@@ -1,0 +1,92 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Refund Requests{% endblock %}
+
+{% block content %}
+<style>
+    .refund-page { padding: 24px; color: #263442; }
+    .refund-page h1 { margin: 0 0 8px; font-size: 26px; }
+    .refund-page > p { margin: 0 0 24px; color: #6b7785; }
+    .request-section { margin-bottom: 28px; }
+    .request-section h2 { margin: 0 0 14px; font-size: 19px; }
+    .request-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; padding: 18px; margin-bottom: 12px; background: #fff; border: 1px solid #dfe6ec; border-radius: 10px; box-shadow: 0 4px 14px rgba(31, 41, 55, .05); }
+    .request-meta { display: grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap: 10px 18px; margin-top: 12px; color: #53616e; font-size: 13px; }
+    .request-meta strong { display: block; margin-bottom: 3px; color: #87919c; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; }
+    .reason { margin: 10px 0 0; color: #53616e; font-size: 13px; }
+    .request-actions { display: flex; align-items: center; gap: 8px; }
+    .request-actions form { margin: 0; }
+    .request-actions input { width: 130px; padding: 8px; border: 1px solid #d0d9e2; border-radius: 6px; font-size: 12px; }
+    .action-btn { padding: 8px 12px; border: 0; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .approve-btn { background: #16803c; }
+    .reject-btn { background: #bf3b3b; }
+    .empty-state { padding: 22px; border: 1px dashed #cdd7e0; border-radius: 10px; color: #71808f; background: #fff; }
+    @media (max-width: 900px) { .request-card { grid-template-columns: 1fr; } .request-actions { flex-wrap: wrap; } .request-meta { grid-template-columns: 1fr 1fr; } }
+</style>
+
+<main class="refund-page">
+    <h1>Refund Requests</h1>
+    <p>Approve a request to restock the item and credit the eligible paid amount to the customer wallet.</p>
+
+    <section class="request-section">
+        <h2>Return Requests</h2>
+        {% for return_request in return_requests %}
+            <article class="request-card">
+                <div>
+                    <strong>Return requested for {{ return_request.order_item.product_name }}</strong>
+                    <div class="request-meta">
+                        <div><strong>Order</strong>#{{ return_request.order_item.order_id }}</div>
+                        <div><strong>Customer</strong>{{ return_request.order_item.order.user.get_full_name|default:return_request.order_item.order.user.username }}</div>
+                        <div><strong>Wallet refund</strong>₹{{ return_request.refund_amount|floatformat:2 }}</div>
+                        <div><strong>Quantity</strong>{{ return_request.order_item.quantity }}</div>
+                        <div><strong>Requested</strong>{{ return_request.requested_at|date:"d M Y, H:i" }}</div>
+                    </div>
+                    <p class="reason"><strong>Reason:</strong> {{ return_request.reason }}</p>
+                </div>
+                <div class="request-actions">
+                    <form method="post" action="{% url 'customadmin:review_refund_request' %}">
+                        {% csrf_token %}<input type="hidden" name="request_type" value="return"><input type="hidden" name="request_id" value="{{ return_request.id }}"><input type="hidden" name="review_action" value="approve">
+                        <button class="action-btn approve-btn" type="submit">Approve &amp; Refund</button>
+                    </form>
+                    <form method="post" action="{% url 'customadmin:review_refund_request' %}">
+                        {% csrf_token %}<input type="hidden" name="request_type" value="return"><input type="hidden" name="request_id" value="{{ return_request.id }}"><input type="hidden" name="review_action" value="reject"><input name="review_note" placeholder="Rejection note">
+                        <button class="action-btn reject-btn" type="submit">Reject</button>
+                    </form>
+                </div>
+            </article>
+        {% empty %}
+            <p class="empty-state">No return requests are waiting for review.</p>
+        {% endfor %}
+    </section>
+
+    <section class="request-section">
+        <h2>Cancellation Requests</h2>
+        {% for cancellation_request in cancellation_requests %}
+            <article class="request-card">
+                <div>
+                    <strong>Cancellation requested for {{ cancellation_request.order_item.product_name }}</strong>
+                    <div class="request-meta">
+                        <div><strong>Order</strong>#{{ cancellation_request.order_item.order_id }}</div>
+                        <div><strong>Customer</strong>{{ cancellation_request.order_item.order.user.get_full_name|default:cancellation_request.order_item.order.user.username }}</div>
+                        <div><strong>Wallet refund</strong>₹{{ cancellation_request.refund_amount|floatformat:2 }}</div>
+                        <div><strong>Current status</strong>{{ cancellation_request.order_item.status }}</div>
+                        <div><strong>Requested</strong>{{ cancellation_request.requested_at|date:"d M Y, H:i" }}</div>
+                    </div>
+                    <p class="reason"><strong>Reason:</strong> {{ cancellation_request.reason }}</p>
+                </div>
+                <div class="request-actions">
+                    <form method="post" action="{% url 'customadmin:review_refund_request' %}">
+                        {% csrf_token %}<input type="hidden" name="request_type" value="cancellation"><input type="hidden" name="request_id" value="{{ cancellation_request.id }}"><input type="hidden" name="review_action" value="approve">
+                        <button class="action-btn approve-btn" type="submit">Approve &amp; Refund</button>
+                    </form>
+                    <form method="post" action="{% url 'customadmin:review_refund_request' %}">
+                        {% csrf_token %}<input type="hidden" name="request_type" value="cancellation"><input type="hidden" name="request_id" value="{{ cancellation_request.id }}"><input type="hidden" name="review_action" value="reject"><input name="review_note" placeholder="Rejection note">
+                        <button class="action-btn reject-btn" type="submit">Reject</button>
+                    </form>
+                </div>
+            </article>
+        {% empty %}
+            <p class="empty-state">No cancellation requests are waiting for review.</p>
+        {% endfor %}
+    </section>
+</main>
+{% endblock %}

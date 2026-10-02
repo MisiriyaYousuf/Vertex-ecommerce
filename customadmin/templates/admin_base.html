@@ -227,6 +227,14 @@
         </a>
 
         <a
+            href="{% url 'customadmin:refund_request_management' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'refund_request_management' %}active{% endif %}"
+        >
+            <i class="fas fa-rotate-left"></i>
+            <span>Refund Requests</span>
+        </a>
+
+        <a
             href="{% url 'customadmin:inventory_management' %}"
             class="nav-link"
         >
