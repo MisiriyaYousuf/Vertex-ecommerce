@@ -1042,13 +1042,12 @@
                                     <div class="coupon-actions">
 
 
-                                        <!-- EDIT -->
+                                       <!--Edit-->
 
-                                        <form
+                                       <form
                                             method="POST"
                                             action="{% url 'customadmin:edit_coupon' %}"
                                         >
-
                                             {% csrf_token %}
 
                                             <input
@@ -1063,10 +1062,8 @@
                                             >
                                                 Edit
                                             </button>
-
                                         </form>
-
-
+                                        
                                         <!-- DELETE -->
 
                                         <form
