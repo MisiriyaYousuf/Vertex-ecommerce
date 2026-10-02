@@ -14,9 +14,8 @@ from products.models import (Product,ProductImage,ProductVariant,ProductVariantI
 from .forms import ProductForm,ProductVariantForm
 from django.http import JsonResponse
 from orders.models import Order, OrderItem
-from django.db.models import Q,F,Sum,Value,Prefetch,Count
+from django.db.models import BooleanField, Case, Count, F, Prefetch, Q, Sum, Value, When
 from django.db.models.functions import Coalesce
-from django.db.models import Sum
 from orders.views import update_status
 from orders.models import Coupon
 from wallet.models import CancellationRequest, ReturnRequest, WalletTransaction
