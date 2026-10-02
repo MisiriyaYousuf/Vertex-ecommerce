@@ -1,0 +1,386 @@
+{% extends "admin_base.html" %}
+
+{% block title %}
+    Coupon Details
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+.coupon-detail-page {
+    padding: 30px;
+    background: #f6f7fb;
+    min-height: calc(100vh - 70px);
+}
+
+.coupon-detail-wrapper {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.coupon-detail-card {
+    background: #ffffff;
+    border: 1px solid #e7e6ef;
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 8px 25px rgba(30, 25, 50, 0.06);
+}
+
+.coupon-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.coupon-detail-title {
+    margin: 0;
+    color: #25233a;
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.coupon-detail-subtitle {
+    margin-top: 5px;
+    color: #77758a;
+    font-size: 13px;
+}
+
+.coupon-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: #e9e8ef;
+    border: 1px solid #e9e8ef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.detail-item {
+    padding: 16px;
+    background: #ffffff;
+}
+
+.detail-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #77758a;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.detail-value {
+    color: #29273e;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.coupon-code-detail {
+    color: #5d4acb;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.status-active {
+    background: #e9f8ef;
+    color: #21824a;
+}
+
+.status-inactive {
+    background: #f0eff4;
+    color: #777383;
+}
+
+.status-expired {
+    background: #fff0f0;
+    color: #c94a4a;
+}
+
+.coupon-detail-actions {
+    margin-top: 22px;
+    display: flex;
+    gap: 8px;
+}
+
+.back-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border: 1px solid #dddce7;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #555267;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.back-btn:hover {
+    background: #f7f6fb;
+}
+
+@media (max-width: 650px) {
+
+    .coupon-detail-page {
+        padding: 20px;
+    }
+
+    .coupon-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .coupon-detail-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+</style>
+
+
+<section class="coupon-detail-page">
+
+    <div class="coupon-detail-wrapper">
+
+        <div class="coupon-detail-card">
+
+            <div class="coupon-detail-header">
+
+                <div>
+
+                    <h1 class="coupon-detail-title">
+                        Coupon Details
+                    </h1>
+
+                    <div class="coupon-detail-subtitle">
+                        Complete information about this coupon.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="coupon-detail-grid">
+
+
+                <!-- CODE -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Coupon Code
+                    </span>
+
+                    <span class="coupon-code-detail">
+                        {{ coupon.code }}
+                    </span>
+
+                </div>
+
+
+                <!-- DISCOUNT TYPE -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Discount Type
+                    </span>
+
+                    <span class="detail-value">
+                        {{ coupon.get_discount_type_display }}
+                    </span>
+
+                </div>
+
+
+                <!-- DISCOUNT VALUE -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Discount Value
+                    </span>
+
+                    <span class="detail-value">
+
+                        {% if coupon.discount_type == "PERCENTAGE" %}
+
+                            {{ coupon.discount_value|floatformat:0 }}%
+
+                        {% else %}
+
+                            ₹{{ coupon.discount_value|floatformat:2 }}
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- MINIMUM PURCHASE -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Minimum Purchase
+                    </span>
+
+                    <span class="detail-value">
+                        ₹{{ coupon.minimum_purchase|floatformat:2 }}
+                    </span>
+
+                </div>
+
+
+                <!-- MAXIMUM DISCOUNT -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Maximum Discount
+                    </span>
+
+                    <span class="detail-value">
+
+                        {% if coupon.maximum_discount %}
+
+                            ₹{{ coupon.maximum_discount|floatformat:2 }}
+
+                        {% else %}
+
+                            No Limit
+
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+
+                <!-- USAGE LIMIT -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Usage Limit
+                    </span>
+
+                    <span class="detail-value">
+                        {{ coupon.usage_limit }}
+                    </span>
+
+                </div>
+
+
+                <!-- START DATE -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Start Date
+                    </span>
+
+                    <span class="detail-value">
+                        {{ coupon.start_date|date:"d M Y, h:i A" }}
+                    </span>
+
+                </div>
+
+
+                <!-- END DATE -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        End Date
+                    </span>
+
+                    <span class="detail-value">
+                        {{ coupon.end_date|date:"d M Y, h:i A" }}
+                    </span>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Status
+                    </span>
+
+                    {% if not coupon.is_active %}
+
+                        <span class="status-badge status-inactive">
+                            Inactive
+                        </span>
+
+                    {% elif coupon.is_expired %}
+
+                        <span class="status-badge status-expired">
+                            Expired
+                        </span>
+
+                    {% else %}
+
+                        <span class="status-badge status-active">
+                            Active
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- CREATED -->
+
+                <div class="detail-item">
+
+                    <span class="detail-label">
+                        Created At
+                    </span>
+
+                    <span class="detail-value">
+                        {{ coupon.created_at|date:"d M Y, h:i A" }}
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <div class="coupon-detail-actions">
+
+                <a
+                    href="{% url 'customadmin:coupon_management' %}"
+                    class="back-btn"
+                >
+                    ← Back to Coupons
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

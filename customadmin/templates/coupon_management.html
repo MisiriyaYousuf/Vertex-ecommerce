@@ -359,6 +359,12 @@
     cursor: pointer;
 }
 
+.view-btn {
+    border: 1px solid #d5e2f3;
+    background: #f3f8ff;
+    color: #3974b8;
+}
+
 .edit-btn {
     border: 1px solid #d9d5f3;
     background: #f6f4ff;
@@ -1040,6 +1046,30 @@
                                 <td>
 
                                     <div class="coupon-actions">
+
+                                        <!--View-->
+
+                                            <form
+                                                method="POST"
+                                                action="{% url 'customadmin:view_coupon' %}"
+                                            >
+                                                {% csrf_token %}
+
+                                                <input
+                                                    type="hidden"
+                                                    name="coupon_id"
+                                                    value="{{ coupon.id }}"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="action-btn view-btn"
+                                                >
+                                                    View
+                                                </button>
+
+                                            </form>
+
 
 
                                        <!-- EDIT -->
