@@ -2868,9 +2868,7 @@ def edit_coupon(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    coupon_id = request.POST.get(
-        "coupon_id"
-    )
+    coupon_id = request.POST.get("coupon_id")
 
     if not coupon_id:
         messages.error(
@@ -2896,6 +2894,28 @@ def edit_coupon(request):
             "customadmin:coupon_management"
         )
 
+    if request.POST.get("action") == "load":
+
+        form = CouponForm(
+            instance=coupon
+        )
+
+        coupons = Coupon.objects.all().order_by(
+            "-created_at"
+        )
+
+        return render(
+            request,
+            "coupon_management.html",
+            {
+                "coupons": coupons,
+                "form": form,
+                "search": "",
+                "edit_coupon_id": coupon.id,
+                "coupon": coupon,
+            }
+        )
+    
     form = CouponForm(
         request.POST,
         instance=coupon
@@ -2929,6 +2949,7 @@ def edit_coupon(request):
             "coupon": coupon,
         }
     )
+
 
 @never_cache
 @login_required
