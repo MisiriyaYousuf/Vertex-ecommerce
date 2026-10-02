@@ -1042,27 +1042,33 @@
                                     <div class="coupon-actions">
 
 
-                                       <!--Edit-->
+                                       <!-- EDIT -->
 
-                                       <form
-                                            method="POST"
-                                            action="{% url 'customadmin:edit_coupon' %}"
-                                        >
-                                            {% csrf_token %}
-
-                                            <input
-                                                type="hidden"
-                                                name="coupon_id"
-                                                value="{{ coupon.id }}"
+                                            <form
+                                                method="POST"
+                                                action="{% url 'customadmin:edit_coupon' %}"
                                             >
+                                                {% csrf_token %}
 
-                                            <button
-                                                type="submit"
-                                                class="action-btn edit-btn"
-                                            >
-                                                Edit
-                                            </button>
-                                        </form>
+                                                <input
+                                                    type="hidden"
+                                                    name="coupon_id"
+                                                    value="{{ coupon.id }}"
+                                                >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="action"
+                                                    value="load"
+                                                >
+
+                                                <button
+                                                    type="submit"
+                                                    class="action-btn edit-btn"
+                                                >
+                                                    Edit
+                                                </button>
+                                            </form>
                                         
                                         <!-- DELETE -->
 
