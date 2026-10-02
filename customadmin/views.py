@@ -2860,6 +2860,50 @@ def coupon_management(request):
 
 @never_cache
 @login_required
+def view_coupon(request):
+
+    if not request.user.is_superuser:
+        return redirect("users:home")
+
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    coupon_id = request.POST.get("coupon_id")
+
+    if not coupon_id:
+        messages.error(
+            request,
+            "Coupon ID is required."
+        )
+
+        return redirect(
+            "customadmin:coupon_management"
+        )
+
+    coupon = Coupon.objects.filter(
+        id=coupon_id
+    ).first()
+
+    if not coupon:
+        messages.error(
+            request,
+            "Coupon not found."
+        )
+
+        return redirect(
+            "customadmin:coupon_management"
+        )
+
+    return render(
+        request,
+        "coupon_detail.html",
+        {
+            "coupon": coupon,
+        }
+    )
+
+@never_cache
+@login_required
 def edit_coupon(request):
 
     if not request.user.is_superuser:
