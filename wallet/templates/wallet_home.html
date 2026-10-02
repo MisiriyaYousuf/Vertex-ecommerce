@@ -1,0 +1,42 @@
+{% extends "user_base.html" %}
+
+{% block title %}My Wallet{% endblock %}
+
+{% block content %}
+<main style="max-width: 960px; margin: 40px auto; padding: 24px; color: #fff;">
+    <h1>My Wallet</h1>
+    <section style="padding: 24px; margin: 20px 0; border-radius: 14px; background: #291c38;">
+        <p>Available balance</p>
+        <strong style="font-size: 2rem;">₹{{ wallet.balance|floatformat:2 }}</strong>
+    </section>
+
+    <h2>Wallet activity</h2>
+    {% if transactions.object_list %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead><tr><th>Date</th><th>Activity</th><th>Order</th><th>Amount</th><th>Balance</th></tr></thead>
+                <tbody>
+                {% for entry in transactions %}
+                    <tr>
+                        <td>{{ entry.created_at|date:"d M Y, H:i" }}</td>
+                        <td>{{ entry.get_transaction_type_display }}{% if entry.description %}<br><small>{{ entry.description }}</small>{% endif %}</td>
+                        <td>{% if entry.order_id %}#{{ entry.order_id }}{% else %}—{% endif %}</td>
+                        <td>{% if entry.transaction_type == "PURCHASE" %}−{% else %}+{% endif %}₹{{ entry.amount|floatformat:2 }}</td>
+                        <td>₹{{ entry.balance_after|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if transactions.has_other_pages %}
+            <nav>
+                {% if transactions.has_previous %}<a href="?page={{ transactions.previous_page_number }}">Previous</a>{% endif %}
+                <span>Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
+                {% if transactions.has_next %}<a href="?page={{ transactions.next_page_number }}">Next</a>{% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <p>No wallet activity yet.</p>
+    {% endif %}
+</main>
+{% endblock %}

@@ -13,6 +13,7 @@ class CheckoutForm(forms.Form):
         choices=[
             ("COD", "Cash on Delivery"),
             ("RAZORPAY", "Online Payment"),
+            ("WALLET", "Wallet"),
 
         ],
         widget=forms.RadioSelect

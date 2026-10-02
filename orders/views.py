@@ -37,6 +37,14 @@ import razorpay
 from django.conf import settings
 from django.urls import reverse
 from orders.models import Coupon,CouponUsage
+from wallet.models import ReturnRequest, Wallet, WalletTransaction
+from wallet.forms import ReturnRequestForm
+from wallet.services import (
+    credit_item_refund,
+    debit_wallet_for_order,
+    get_wallet,
+    mark_fully_refunded,
+)
 
 
 MAX_CART_QUANTITY = 5
@@ -539,6 +547,7 @@ def checkout(request):
         + tax
         + shipping_charge
     )
+    wallet = get_wallet(request.user)
     total_items = sum(
         item.quantity
         for item in cart_items
@@ -563,6 +572,13 @@ def checkout(request):
             payment_method = form.cleaned_data[
                 "payment_method"
             ]
+
+            if payment_method == "WALLET" and wallet.balance < total_amount:
+                messages.error(
+                    request,
+                    "Your wallet balance is not enough for this order. Choose another payment method or add funds through refunds.",
+                )
+                return redirect("orders:checkout")
 
             if (
                 address.user_id != request.user.id
@@ -649,6 +665,8 @@ def checkout(request):
         "payment_method": selected_payment_method,
 
         "payment_method_display": payment_method_display,
+
+        "wallet_balance": wallet.balance,
 
     }
 
@@ -1527,6 +1545,8 @@ def place_order(request):
         return redirect(
             "orders:razorpay_payment"
         )
+    if payment_method == "WALLET":
+        return place_cod_order(request)
     return place_cod_order(request)
 
 @login_required
@@ -1547,7 +1567,7 @@ def place_cod_order(request):
         "checkout_delivery_date"
     )
 
-    if payment_method != "COD":
+    if payment_method not in ["COD", "WALLET"]:
 
         return redirect(
             "orders:order_detail"
@@ -1980,13 +2000,19 @@ def place_cod_order(request):
         + shipping_charge
     )
 
+    if payment_method == "WALLET":
+        wallet = Wallet.objects.select_for_update().filter(user=request.user).first()
+        if not wallet or wallet.balance < total_amount:
+            messages.error(request, "Your wallet balance is not enough for this order.")
+            return redirect("orders:checkout")
+
     order = Order.objects.create(
 
         user=request.user,
 
         address=address,
 
-        payment_method="COD",
+        payment_method=payment_method,
 
         payment_status="Paid",
 
@@ -2007,6 +2033,9 @@ def place_cod_order(request):
 
         total_amount=total_amount,
     )
+
+    if payment_method == "WALLET":
+        debit_wallet_for_order(request.user, order)
 
     for item in validated_items:
 
@@ -4231,7 +4260,15 @@ def cancel_order(request):
                 ]
             )
 
+            if locked_order.payment_status == "Paid":
+                credit_item_refund(
+                    item,
+                    WalletTransaction.CANCEL_REFUND,
+                    f"Cancellation refund for order #{locked_order.pk}",
+                )
+
         update_status(locked_order)
+        mark_fully_refunded(locked_order)
 
     request.session[
         "last_cancelled_order_id"
@@ -4369,9 +4406,9 @@ def return_order(request):
         )
 
     returnable_items = list(
-         OrderItem.objects 
-         .filter( order=order,
-          status="Delivered", ) 
+        OrderItem.objects
+            .filter(order=order, status="Delivered")
+            .exclude(return_request__status=ReturnRequest.PENDING)
           .select_related(
              "product",
              "product__main_image",
@@ -4481,12 +4518,8 @@ def return_order(request):
             },
         )
 
-    return_reason = request.POST.get(
-        "return_reason",
-        ""
-    ).strip()
-
-    if not return_reason:
+    return_form = ReturnRequestForm(request.POST)
+    if not return_form.is_valid():
 
         messages.error(
             request,
@@ -4499,10 +4532,12 @@ def return_order(request):
             {
                 "order": order,
                 "returnable_items": returnable_items,
+                "return_form": return_form,
             },
         )
 
-    returned_any = False
+    return_reason = return_form.cleaned_data["return_reason"]
+    requested_any = False
 
     for item_id in selected_items:
 
@@ -4515,64 +4550,24 @@ def return_order(request):
         if not item:
             continue
 
-        if item.variant_id:
-
-            variant = (
-                ProductVariant.objects
-                .select_for_update()
-                .filter(
-                    id=item.variant_id,
-                    product_id=item.product_id,
-                )
-                .first()
-            )
-
-            if variant:
-
-                variant.quantity += item.quantity
-
-                variant.save(
-                    update_fields=[
-                        "quantity",
-                        "updated_at",
-                    ]
-                )
-
-        else:
-
-            product = (
-                Product.objects
-                .select_for_update()
-                .filter(
-                    id=item.product_id
-                )
-                .first()
-            )
-
-            if product:
-
-                product.quantity += item.quantity
-
-                product.save(
-                    update_fields=[
-                        "quantity",
-                        "updated_at",
-                    ]
-                )
-
-        item.return_reason = return_reason
-        item.status = "Returned"
-
-        item.save(
-            update_fields=[
-                "return_reason",
-                "status",
-            ]
+        return_request, created = ReturnRequest.objects.get_or_create(
+            order_item=item,
+            defaults={"reason": return_reason},
         )
+        if not created and return_request.status == ReturnRequest.REJECTED:
+            return_request.reason = return_reason
+            return_request.status = ReturnRequest.PENDING
+            return_request.reviewed_by = None
+            return_request.reviewed_at = None
+            return_request.review_note = ""
+            return_request.save(update_fields=[
+                "reason", "status", "reviewed_by", "reviewed_at", "review_note"
+            ])
+        elif not created:
+            continue
+        requested_any = True
 
-        returned_any = True
-
-    if not returned_any:
+    if not requested_any:
 
         messages.error(
             request,
@@ -4588,15 +4583,13 @@ def return_order(request):
             },
         )
 
-    update_status(order)
-
     request.session[
         "return_success_order_id"
     ] = order.id
 
     messages.success(
         request,
-        "Selected product(s) returned successfully."
+        "Return request submitted. The refund will be added to your wallet after admin approval."
     )
 
     return redirect(

@@ -19,6 +19,8 @@ from django.db.models.functions import Coalesce
 from django.db.models import Sum
 from orders.views import update_status
 from orders.models import Coupon
+from wallet.models import WalletTransaction
+from wallet.services import credit_item_refund, mark_fully_refunded
 
 @login_required
 @never_cache
@@ -2208,9 +2210,14 @@ def update_order_status(request):
             request,
             "Invalid item status."
         )
-        return redirect(
-            "customadmin:order_management"
+        return redirect("customadmin:order_management")
+
+    if new_status == "Returned":
+        messages.error(
+            request,
+            "Create a customer return request and approve it in Django Admin → Wallet → Return requests so the refund is recorded.",
         )
+        return redirect("customadmin:order_management")
 
     order = (
         Order.objects
@@ -2310,6 +2317,13 @@ def update_order_status(request):
             ]
         )
 
+        if order.payment_status == "Paid":
+            credit_item_refund(
+                item,
+                WalletTransaction.CANCEL_REFUND,
+                f"Cancellation refund for order #{order.pk}",
+            )
+
     # -------------------------------------------------
     # RETURN ITEM
     # -------------------------------------------------
@@ -2368,6 +2382,7 @@ def update_order_status(request):
     # -------------------------------------------------
 
     update_status(order)
+    mark_fully_refunded(order)
 
     messages.success(
         request,

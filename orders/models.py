@@ -9,6 +9,7 @@ class Order(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ("COD", "Cash on Delivery"),
         ("RAZORPAY", "Online Payment"),
+        ("WALLET", "Wallet"),
     ]
 
     PAYMENT_STATUS_CHOICES = [

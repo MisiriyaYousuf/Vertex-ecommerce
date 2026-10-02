@@ -1920,6 +1920,29 @@ Checkout
 
                         </label>
 
+                        <!-- WALLET -->
+                        <label
+                            class="payment-option {% if payment_method == 'WALLET' %}selected{% endif %}"
+                            onclick="selectPayment(this)"
+                        >
+                            <input
+                                class="payment-radio"
+                                type="radio"
+                                name="payment_method"
+                                value="WALLET"
+                                {% if payment_method == "WALLET" %}checked{% endif %}
+                            >
+                            <div class="payment-icon">👛</div>
+                            <div class="payment-content">
+                                <div class="payment-title">Wallet</div>
+                                <div class="payment-description">
+                                    Balance: ₹{{ wallet_balance|floatformat:2 }}
+                                    · <a href="{% url 'wallet:home' %}">View wallet</a>
+                                </div>
+                            </div>
+                            <div class="payment-check">✓</div>
+                        </label>
+
 
                         <!-- RAZORPAY -->
 
@@ -1984,6 +2007,11 @@ Checkout
 
                                 You will be redirected to Razorpay
                                 to complete your payment securely.
+
+                            {% elif payment_method == "WALLET" %}
+
+                                Pay using your wallet balance of
+                                ₹{{ wallet_balance|floatformat:2 }}.
 
                             {% else %}
 
@@ -2301,6 +2329,10 @@ Checkout
                             {% if payment_method == "RAZORPAY" %}
 
                                 Continue to Payment
+
+                            {% elif payment_method == "WALLET" %}
+
+                                Pay with Wallet
 
                             {% else %}
 
@@ -2780,6 +2812,11 @@ function updatePaymentInformation(
             "You will be redirected to Razorpay " +
             "to complete your payment securely.";
 
+    } else if (paymentMethod === "WALLET") {
+
+        paymentInfoText.textContent =
+            "The order total will be deducted from your wallet balance.";
+
     } else {
 
         paymentInfoText.textContent =
@@ -2817,6 +2854,10 @@ function updatePaymentButton(
         buttonText.textContent =
             "Continue to Payment";
 
+    } else if (paymentMethod === "WALLET") {
+
+        buttonText.textContent = "Pay with Wallet";
+
     } else {
 
         buttonText.textContent =
@@ -2852,6 +2893,10 @@ function updatePaymentSummary(
 
         summaryPaymentMethod.textContent =
             "Online Payment";
+
+    } else if (paymentMethod === "WALLET") {
+
+        summaryPaymentMethod.textContent = "Wallet";
 
     } else {
 

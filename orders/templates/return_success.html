@@ -97,7 +97,7 @@
 
 
     <p>
-        Your return request has been submitted successfully.
+        Your return request has been submitted. Once an administrator approves it, the refund will be credited to your wallet.
     </p>
 
 
@@ -112,6 +112,14 @@
         class="orders-btn"
     >
         View Orders
+    </a>
+
+    <a
+        href="{% url 'wallet:home' %}"
+        class="orders-btn"
+        style="margin-left: 8px;"
+    >
+        View Wallet
     </a>
 
 </div>
