@@ -214,6 +214,10 @@
             <i class="fas fa-users"></i>Coupon Management
         </a>
 
+        <a href="{% url 'customadmin:offer_management' %}" class="{% if request.resolver_match.url_name == 'offer_management' %}active{% endif %}">
+            <i class="fas fa-tags"></i>Offer Management
+        </a>
+
         <a href="{% url 'customadmin:category_management' %}" class="{% if request.resolver_match.url_name in 'category_management,edit_category' %}active{% endif %}">
             <i class="fas fa-tags"></i>Category Management
         </a>

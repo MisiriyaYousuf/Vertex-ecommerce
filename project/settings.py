@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'cart',
     'orders',
     'wallet',
+    'offers.apps.OffersConfig',
 
     'allauth',
     'allauth.account',

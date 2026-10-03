@@ -1,0 +1,48 @@
+{% extends "user_base.html" %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 960px; color: #fff;">
+    <div class="p-4 rounded-3 mb-4" style="background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.16);">
+        <h1 class="h3 mb-3">Invite friends and earn rewards</h1>
+        <p class="mb-3">Share your link or referral code. When a friend verifies a new account with it, you receive a single-use coupon.</p>
+        <label class="form-label" for="referral-code">Your referral code</label>
+        <div class="input-group mb-3">
+            <input id="referral-code" class="form-control" value="{{ referral_profile.code }}" readonly>
+            <button class="btn btn-light" type="button" onclick="copyValue('referral-code')">Copy code</button>
+        </div>
+        <label class="form-label" for="referral-link">Your invitation link</label>
+        <div class="input-group">
+            <input id="referral-link" class="form-control" value="{{ invite_url }}" readonly>
+            <button class="btn btn-light" type="button" onclick="copyValue('referral-link')">Copy link</button>
+        </div>
+    </div>
+
+    <div class="p-4 rounded-3" style="background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.16);">
+        <h2 class="h4 mb-3">Your referral coupons</h2>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead><tr><th>Friend</th><th>Coupon</th><th>Reward</th><th>Expires</th></tr></thead>
+                <tbody>
+                    {% for reward in rewards %}
+                        <tr>
+                            <td>{{ reward.referred_user.get_full_name|default:reward.referred_user.username }}</td>
+                            <td><strong>{{ reward.coupon.code }}</strong></td>
+                            <td>{% if reward.coupon.discount_type == "PERCENTAGE" %}{{ reward.coupon.discount_value }}% off{% else %}₹{{ reward.coupon.discount_value }} off{% endif %}</td>
+                            <td>{{ reward.coupon.end_date }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted py-4">No referral rewards yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyValue(id) {
+    const input = document.getElementById(id);
+    navigator.clipboard.writeText(input.value);
+}
+</script>
+{% endblock %}

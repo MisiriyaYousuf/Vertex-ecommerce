@@ -1,0 +1,78 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Offer Management{% endblock %}
+{% block navbar_title %}Offer Management{% endblock %}
+{% block navbar_icon %}tags{% endblock %}
+
+{% block content %}
+<style>
+    .offer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .offer-card { border: 1px solid #dde3ea; border-radius: 10px; padding: 20px; background: #fff; }
+    .offer-card h3 { font-size: 1.1rem; margin-bottom: 16px; }
+    .offer-table { background: #fff; border-radius: 10px; overflow: hidden; }
+    .status-active { color: #198754; font-weight: 600; }
+    .status-inactive { color: #6c757d; font-weight: 600; }
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<p class="text-muted">For each item, customers receive the larger of its product offer and category offer. Offers never stack.</p>
+
+<div class="offer-grid mb-4">
+    <section class="offer-card">
+        <h3><i class="fas fa-box me-2"></i>Add product offer</h3>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="offer_type" value="product">
+            {% for field in product_offer_form %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Save product offer</button>
+        </form>
+    </section>
+
+    <section class="offer-card">
+        <h3><i class="fas fa-layer-group me-2"></i>Add category offer</h3>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="offer_type" value="category">
+            {% for field in category_offer_form %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Save category offer</button>
+        </form>
+    </section>
+
+    <section class="offer-card">
+        <h3><i class="fas fa-gift me-2"></i>Add referral reward</h3>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="offer_type" value="referral">
+            {% for field in referral_offer_form %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Save referral reward</button>
+        </form>
+    </section>
+</div>
+
+{% include "offer_table.html" with title="Product offers" offers=product_offers offer_type="product" target="product" %}
+{% include "offer_table.html" with title="Category offers" offers=category_offers offer_type="category" target="category" %}
+{% include "offer_table.html" with title="Referral rewards" offers=referral_offers offer_type="referral" target="" %}
+{% endblock %}

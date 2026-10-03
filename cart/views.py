@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 from products.models import Product, ProductVariant
 from .models import Cart, Wishlist
+from offers.services import get_effective_price
 
 MAX_CART_QUANTITY = 5
 
@@ -107,27 +108,13 @@ def cart_view(request):
             item.has_exceeded_stock = True
             has_exceeded_stock_items = True
 
-        if discount_price is not None:
-
-            selling_price = discount_price
-            mrp = sale_price
-
-            discount_per_item = (
-                mrp - selling_price
-            )
-
-            if mrp > 0:
-
-                item.discount_percentage = round(
-                    (discount_per_item / mrp) * 100
-                )
-
-        else:
-
-            selling_price = sale_price
-            mrp = sale_price
-
-            discount_per_item = 0
+        pricing = get_effective_price(product, variant)
+        item.pricing = pricing
+        item.offer_name = pricing.offer_name
+        selling_price = pricing.unit_price
+        mrp = pricing.original_price
+        discount_per_item = pricing.discount_amount
+        item.discount_percentage = pricing.discount_percentage
 
         item.unit_price = selling_price
         item.original_unit_price = mrp
@@ -857,6 +844,9 @@ def wishlist_view(request):
     wishlist_items = wishlist_items.exclude(
         product_id__in=cart_product_ids
     )
+
+    for item in wishlist_items:
+        item.product.pricing = get_effective_price(item.product)
 
     return render(
         request,

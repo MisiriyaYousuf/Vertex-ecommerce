@@ -1720,13 +1720,13 @@
                                 class="current-price product-current-price"
                             >
 
-                                {% if product.discount_price %}
+                                {% if product.pricing.has_discount %}
 
-                                    ₹{{ product.discount_price }}
+                                    ₹{{ product.pricing.unit_price }}
 
                                 {% else %}
 
-                                    ₹{{ product.sale_price }}
+                                    ₹{{ product.pricing.unit_price }}
 
                                 {% endif %}
 
@@ -1736,14 +1736,14 @@
                             <del
                                 class="old-price product-old-price"
 
-                                {% if not product.discount_price %}
+                                {% if not product.pricing.has_discount %}
                                     style="display:none;"
                                 {% endif %}
                             >
 
-                                {% if product.discount_price %}
+                                {% if product.pricing.has_discount %}
 
-                                    ₹{{ product.sale_price }}
+                                    ₹{{ product.pricing.original_price }}
 
                                 {% endif %}
 
@@ -1840,9 +1840,9 @@
 
                                     data-type="product"
 
-                                    data-price="{% if product.discount_price %}{{ product.discount_price }}{% else %}{{ product.sale_price }}{% endif %}"
+                                    data-price="{{ product.pricing.unit_price }}"
 
-                                    data-mrp="{{ product.sale_price }}"
+                                    data-mrp="{{ product.pricing.original_price }}"
 
                                     data-stock="{% if product.quantity > 0 %}1{% else %}0{% endif %}"
 
@@ -1887,9 +1887,9 @@
 
                                                 data-type="variant"
 
-                                                data-price="{% if variant.discount_price %}{{ variant.discount_price }}{% else %}{{ variant.sale_price }}{% endif %}"
+                                                data-price="{{ variant.pricing.unit_price }}"
 
-                                                data-mrp="{{ variant.sale_price }}"
+                                                data-mrp="{{ variant.pricing.original_price }}"
 
                                                 data-stock="{% if variant.quantity > 0 %}1{% else %}0{% endif %}"
 

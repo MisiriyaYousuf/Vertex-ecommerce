@@ -19,6 +19,7 @@ from django.db.models.functions import Coalesce
 from orders.views import update_status
 from orders.models import Coupon
 from wallet.models import CancellationRequest, ReturnRequest, WalletTransaction
+from offers.views import delete_offer, edit_offer, offer_management, toggle_offer
 from wallet.services import (
     approve_cancellation_request,
     approve_return_request,

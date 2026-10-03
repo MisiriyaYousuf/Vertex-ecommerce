@@ -40,6 +40,8 @@ from orders.models import Coupon,CouponUsage
 from wallet.models import CancellationRequest, ReturnRequest, Wallet
 from wallet.forms import ReturnRequestForm
 from wallet.services import debit_wallet_for_order, get_wallet
+from offers.services import get_effective_price
+from offers.models import ReferralReward
 
 
 MAX_CART_QUANTITY = 5
@@ -158,35 +160,17 @@ def get_purchase_label(product, variant=None):
     return ""
 
 def get_product_pricing(product, quantity, variant=None):
-
-    source = variant if variant else product
-
-    if (
-        source.discount_price is not None
-        and source.discount_price < source.sale_price
-    ):
-        unit_price = source.discount_price
-
-        unit_discount = (
-            source.sale_price
-            - source.discount_price
-        )
-
+    pricing = get_effective_price(product, variant)
+    if variant is None:
+        product.pricing = pricing
     else:
-        unit_price = source.sale_price
-        unit_discount = Decimal("0.00")
+        variant.pricing = pricing
 
-    original_total = (
-        source.sale_price * quantity
-    )
-
-    discount_total = (
-        unit_discount * quantity
-    )
-
-    final_total = (
-        unit_price * quantity
-    )
+    unit_price = pricing.unit_price
+    unit_discount = pricing.discount_amount
+    original_total = pricing.original_price * quantity
+    discount_total = unit_discount * quantity
+    final_total = unit_price * quantity
 
     return (
         original_total,
@@ -243,6 +227,15 @@ def get_applied_coupon(request):
     )
 
     if not coupon:
+        request.session.pop(
+            "checkout_coupon_id",
+            None
+        )
+        request.session.modified = True
+        return None
+
+    referral_reward = ReferralReward.objects.filter(coupon=coupon).only("referrer_id").first()
+    if referral_reward and referral_reward.referrer_id != request.user.id:
         request.session.pop(
             "checkout_coupon_id",
             None
@@ -484,6 +477,8 @@ def checkout(request):
             item.quantity,
             item.variant,
         )
+
+        item.pricing = item.variant.pricing if item.variant else item.product.pricing
 
         subtotal += Decimal(
             original_total
@@ -4580,6 +4575,14 @@ def apply_coupon(request):
         return redirect(
             "orders:checkout"
         )
+
+    referral_reward = ReferralReward.objects.filter(coupon=coupon).only("referrer_id").first()
+    if referral_reward and referral_reward.referrer_id != request.user.id:
+        messages.error(
+            request,
+            "This referral coupon belongs to another customer."
+        )
+        return redirect("orders:checkout")
     
     if CouponUsage.objects.filter(
         coupon=coupon,

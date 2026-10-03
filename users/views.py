@@ -22,6 +22,8 @@ from .models import UserProfile,Address,OTP
 from products.models import Product
 from django.db.models import F,Q, Sum,Value
 from django.db.models.functions import Coalesce
+from offers.services import award_referral_coupon
+from offers.services import add_pricing
 
 
 def custom_404(request):
@@ -139,6 +141,7 @@ def signup(request):
                 "email": form.cleaned_data["email"],
                 "password": form.cleaned_data["password1"],
                 "phone": form.cleaned_data["phone"],
+                "referral_code": form.cleaned_data["referral_code"],
             }
 
             otp, otp_code = generate_otp(form.cleaned_data["email"])
@@ -167,7 +170,9 @@ def signup(request):
             return redirect("users:verify_otp")
 
     else:
-        form = forms.SignupForm()
+        form = forms.SignupForm(initial={
+            "referral_code": request.session.get("signup_referral_code", ""),
+        })
 
     return render(request, "signup.html", {"form": form})
 
@@ -287,7 +292,13 @@ def verify_view(request):
                             phone=signup_data["phone"]
                         )
 
+                        award_referral_coupon(
+                            user,
+                            signup_data.get("referral_code", ""),
+                        )
+
                         request.session.pop("signup_data", None)
+                        request.session.pop("signup_referral_code", None)
 
                         messages.success(
                             request,
@@ -593,9 +604,7 @@ def home(request):
         .filter(
             is_deleted=False,
             is_active=True,
-            discount_price__isnull=False,
-            sale_price__isnull=False,
-            discount_price__lt=F("sale_price"),
+            category__is_trashed=False,
         )
         .select_related(
             "category",
@@ -606,8 +615,6 @@ def home(request):
             "variants"
         )
         .annotate(
-            discount_amount=F("sale_price") - F("discount_price"),
-
             variant_stock=Coalesce(
                 Sum(
                     "variants__quantity",
@@ -622,11 +629,13 @@ def home(request):
             total_stock=F("quantity") + F("variant_stock")
         )
         .distinct()
-        .order_by(
-            "-discount_amount",
-            "-id"
-        )[:6]
+        .order_by("-id")
     )
+
+    products = list(products)
+    for product in products:
+        add_pricing(product)
+    products = [product for product in products if product.pricing.has_discount][:6]
 
     return render(
         request,

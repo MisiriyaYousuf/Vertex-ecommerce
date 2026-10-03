@@ -1421,63 +1421,22 @@
 
                                 <div class="price-row">
 
-                                    {% if item.variant %}
+                                    <span class="current-price">
+                                        ₹{{ item.unit_price }}
+                                    </span>
 
-                                
-                                        {% if item.variant.discount_price %}
+                                    {% if item.pricing.has_discount %}
+                                        <span class="mrp">
+                                            MRP ₹{{ item.original_unit_price }}
+                                        </span>
 
-                                            <span class="current-price">
-                                                ₹{{ item.variant.discount_price }}
-                                            </span>
+                                        <span class="discount">
+                                            {{ item.discount_percentage }}% OFF
+                                        </span>
 
-                                            <span class="mrp">
-                                                MRP ₹{{ item.variant.sale_price }}
-                                            </span>
-
-                                            {% if item.discount_percentage %}
-
-                                                <span class="discount">
-                                                    {{ item.discount_percentage }}% OFF
-                                                </span>
-
-                                            {% endif %}
-
-                                        {% else %}
-
-                                            <span class="current-price">
-                                                ₹{{ item.variant.sale_price }}
-                                            </span>
-
+                                        {% if item.offer_name %}
+                                            <span class="discount">{{ item.offer_name }}</span>
                                         {% endif %}
-
-                                    {% else %}
-
-                                        {% if item.product.discount_price %}
-
-                                            <span class="current-price">
-                                                ₹{{ item.product.discount_price }}
-                                            </span>
-
-                                            <span class="mrp">
-                                                MRP ₹{{ item.product.sale_price }}
-                                            </span>
-
-                                            {% if item.discount_percentage %}
-
-                                                <span class="discount">
-                                                    {{ item.discount_percentage }}% OFF
-                                                </span>
-
-                                            {% endif %}
-
-                                        {% else %}
-
-                                            <span class="current-price">
-                                                ₹{{ item.product.sale_price }}
-                                            </span>
-
-                                        {% endif %}
-
                                     {% endif %}
 
                                 </div>

@@ -1804,19 +1804,19 @@ Checkout
 
                             <div class="checkout-product-price">
 
-                                {% if item.product.discount_price is not None and item.product.discount_price < item.product.sale_price %}
+                                {% if item.pricing.has_discount %}
 
-                                    ₹{{ item.product.discount_price|floatformat:2 }}
+                                    ₹{{ item.pricing.unit_price|floatformat:2 }}
 
                                     <span class="checkout-product-original-price">
 
-                                        ₹{{ item.product.sale_price|floatformat:2 }}
+                                        ₹{{ item.pricing.original_price|floatformat:2 }}
 
                                     </span>
 
                                 {% else %}
 
-                                    ₹{{ item.product.sale_price|floatformat:2 }}
+                                    ₹{{ item.pricing.unit_price|floatformat:2 }}
 
                                 {% endif %}
 

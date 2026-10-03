@@ -869,20 +869,20 @@
 
                 <div class="wishlist-price">
 
-                    {% if item.product.discount_price %}
+                    {% if item.product.pricing.has_discount %}
 
                         <span class="wishlist-current-price">
 
-                            ₹{{ item.product.discount_price }}
+                            ₹{{ item.product.pricing.unit_price }}
 
                         </span>
 
 
-                        {% if item.product.sale_price %}
+                        {% if item.product.pricing.has_discount %}
 
                             <del class="wishlist-old-price">
 
-                                ₹{{ item.product.sale_price }}
+                                ₹{{ item.product.pricing.original_price }}
 
                             </del>
 
@@ -892,7 +892,7 @@
 
                         <span class="wishlist-current-price">
 
-                            ₹{{ item.product.sale_price }}
+                            ₹{{ item.product.pricing.unit_price }}
 
                         </span>
 

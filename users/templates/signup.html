@@ -180,6 +180,36 @@
     <br>
 
 
+    <!-- Referral code -->
+    <div class="field-group" id="field-referral_code">
+
+        <label for="id_referral_code">
+            <i class="fas fa-gift"></i> Referral code <span class="text-muted">(optional)</span>
+        </label>
+
+        <input
+            type="text"
+            id="id_referral_code"
+            name="referral_code"
+            placeholder="Referral code (optional)"
+            value="{{ form.referral_code.value|default_if_none:'' }}"
+            maxlength="16"
+            autocomplete="off"
+            style="text-transform: uppercase;"
+        >
+
+        {% if form.referral_code.errors %}
+            <div class="error-text">
+                {{ form.referral_code.errors.0 }}
+            </div>
+        {% endif %}
+
+    </div>
+
+
+    <br>
+
+
     <!-- Password -->
     <div class="field-group" id="field-password1">
 

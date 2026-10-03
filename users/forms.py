@@ -4,6 +4,7 @@ from .models import UserProfile
 from django.core.exceptions import ValidationError
 import re
 from .models import Address
+from offers.models import ReferralProfile
 
 class SignupForm(forms.Form):
 
@@ -13,10 +14,15 @@ class SignupForm(forms.Form):
     password1 = forms.CharField(label='New Password',widget=forms.PasswordInput(attrs={'placeholder': 'Enter New Password','class': 'form-control'}))
     password2 = forms.CharField(label='Confirm Password',widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password','class': 'form-control'}))
     phone = forms.CharField(max_length=15,required=True,widget=forms.TextInput(attrs={'placeholder': 'Phone Number','class': 'form-control'}))
+    referral_code = forms.CharField(
+        max_length=16,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Referral code (optional)', 'class': 'form-control'}),
+    )
     
     class Meta:
         model = User
-        fields = ['first_name','last_name','email','password1','password2','phone']
+        fields = ['first_name','last_name','email','password1','password2','phone','referral_code']
 
 
     def clean_first_name(self):
@@ -115,6 +121,12 @@ class SignupForm(forms.Form):
             raise ValidationError("This mobile number is already registered.")
 
         return phone
+
+    def clean_referral_code(self):
+        referral_code = self.cleaned_data.get("referral_code", "").strip().upper()
+        if referral_code and not ReferralProfile.objects.filter(code__iexact=referral_code).exists():
+            raise ValidationError("This referral code is not valid.")
+        return referral_code
 
 
 class OTPVerificationForm(forms.Form):

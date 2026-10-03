@@ -1539,10 +1539,10 @@
     id="display-product-price"
     class="product-price"
 >
-    {% if product.discount_price %}
-        ₹{{ product.discount_price }}
+    {% if product.pricing.has_discount %}
+        ₹{{ product.pricing.unit_price }}
     {% else %}
-        ₹{{ product.sale_price }}
+        ₹{{ product.pricing.unit_price }}
     {% endif %}
 </span>
 
@@ -1550,12 +1550,12 @@
 <del
     id="display-old-price"
     class="old-price"
-    {% if not product.discount_price %}
+    {% if not product.pricing.has_discount %}
         style="display:none;"
     {% endif %}
 >
-    {% if product.discount_price %}
-        ₹{{ product.sale_price }}
+    {% if product.pricing.has_discount %}
+        ₹{{ product.pricing.original_price }}
     {% endif %}
 </del>
 
@@ -1563,11 +1563,11 @@
 <span
     id="display-discount-label"
     class="discount-label"
-    {% if not product.discount_price %}
+    {% if not product.pricing.has_discount %}
         style="display:none;"
     {% endif %}
 >
-    Special Price
+    Best available offer
 </span>
 
 </div>
@@ -1580,7 +1580,7 @@
 <div
     id="offer-box"
     class="offer-box"
-    {% if not product.discount_price %}
+    {% if not product.pricing.has_discount %}
         style="display:none;"
     {% endif %}
 >
@@ -1590,7 +1590,7 @@
 </div>
 
 <div class="offer-text">
-    Save more on this product with the current discounted price.
+    {{ product.pricing.offer_name }} gives you {{ product.pricing.discount_percentage }}% off.
 </div>
 
 </div>
@@ -1952,11 +1952,11 @@ Add to Cart
 
     data-code="{{ product.product_code|default:''|escapejs }}"
 
-    data-price="{% if product.discount_price %}{{ product.discount_price }}{% else %}{{ product.sale_price }}{% endif %}"
+    data-price="{{ product.pricing.unit_price }}"
 
-    data-old-price="{% if product.discount_price %}{{ product.sale_price }}{% endif %}"
+    data-old-price="{% if product.pricing.has_discount %}{{ product.pricing.original_price }}{% endif %}"
 
-    data-discounted="{% if product.discount_price %}true{% else %}false{% endif %}"
+    data-discounted="{% if product.pricing.has_discount %}true{% else %}false{% endif %}"
 
     onclick="showBaseProduct(this)"
 
@@ -2011,11 +2011,11 @@ Add to Cart
 
     data-code="{{ variant.product_code|default:''|escapejs }}"
 
-    data-price="{% if variant.discount_price %}{{ variant.discount_price }}{% elif product.discount_price %}{{ product.discount_price }}{% else %}{{ product.sale_price }}{% endif %}"
+    data-price="{{ variant.pricing.unit_price }}"
 
-    data-old-price="{% if variant.discount_price %}{{ variant.sale_price }}{% elif product.discount_price %}{{ product.sale_price }}{% endif %}"
+    data-old-price="{% if variant.pricing.has_discount %}{{ variant.pricing.original_price }}{% endif %}"
 
-    data-discounted="{% if variant.discount_price or product.discount_price %}true{% else %}false{% endif %}"
+    data-discounted="{% if variant.pricing.has_discount %}true{% else %}false{% endif %}"
 
     onclick="showVariant(this)"
 
@@ -2363,20 +2363,20 @@ Add to Cart
 
 <div class="mb-2">
 
-{% if related_product.discount_price %}
+{% if related_product.pricing.has_discount %}
 
 <span class="related-price">
-    ₹{{ related_product.discount_price }}
+    ₹{{ related_product.pricing.unit_price }}
 </span>
 
 <del class="text-muted small ms-1">
-    ₹{{ related_product.sale_price }}
+    ₹{{ related_product.pricing.original_price }}
 </del>
 
 {% else %}
 
 <span class="related-price">
-    ₹{{ related_product.sale_price }}
+    ₹{{ related_product.pricing.unit_price }}
 </span>
 
 {% endif %}

@@ -6,6 +6,7 @@ from django.db.models import Exists, OuterRef, Q,Prefetch
 from cart.views import MAX_CART_QUANTITY
 from customadmin.models import Category
 from .models import Product, ProductVariant,ProductImage,ProductVariantImage
+from offers.services import add_pricing
 
 
 @never_cache
@@ -203,6 +204,11 @@ def products(request):
     products_page = paginator.get_page(
         page_number,
     )
+
+    for product in products_page:
+        add_pricing(product)
+        for variant in product.variants.all():
+            add_pricing(product, variant)
     context = {
 
         "products": products_page,
@@ -299,6 +305,13 @@ def products_details(request, name):
         )
         .distinct()[:8]
     )
+
+    add_pricing(product)
+    for variant in variants:
+        add_pricing(product, variant)
+    for related_product in related_products:
+        add_pricing(related_product)
+
     return render(
         request,
         "products_details.html",
