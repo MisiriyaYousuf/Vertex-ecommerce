@@ -1,0 +1,590 @@
+{% extends "admin_base.html" %}
+
+{% block title %}
+Sales Report
+{% endblock %}
+
+{% block navbar_icon %}
+chart-line
+{% endblock %}
+
+{% block navbar_title %}
+Sales Report
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+
+    .sales-header {
+        margin-bottom: 25px;
+    }
+
+    .sales-header h2 {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .filter-card {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        margin-bottom: 25px;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+
+    .summary-label {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .summary-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .report-table {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .report-table table {
+        margin-bottom: 0;
+    }
+
+    .report-table thead {
+        background: #2c3e50;
+        color: white;
+    }
+
+    .download-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .custom-date-fields {
+        display: none;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="sales-header">
+
+    <h2>
+        <i class="fas fa-chart-line me-2"></i>
+        Sales Report
+    </h2>
+
+    <p class="text-muted">
+        Generate and download sales reports
+        based on your selected date range.
+    </p>
+
+</div>
+
+
+<!-- FILTER -->
+
+<div class="filter-card">
+
+    <form method="get">
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+
+                <label class="form-label">
+                    Report Type
+                </label>
+
+                {{ form.report_type }}
+
+            </div>
+
+
+            <div class="col-md-3" id="date_field">
+
+                <label class="form-label">
+                    Date
+                </label>
+
+                {{ form.date }}
+
+            </div>
+
+
+            <div class="col-md-3" id="month_field">
+
+                <label class="form-label">
+                    Month
+                </label>
+
+                {{ form.month }}
+
+            </div>
+
+
+            <div class="col-md-3" id="year_field">
+
+                <label class="form-label">
+                    Year
+                </label>
+
+                {{ form.year }}
+
+            </div>
+
+
+            <div
+                class="col-md-3 custom-date-fields"
+                id="start_date_field"
+            >
+
+                <label class="form-label">
+                    Start Date
+                </label>
+
+                {{ form.start_date }}
+
+            </div>
+
+
+            <div
+                class="col-md-3 custom-date-fields"
+                id="end_date_field"
+            >
+
+                <label class="form-label">
+                    End Date
+                </label>
+
+                {{ form.end_date }}
+
+            </div>
+
+
+            <div class="col-md-2 d-flex align-items-end">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary w-100"
+                >
+
+                    <i class="fas fa-filter me-1"></i>
+
+                    Generate
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        {% if form.non_field_errors %}
+
+            <div class="alert alert-danger mt-3">
+
+                {{ form.non_field_errors }}
+
+            </div>
+
+        {% endif %}
+
+    </form>
+
+</div>
+
+
+{% if report_generated %}
+
+
+<!-- REPORT INFORMATION -->
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div>
+
+        <h4>
+            {{ report_title }}
+        </h4>
+
+        <span class="text-muted">
+
+            {{ start_date }}
+            -
+            {{ end_date }}
+
+        </span>
+
+    </div>
+
+
+    <div class="download-buttons">
+
+        <a
+            href="{% url 'sales:sales_report_pdf' %}?{{ request.GET.urlencode }}"
+            class="btn btn-danger"
+        >
+
+            <i class="fas fa-file-pdf me-1"></i>
+
+            PDF
+
+        </a>
+
+
+        <a
+            href="{% url 'sales:sales_report_excel' %}?{{ request.GET.urlencode }}"
+            class="btn btn-success"
+        >
+
+            <i class="fas fa-file-excel me-1"></i>
+
+            Excel
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- SUMMARY CARDS -->
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Overall Sales Count
+            </div>
+
+            <div class="summary-value">
+                {{ sales_count }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Overall Order Amount
+            </div>
+
+            <div class="summary-value">
+                ₹ {{ order_amount|floatformat:2 }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Product Discount
+            </div>
+
+            <div class="summary-value">
+                ₹ {{ product_discount|floatformat:2 }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Coupon Discount
+            </div>
+
+            <div class="summary-value">
+                ₹ {{ coupon_discount|floatformat:2 }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Overall Discount
+            </div>
+
+            <div class="summary-value">
+                ₹ {{ overall_discount|floatformat:2 }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Net Sales
+            </div>
+
+            <div class="summary-value">
+                ₹ {{ net_sales|floatformat:2 }}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ORDERS -->
+
+<div class="report-table">
+
+    <div class="p-3">
+
+        <h5 class="mb-0">
+            Orders
+        </h5>
+
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle">
+
+            <thead>
+
+                <tr>
+
+                    <th>Order</th>
+
+                    <th>Customer</th>
+
+                    <th>Date</th>
+
+                    <th>Payment</th>
+
+                    <th>Status</th>
+
+                    <th class="text-end">
+                        Amount
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for order in orders %}
+
+                <tr>
+
+                    <td>
+                        #{{ order.id }}
+                    </td>
+
+                    <td>
+                        {{ order.user.username }}
+                    </td>
+
+                    <td>
+                        {{ order.created_at|date:"d M Y" }}
+                    </td>
+
+                    <td>
+                        {{ order.payment_method }}
+                    </td>
+
+                    <td>
+                        {{ order.status }}
+                    </td>
+
+                    <td class="text-end">
+
+                        ₹ {{ order.total_amount|floatformat:2 }}
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="text-center py-4"
+                    >
+
+                        No sales found for
+                        the selected period.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+    function updateReportFields() {
+
+        const reportType =
+            document.getElementById(
+                "report_type"
+            ).value;
+
+
+        const dateField =
+            document.getElementById(
+                "date_field"
+            );
+
+        const monthField =
+            document.getElementById(
+                "month_field"
+            );
+
+        const yearField =
+            document.getElementById(
+                "year_field"
+            );
+
+        const startDateField =
+            document.getElementById(
+                "start_date_field"
+            );
+
+        const endDateField =
+            document.getElementById(
+                "end_date_field"
+            );
+
+
+        dateField.style.display = "none";
+
+        monthField.style.display = "none";
+
+        yearField.style.display = "none";
+
+        startDateField.style.display = "none";
+
+        endDateField.style.display = "none";
+
+
+        if (
+            reportType === "daily" ||
+            reportType === "weekly"
+        ) {
+
+            dateField.style.display = "block";
+
+        }
+
+
+        else if (
+            reportType === "monthly"
+        ) {
+
+            monthField.style.display = "block";
+
+        }
+
+
+        else if (
+            reportType === "yearly"
+        ) {
+
+            yearField.style.display = "block";
+
+        }
+
+
+        else if (
+            reportType === "custom"
+        ) {
+
+            startDateField.style.display = "block";
+
+            endDateField.style.display = "block";
+
+        }
+
+    }
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        updateReportFields
+    );
+
+
+    document.getElementById(
+        "report_type"
+    ).addEventListener(
+        "change",
+        updateReportFields
+    );
+
+</script>
+
+{% endblock %}

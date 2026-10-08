@@ -85,6 +85,12 @@ class Order(models.Model):
         default=0
     )
 
+    coupon_discount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0
+    )
+
     tax = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -111,6 +117,8 @@ class Order(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True
     )
+
+    
 
 class OrderItem(models.Model):
 

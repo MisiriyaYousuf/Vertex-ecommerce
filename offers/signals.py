@@ -11,7 +11,6 @@ def create_referral_profile(sender, instance, created, **kwargs):
     if not created:
         return
 
-    # The unique constraint protects against the extremely unlikely random-code collision.
     for _ in range(10):
         try:
             ReferralProfile.objects.create(user=instance, code=generate_referral_code())
