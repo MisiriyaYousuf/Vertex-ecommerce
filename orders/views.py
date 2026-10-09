@@ -2010,10 +2010,9 @@ def place_cod_order(request):
 
         subtotal=subtotal,
 
-        discount=(
-            discount_amount
-            + coupon_discount
-        ),
+        discount=discount_amount,
+
+        coupon_discount=coupon_discount,
 
         tax=tax,
 
@@ -2525,10 +2524,8 @@ def razorpay_create(request):
             payment_status="Pending",
             status="Pending",
             subtotal=subtotal,
-            discount=(
-                discount_amount
-                + coupon_discount
-            ),
+            discount=discount_amount,
+            coupon_discount=coupon_discount,
             tax=tax,
             shipping_charge=shipping_charge,
             total_amount=total_amount,
@@ -2540,6 +2537,7 @@ def razorpay_create(request):
         order.address = address
         order.subtotal = subtotal
         order.discount = discount_amount
+        order.coupon_discount = coupon_discount
         order.tax = tax
         order.shipping_charge = shipping_charge
         order.total_amount = total_amount
@@ -2552,6 +2550,7 @@ def razorpay_create(request):
                 "address",
                 "subtotal",
                 "discount",
+                "coupon_discount",
                 "tax",
                 "shipping_charge",
                 "total_amount",

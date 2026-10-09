@@ -1002,28 +1002,6 @@
 
                         </div>
 
-
-                        <!-- PRICE -->
-                        <div class="price-row">
-
-                            <span class="current-price">
-                                ₹{{ item.price }}
-                            </span>
-
-                            {% if item.discount > 0 %}
-
-                                <span class="original-price">
-                                    ₹{% widthratio item.price 1 1 %}
-                                </span>
-
-                                <span class="discount-text">
-                                    Discount: ₹{{ item.discount }}
-                                </span>
-
-                            {% endif %}
-
-                        </div>
-
                     </div>
 
                 </div>
@@ -1304,17 +1282,29 @@
             </div>
 
 
-            <div class="total-row discount">
+            <!-- PRODUCT DISCOUNT -->
+                {% if order.discount > 0 %}
+                <div class="total-row discount">
+                    <span>
+                        Product Discount
+                    </span>
+                    <span>
+                        - ₹{{ order.discount }}
+                    </span>
+                </div>
+                {% endif %}
 
-                <span>
-                    Discount
-                </span>
-
-                <span>
-                    - ₹{{ order.discount }}
-                </span>
-
-            </div>
+                <!-- COUPON DISCOUNT -->
+                {% if order.coupon_discount > 0 %}
+                <div class="total-row discount">
+                    <span>
+                        Coupon Discount
+                    </span>
+                    <span>
+                        - ₹{{ order.coupon_discount }}
+                    </span>
+                </div>
+                {% endif %}
 
 
             <div class="total-row">

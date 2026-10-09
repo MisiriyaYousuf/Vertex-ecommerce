@@ -697,20 +697,25 @@
 
                             <div class="product-details">
 
+                                <!-- QUANTITY -->
                                 <span>
                                     Qty:
                                     <strong>{{ item.quantity }}</strong>
                                 </span>
 
+                                <!-- ORIGINAL UNIT PRICE -->
                                 <span>
-                                    Price:
+                                    Unit Price:
                                     <strong>₹{{ item.price }}</strong>
                                 </span>
 
+                                <!-- PRODUCT DISCOUNT -->
+                                {% if item.discount > 0 %}
                                 <span>
-                                    Total:
-                                    <strong>₹{{ item.item_total }}</strong>
+                                    Product Discount:
+                                    <strong> ₹{{ item.discount }}</strong>
                                 </span>
+                                {% endif %}
 
                             </div>
 
@@ -752,9 +757,7 @@
                                 </span>
                             {% endif %}
 
-                            <span class="item-price">
-                                ₹{{ item.item_total }}
-                            </span>
+                           
 
                         </div>
 
@@ -766,9 +769,17 @@
                 <!-- ORDER FOOTER -->
 
                 <div class="order-footer">
+                    
 
                     <div class="order-total">
-                        Order Total:
+                         {% if order.coupon_discount %}
+                                <span>
+                                    Coupon Discount:
+                                    <strong> ₹{{ order.coupon_discount }}</strong>
+                                </span>
+                        {% endif %}
+                        <br>
+                        Paid:
                         <strong>₹{{ order.total_amount }}</strong>
                     </div>
 

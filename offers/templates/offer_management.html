@@ -14,12 +14,6 @@
     .status-inactive { color: #6c757d; font-weight: 600; }
 </style>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-
 <p class="text-muted">For each item, customers receive the larger of its product offer and category offer. Offers never stack.</p>
 
 <div class="offer-grid mb-4">

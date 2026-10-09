@@ -9,6 +9,240 @@ Home - Vertex
 
 <style>
 
+/* =========================================
+   COUPON SECTION — PURPLE GLASSMORPHISM
+========================================= */
+
+.coupon-section {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 65px 0;
+    background:
+        radial-gradient(
+            circle at 12% 20%,
+            rgba(153, 91, 205, 0.22),
+            transparent 38%
+        ),
+        radial-gradient(
+            circle at 88% 80%,
+            rgba(106, 65, 153, 0.24),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #21152e,
+            #30203f 55%,
+            #1b1226
+        );
+}
+
+.coupon-section::before,
+.coupon-section::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+}
+
+.coupon-section::before {
+    top: -90px;
+    left: 8%;
+    background: rgba(176, 118, 226, 0.20);
+}
+
+.coupon-section::after {
+    right: 5%;
+    bottom: -100px;
+    background: rgba(116, 73, 175, 0.25);
+}
+
+.coupon-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+.coupon-heading {
+    text-align: center;
+    margin-bottom: 38px;
+}
+
+.coupon-heading h2 {
+    margin-bottom: 10px;
+    color: #fff;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-shadow: 0 3px 18px rgba(0, 0, 0, 0.3);
+}
+
+.coupon-heading p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.coupon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.coupon-card {
+    position: relative;
+    overflow: hidden;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.17);
+    border-radius: 18px;
+
+    background: linear-gradient(
+        145deg,
+        rgba(159, 119, 191, 0.20),
+        rgba(255, 255, 255, 0.055)
+    );
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    transition:
+        transform 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.coupon-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(218, 184, 255, 0.52);
+
+    box-shadow:
+        0 18px 42px rgba(0, 0, 0, 0.28),
+        0 0 24px rgba(159, 105, 213, 0.10);
+}
+
+.coupon-label {
+    display: inline-block;
+    padding: 6px 10px;
+    border: 1px solid rgba(219, 187, 255, 0.25);
+    border-radius: 20px;
+    background: rgba(183, 132, 226, 0.12);
+    color: #dfc2ff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+}
+
+.coupon-card h3 {
+    margin: 17px 0 12px;
+    color: #fff;
+    font-size: 23px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    overflow-wrap: anywhere;
+}
+
+.coupon-discount {
+    margin-bottom: 18px;
+    color: #d9b6ff;
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.coupon-condition,
+.coupon-expiry {
+    margin-bottom: 9px;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.coupon-expiry {
+    margin-top: 14px;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.copy-coupon-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px 16px;
+    border: 1px solid rgba(224, 195, 255, 0.55);
+    border-radius: 24px;
+
+    background: rgba(178, 127, 223, 0.16);
+    color: #fff;
+
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.copy-coupon-btn:hover {
+    background: rgba(178, 127, 223, 0.34);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+}
+
+.copy-coupon-btn:focus-visible {
+    outline: 2px solid #e3c8ff;
+    outline-offset: 3px;
+}
+
+/* Empty state */
+.no-coupons-message {
+    grid-column: 1 / -1;
+    padding: 35px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.045);
+    color: rgba(255, 255, 255, 0.72);
+    text-align: center;
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+    .coupon-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 575px) {
+    .coupon-section {
+        padding: 45px 0;
+    }
+
+    .coupon-heading h2 {
+        font-size: 25px;
+    }
+
+    .coupon-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .coupon-card {
+        padding: 21px;
+    }
+
+    .coupon-card h3 {
+        font-size: 21px;
+    }
+}
+
 /* =========================================================
    HERO SECTION
 ========================================================= */
@@ -114,7 +348,14 @@ Home - Vertex
     margin-right: 0;
     color: rgba(255, 255, 255, 0.82);
 }
-
+.offer-badge {
+    padding: 3px 7px;
+    border-radius: 5px;
+    background: #27845c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+}
 /* =========================================================
    HERO BUTTON
 ========================================================= */
@@ -1449,6 +1690,54 @@ Home - Vertex
 
 </section>
 
+{% if coupons %}
+<section class="coupon-section">
+    <div class="container">
+        <div class="coupon-heading">
+            <h2>Exclusive Offers</h2>
+            <p>Use a coupon at checkout to save more.</p>
+        </div>
+
+        <div class="coupon-grid">
+            {% for coupon in coupons %}
+            <div class="coupon-card">
+                <span class="coupon-label">SPECIAL OFFER</span>
+
+                <h3>{{ coupon.code }}</h3>
+
+                {% if coupon.discount_type == "PERCENTAGE" %}
+                    <p class="coupon-discount">
+                        {{ coupon.discount_value|floatformat:0 }}% OFF
+                    </p>
+                {% else %}
+                    <p class="coupon-discount">
+                        ₹{{ coupon.discount_value|floatformat:2 }} OFF
+                    </p>
+                {% endif %}
+
+                <p class="coupon-condition">
+                    Minimum purchase:
+                    ₹{{ coupon.minimum_purchase|floatformat:2 }}
+                </p>
+
+                <p class="coupon-expiry">
+                    Valid until {{ coupon.end_date|date:"d M Y" }}
+                </p>
+
+                <button
+                    type="button"
+                    class="copy-coupon-btn"
+                    data-code="{{ coupon.code }}"
+                >
+                    Copy Coupon
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- =========================================================
      TOP SALE PRODUCTS
 ========================================================= -->
@@ -1521,15 +1810,19 @@ Home - Vertex
 
 
                     <!-- Price -->
-                    <div class="product-price">
-
+                   <div class="product-price">
+                    <span>
                         ₹{{ product.pricing.unit_price|floatformat:2 }}
+                    </span>
 
+                    {% if product.pricing.has_discount %}
                         <del class="old-price">
                             ₹{{ product.pricing.original_price|floatformat:2 }}
                         </del>
 
-                    </div>
+                        <span class="offer-badge">OFFER</span>
+                    {% endif %}
+                </div>
 
 
                     <!-- Rating -->
@@ -1668,4 +1961,22 @@ Home - Vertex
 {% endblock %}
 
 {% block extra_js %}
+<script>
+document.querySelectorAll(".copy-coupon-btn").forEach(button => {
+    button.addEventListener("click", async () => {
+        const code = button.dataset.code;
+
+        try {
+            await navigator.clipboard.writeText(code);
+            button.textContent = "Copied!";
+        } catch (error) {
+            window.prompt("Copy your coupon code:", code);
+        }
+
+        setTimeout(() => {
+            button.textContent = "Copy Coupon";
+        }, 1800);
+    });
+});
+</script>
 {% endblock %}

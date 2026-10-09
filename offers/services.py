@@ -35,13 +35,7 @@ def _valid_offer(queryset, today):
 
 
 def get_effective_price(product, variant=None, on_date=None):
-    """Return one price after selecting the largest applicable discount.
-
-    Product and category offers are alternatives. Their percentages are compared,
-    then only the better one is used. Existing product/variant sale prices are
-    considered as an existing discount too, so an offer never makes an item cost
-    more than it did before offers were introduced.
-    """
+  
     today = on_date or timezone.localdate()
     source = variant or product
     original_price = Decimal(source.sale_price).quantize(MONEY)

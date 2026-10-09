@@ -24,6 +24,9 @@ from django.db.models import F,Q, Sum,Value
 from django.db.models.functions import Coalesce
 from offers.services import award_referral_coupon
 from offers.services import add_pricing
+from django.db.models import Count, F
+from django.utils import timezone
+from orders.models import Coupon
 
 
 def custom_404(request):
@@ -134,6 +137,7 @@ def signup(request):
 
         if form.is_valid():
 
+        
             # Store signup data in session
             request.session["signup_data"] = {
                 "first_name": form.cleaned_data["first_name"],
@@ -583,13 +587,10 @@ def home(request):
         profile = request.user.profile
 
     except UserProfile.DoesNotExist:
-
         logout(request)
-
         return redirect("users:signin")
 
     if profile.blocked or not request.user.is_active:
-
         logout(request)
 
         messages.error(
@@ -599,6 +600,7 @@ def home(request):
 
         return redirect("users:signin")
 
+    # Active products with stock calculated from product and variant quantities.
     products = (
         Product.objects
         .filter(
@@ -608,42 +610,66 @@ def home(request):
         )
         .select_related(
             "category",
-            "main_image"
+            "main_image",
         )
         .prefetch_related(
             "images",
-            "variants"
+            "variants",
         )
         .annotate(
             variant_stock=Coalesce(
                 Sum(
                     "variants__quantity",
-                    filter=Q(
-                        variants__is_active=True
-                    )
+                    filter=Q(variants__is_active=True),
                 ),
-                Value(0)
+                Value(0),
             ),
         )
         .annotate(
-            total_stock=F("quantity") + F("variant_stock")
+            total_stock=F("quantity") + F("variant_stock"),
         )
         .distinct()
         .order_by("-id")
     )
 
     products = list(products)
+
     for product in products:
         add_pricing(product)
-    products = [product for product in products if product.pricing.has_discount][:6]
 
-    return render(
-        request,
-        "home.html",
-        {
-            "products": products
-        }
+    # Keep only discounted products for the Top Sale Watches section.
+    products = [
+        product for product in products
+        if product.pricing.has_discount
+    ][:6]
+
+    # Coupons valid today.
+    today = timezone.localdate()
+
+    coupons = (
+        Coupon.objects
+        .filter(
+            is_active=True,
+            start_date__lte=today,
+            end_date__gte=today,
+        )
+        .order_by("-created_at")
+        .annotate(
+            used_count=Count("usages", distinct=True),
+        )
+        .filter(
+            used_count__lt=F("usage_limit"),
+        )
+        .order_by("-created_at")
     )
+
+    context = {
+        "products": products,
+        "coupons": coupons,
+    }
+
+    return render(request, "home.html", context)
+
 
 @never_cache
 def logout_view(request):

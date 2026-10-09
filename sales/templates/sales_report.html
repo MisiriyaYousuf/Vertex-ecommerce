@@ -1,5 +1,4 @@
 {% extends "admin_base.html" %}
-
 {% block title %}
 Sales Report
 {% endblock %}
@@ -16,68 +15,428 @@ Sales Report
 
 <style>
 
+    /* =========================================
+       SALES REPORT
+    ========================================= */
+
     .sales-header {
-        margin-bottom: 25px;
+        margin-bottom: 28px;
     }
 
     .sales-header h2 {
-        font-weight: 700;
-        color: #2c3e50;
+        margin: 0;
+        font-weight: 750;
+        color: #1e293b;
+        letter-spacing: -0.4px;
     }
+
+    .sales-header p {
+        margin-top: 7px;
+        color: #64748b !important;
+        font-size: 14px;
+    }
+
+
+    /* =========================================
+       FILTER CARD
+    ========================================= */
 
     .filter-card {
-        background: #ffffff;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        margin-bottom: 25px;
+        background: linear-gradient(
+            145deg,
+            #ffffff,
+            #f8fafc
+        );
+
+        padding: 26px;
+
+        border-radius: 16px;
+
+        border: 1px solid #e2e8f0;
+
+        box-shadow:
+            0 10px 30px rgba(15, 23, 42, 0.06);
+
+        margin-bottom: 28px;
     }
 
+    .filter-card label {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 650;
+        margin-bottom: 7px;
+    }
+
+    .filter-card input,
+    .filter-card select {
+        border-radius: 9px;
+        border: 1px solid #cbd5e1;
+        min-height: 42px;
+        transition: 0.2s ease;
+    }
+
+    .filter-card input:focus,
+    .filter-card select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+
+    .filter-card .btn-primary {
+        min-height: 42px;
+        border: none;
+        border-radius: 9px;
+        font-weight: 650;
+        background: linear-gradient(
+            135deg,
+            #4f46e5,
+            #6366f1
+        );
+
+        box-shadow:
+            0 6px 15px rgba(79,70,229,0.22);
+
+        transition: 0.2s ease;
+    }
+
+    .filter-card .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow:
+            0 9px 20px rgba(79,70,229,0.28);
+    }
+
+
+    /* =========================================
+       SUMMARY CARDS
+    ========================================= */
+
     .summary-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        position: relative;
+
+        background: #ffffff;
+
+        border-radius: 16px;
+
+        padding: 22px;
+
+        border: 1px solid #e2e8f0;
+
+        box-shadow:
+            0 8px 25px rgba(15,23,42,0.06);
+
         height: 100%;
+
+        overflow: hidden;
+
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .summary-card::before {
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 3px;
+
+        background: linear-gradient(
+            90deg,
+            #6366f1,
+            #8b5cf6
+        );
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+
+        box-shadow:
+            0 14px 32px rgba(15,23,42,0.10);
     }
 
     .summary-label {
-        color: #7f8c8d;
-        font-size: 14px;
+        color: #64748b;
+
+        font-size: 12px;
+
+        font-weight: 650;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.5px;
+
         margin-bottom: 8px;
     }
 
     .summary-value {
-        font-size: 24px;
-        font-weight: 700;
-        color: #2c3e50;
+        font-size: 23px;
+
+        font-weight: 750;
+
+        color: #0f172a;
+
+        letter-spacing: -0.4px;
     }
 
+
+    /* =========================================
+       DOWNLOAD BUTTONS
+    ========================================= */
+
+    .download-buttons {
+        display: flex;
+
+        gap: 10px;
+
+        justify-content: flex-end;
+
+        margin-bottom: 20px;
+    }
+
+    .download-buttons .btn {
+        border-radius: 9px;
+
+        padding: 9px 15px;
+
+        font-size: 13px;
+
+        font-weight: 650;
+
+        border: none;
+
+        transition: 0.2s ease;
+    }
+
+    .download-buttons .btn:hover {
+        transform: translateY(-1px);
+    }
+
+
+    /* =========================================
+       REPORT TABLE
+    ========================================= */
+
     .report-table {
-        background: white;
-        border-radius: 10px;
+        background: #ffffff;
+
+        border-radius: 16px;
+
+        border: 1px solid #e2e8f0;
+
         overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+
+        box-shadow:
+            0 10px 30px rgba(15,23,42,0.06);
+    }
+
+    .report-table > .p-3 {
+        padding: 20px 22px !important;
+
+        border-bottom: 1px solid #e2e8f0;
+
+        background: #ffffff;
+    }
+
+    .report-table h5 {
+        color: #0f172a;
+
+        font-weight: 750;
+
+        margin: 0;
+    }
+
+    .report-table .table-responsive {
+        overflow-x: auto;
     }
 
     .report-table table {
         margin-bottom: 0;
+
+        min-width: 1050px;
     }
 
     .report-table thead {
-        background: #2c3e50;
-        color: white;
+        background: #f8fafc;
+
+        color: #475569;
     }
 
-    .download-buttons {
-        display: flex;
-        gap: 10px;
-        justify-content: flex-end;
-        margin-bottom: 20px;
+    .report-table thead th {
+        padding: 14px 16px;
+
+        border-bottom: 1px solid #e2e8f0;
+
+        font-size: 11px;
+
+        font-weight: 750;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.45px;
+
+        white-space: nowrap;
     }
 
-    .custom-date-fields {
-        display: none;
+    .report-table tbody td {
+        padding: 15px 16px;
+
+        border-bottom: 1px solid #f1f5f9;
+
+        color: #475569;
+
+        font-size: 13px;
+
+        vertical-align: middle;
+    }
+
+    .report-table tbody tr {
+        transition: background 0.15s ease;
+    }
+
+    .report-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+
+    /* =========================================
+       ORDER ID
+    ========================================= */
+
+    .order-id {
+        font-weight: 700;
+
+        color: #4f46e5;
+
+        background: #eef2ff;
+
+        padding: 5px 9px;
+
+        border-radius: 7px;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================================
+       DISCOUNTS
+    ========================================= */
+
+    .discount-value {
+        color: #dc2626 !important;
+
+        font-weight: 650;
+    }
+
+    .coupon-value {
+        color: #7c3aed !important;
+
+        font-weight: 650;
+    }
+
+
+    /* =========================================
+       FINAL ORDER AMOUNT
+    ========================================= */
+
+    .final-amount {
+        color: #059669 !important;
+
+        font-weight: 750;
+
+        white-space: nowrap;
+    }
+
+
+    /* =========================================
+       STATUS
+    ========================================= */
+
+    .status-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        padding: 5px 9px;
+
+        border-radius: 999px;
+
+        font-size: 10px;
+
+        font-weight: 700;
+
+        white-space: nowrap;
+
+        background: #f1f5f9;
+
+        color: #475569;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-shipped {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-outfordelivery {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .status-delivered {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-returned {
+        background: #f3e8ff;
+        color: #7e22ce;
+    }
+
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+
+    @media (max-width: 768px) {
+
+        .sales-header h2 {
+            font-size: 22px;
+        }
+
+        .filter-card {
+            padding: 18px;
+        }
+
+        .summary-card {
+            padding: 18px;
+        }
+
+        .summary-value {
+            font-size: 20px;
+        }
+
+        .download-buttons {
+            justify-content: flex-start;
+
+            flex-wrap: wrap;
+        }
+
     }
 
 </style>
@@ -278,7 +637,7 @@ Sales Report
         <div class="summary-card">
 
             <div class="summary-label">
-                Overall Sales Count
+                Total Sales Count
             </div>
 
             <div class="summary-value">
@@ -295,7 +654,7 @@ Sales Report
         <div class="summary-card">
 
             <div class="summary-label">
-                Overall Order Amount
+                Total Order Amount
             </div>
 
             <div class="summary-value">
@@ -346,7 +705,7 @@ Sales Report
         <div class="summary-card">
 
             <div class="summary-label">
-                Overall Discount
+                Total Discount
             </div>
 
             <div class="summary-value">
@@ -394,68 +753,107 @@ Sales Report
         <table class="table table-hover align-middle">
 
             <thead>
-
                 <tr>
-
                     <th>Order</th>
-
                     <th>Customer</th>
-
                     <th>Date</th>
-
                     <th>Payment</th>
-
                     <th>Status</th>
 
                     <th class="text-end">
-                        Amount
+                        Product Discount
                     </th>
 
-                </tr>
+                    <th>
+                        Coupon code
+                    </th>
 
+                    <th class="text-end">
+                        Coupon Discount
+                    </th>
+
+                    <th class="text-end">
+                        Final Order Amount
+                    </th>
+                </tr>
             </thead>
 
 
             <tbody>
 
                 {% for order in orders %}
-
                 <tr>
 
-                    <td>
+                <!-- ORDER -->
+                <td>
+                    <span class="order-id">
                         #{{ order.id }}
-                    </td>
+                    </span>
+                </td>
 
-                    <td>
-                        {{ order.user.username }}
-                    </td>
+                <!-- CUSTOMER -->
+                <td>
+                    {{ order.user.username }}
+                </td>
 
-                    <td>
-                        {{ order.created_at|date:"d M Y" }}
-                    </td>
+                <!-- DATE -->
+                <td>
+                    {{ order.created_at|date:"d M Y" }}
+                </td>
 
-                    <td>
-                        {{ order.payment_method }}
-                    </td>
+                <!-- PAYMENT -->
+                <td>
+                    {{ order.payment_method }}
+                </td>
 
-                    <td>
+                <!-- STATUS -->
+                <td>
+                    <span class="status-badge status-{{ order.status|lower|cut:' ' }}">
                         {{ order.status }}
-                    </td>
+                    </span>
+                </td>
 
-                    <td class="text-end">
+                <!-- PRODUCT DISCOUNT -->
+                <td class="text-end discount-value">
+                    {% if order.discount > 0 %}
+                        - ₹{{ order.discount|floatformat:2 }}
+                    {% else %}
+                        ₹0.00
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if order.coupon_usage %}
+                        <span class="coupon-value">
+                            {{ order.coupon_usage.coupon.code }}
+                        </span>
+                    {% else %}
+                        <span class="text-muted">No coupon</span>
+                    {% endif %}
+                </td>
 
-                        ₹ {{ order.total_amount|floatformat:2 }}
+                <!-- COUPON DISCOUNT -->
+                <td class="text-end coupon-value">
+                    {% if order.coupon_discount > 0 %}
+                        - ₹{{ order.coupon_discount|floatformat:2 }}
+                    {% else %}
+                        ₹0.00
+                    {% endif %}
+                </td>
 
-                    </td>
+                <!-- FINAL AMOUNT CUSTOMER PAYS -->
+                <td class="text-end final-amount">
+                    ₹{{ order.total_amount|floatformat:2 }}
+                </td>
 
-                </tr>
+            </tr>
 
                 {% empty %}
 
                 <tr>
 
                     <td
-                        colspan="6"
+                        colspan="9"
                         class="text-center py-4"
                     >
 

@@ -156,19 +156,15 @@ def get_sales_orders(start_date, end_date):
             created_at__gte=start_datetime,
             created_at__lte=end_datetime,
         )
-        .exclude(
-            status="Cancelled"
-        )
+        .exclude(status="Cancelled")
         .select_related(
-            "user"
+            "user",
+            "coupon_usage__coupon",
         )
-        .prefetch_related(
-            "items"
-        )
-        .order_by(
-            "-created_at"
-        )
+        .prefetch_related("items")
+        .order_by("-created_at")
     )
+
 
 @never_cache
 @login_required
@@ -218,6 +214,7 @@ def sales_report(request):
                 end_date
             )
 
+            
             sales_count = orders.count()
 
             order_amount = (
@@ -229,9 +226,7 @@ def sales_report(request):
 
             product_discount = (
                 orders.aggregate(
-                    total=Sum(
-                        "items__discount"
-                    )
+                    total=Sum("discount")
                 )["total"]
                 or Decimal("0.00")
             )
@@ -239,7 +234,6 @@ def sales_report(request):
             coupon_discount = Decimal("0.00")
 
             for order in orders:
-
                 coupon_discount += (
                     getattr(
                         order,
@@ -249,13 +243,11 @@ def sales_report(request):
                     or Decimal("0.00")
                 )
 
-            overall_discount = (
-                product_discount
-                + coupon_discount
-            )
+            overall_discount = product_discount + coupon_discount
 
             net_sales = order_amount
 
+            
             context.update({
 
                 "orders": orders,

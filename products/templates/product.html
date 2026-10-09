@@ -416,6 +416,24 @@
 
     margin-right: -10px;
 }
+.product-offer-info {
+    font-size: 11px;
+}
+
+.product-offer-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid rgba(117, 214, 165, 0.35);
+    border-radius: 5px;
+    background: rgba(25, 80, 55, 0.28);
+    color: #75d6a5;
+    font-weight: 700;
+}
+
+.product-offer-name {
+    color: rgba(255, 255, 255, 0.70);
+    overflow-wrap: anywhere;
+}
 
 .product-column {
 
@@ -1713,43 +1731,33 @@
                         </div>
 
                         <!-- Price -->
+                    
+                    <div class="product-price">
 
-                        <div class="product-price">
+                        <span class="current-price product-current-price">
+                            ₹{{ product.pricing.unit_price }}
+                        </span>
 
-                            <span
-                                class="current-price product-current-price"
-                            >
+                        {% if product.pricing.has_discount %}
+                            <del class="old-price product-old-price">
+                                ₹{{ product.pricing.original_price }}
+                            </del>
+                        {% endif %}
 
-                                {% if product.pricing.has_discount %}
+                    </div>
 
-                                    ₹{{ product.pricing.unit_price }}
-
-                                {% else %}
-
-                                    ₹{{ product.pricing.unit_price }}
-
-                                {% endif %}
-
+                    {% if product.pricing.has_discount %}
+                        <div class="product-offer-info mt-2">
+                            <span class="product-offer-badge">
+                                {{ product.pricing.discount_percentage }}% OFF
                             </span>
 
-
-                            <del
-                                class="old-price product-old-price"
-
-                                {% if not product.pricing.has_discount %}
-                                    style="display:none;"
-                                {% endif %}
-                            >
-
-                                {% if product.pricing.has_discount %}
-
-                                    ₹{{ product.pricing.original_price }}
-
-                                {% endif %}
-
-                            </del>
-
+                            <div class="product-offer-name mt-1">
+                                {{ product.pricing.offer_name }}
+                            </div>
                         </div>
+                    {% endif %}
+
 
                     </div>
 
