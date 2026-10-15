@@ -267,6 +267,21 @@ def coupon_usage_limit_reached(coupon):
         coupon=coupon
     ).count() >= coupon.usage_limit
 
+def calculate_shipping_charge(address):
+    country = (address.country or "").strip().casefold()
+    state = " ".join((address.state or "").split()).casefold()
+
+    if country not in ("india", "in"):
+        return Decimal("500.00")
+
+    shipping_charges = {
+        "kerala": Decimal("100.00"),
+        "tamil nadu": Decimal("200.00"),
+        "karnataka": Decimal("200.00"),
+    }
+
+    return shipping_charges.get(state, Decimal("320.00"))
+
 @login_required
 @never_cache
 def checkout(request):
@@ -528,7 +543,9 @@ def checkout(request):
 
 
     tax = Decimal("0.00")
-    shipping_charge = Decimal("0.00")
+    shipping_charge = calculate_shipping_charge(
+    default_address
+    )
 
     total_amount = (
         subtotal
@@ -562,6 +579,30 @@ def checkout(request):
             payment_method = form.cleaned_data[
                 "payment_method"
             ]
+
+            shipping_charge = calculate_shipping_charge(address)
+
+            amount_after_discounts = (
+                subtotal
+                - discount_amount
+                - coupon_discount
+            )
+
+            total_amount = (
+                amount_after_discounts
+                + tax
+                + shipping_charge
+            )
+
+            COD_LIMIT = Decimal("10000.00")
+
+            if payment_method == "COD" and total_amount > COD_LIMIT:
+                messages.error(
+                    request,
+                    "Cash on Delivery is not available for orders above ₹10,000. "
+                    "Please choose Razorpay or Wallet."
+                )
+                return redirect("orders:checkout")
 
             if payment_method == "WALLET" and wallet.balance < total_amount:
                 messages.error(
@@ -606,7 +647,11 @@ def checkout(request):
             request.user,
             initial={
                 "address": default_address,
-                "payment_method": "COD",
+                "payment_method": (
+                "RAZORPAY"
+                if total_amount > Decimal("10000.00")
+                else "COD"
+              ),
             }
         )
 
@@ -616,6 +661,13 @@ def checkout(request):
             "COD"
         )
     )
+
+    COD_LIMIT = Decimal("10000.00")
+
+    if total_amount > COD_LIMIT and selected_payment_method == "COD":
+        selected_payment_method = "RAZORPAY"
+        request.session["checkout_payment_method"] = "RAZORPAY"
+        request.session.modified = True
 
     payment_method_display = dict(
         Order.PAYMENT_METHOD_CHOICES
@@ -1460,7 +1512,8 @@ def order_detail(request, order_id=None):
 
 
     tax = Decimal("0.00")
-    shipping_charge = Decimal("0.00")
+    shipping_charge = calculate_shipping_charge(address)
+    
 
     grand_total = (
         subtotal
@@ -1941,8 +1994,7 @@ def place_cod_order(request):
         })
 
     tax = Decimal("0.00")
-
-    shipping_charge = Decimal("0.00")
+    shipping_charge = calculate_shipping_charge(address)
     coupon = get_applied_coupon(request)
 
     coupon_discount = Decimal("0.00")
@@ -1989,6 +2041,16 @@ def place_cod_order(request):
         + tax
         + shipping_charge
     )
+
+    COD_LIMIT = Decimal("10000.00")
+
+    if payment_method == "COD" and total_amount > COD_LIMIT:
+        messages.error(
+            request,
+            "Cash on Delivery is not available for orders above ₹10,000. "
+            "Please choose Razorpay or Wallet."
+        )
+        return redirect("orders:checkout")
 
     if payment_method == "WALLET":
         wallet = Wallet.objects.select_for_update().filter(user=request.user).first()
@@ -2417,7 +2479,7 @@ def razorpay_create(request):
         )
 
     tax = Decimal("0")
-    shipping_charge = Decimal("0")
+    shipping_charge = calculate_shipping_charge(address)
     coupon = get_applied_coupon(request)
     coupon_discount = Decimal("0.00")
 

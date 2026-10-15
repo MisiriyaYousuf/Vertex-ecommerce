@@ -9,6 +9,34 @@ Checkout
 
 <style>
 
+
+.payment-unavailable {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.cod-warning {
+    margin-top: 12px;
+    padding: 13px 15px;
+    border: 1px solid rgba(255, 100, 100, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 80, 80, 0.09);
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.cod-warning strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #ffb3b3;
+}
+
+.cod-warning p {
+    margin: 0;
+}
+
+
 /* =========================================================
    CHECKOUT PAGE
 ========================================================= */
@@ -1866,58 +1894,63 @@ Checkout
 
                     <div class="payment-methods">
 
-
-                        <!-- CASH ON DELIVERY -->
-
-                        <label
-                            class="payment-option
-                            {% if payment_method == 'COD' %}
+                    <!-- CASH ON DELIVERY -->
+                    <label
+                        class="payment-option
+                            {% if payment_method == 'COD' and total_amount <= 10000 %}
                                 selected
+                            {% endif %}
+                            {% if total_amount > 10000 %}
+                                payment-unavailable
                             {% endif %}"
+                        {% if total_amount <= 10000 %}
                             onclick="selectPayment(this)"
+                        {% endif %}
+                    >
+                        <input
+                            class="payment-radio"
+                            type="radio"
+                            name="payment_method"
+                            value="COD"
+                            {% if payment_method == "COD" and total_amount <= 10000 %}
+                                checked
+                            {% endif %}
+                            {% if total_amount > 10000 %}
+                                disabled
+                            {% endif %}
+                            required
                         >
 
-                            <input
-                                class="payment-radio"
-                                type="radio"
-                                name="payment_method"
-                                value="COD"
+                        <div class="payment-icon">💵</div>
 
-                                {% if payment_method == "COD" %}
-                                    checked
-                                {% endif %}
-
-                                required
-                            >
-
-
-                            <div class="payment-icon">
-                                💵
+                        <div class="payment-content">
+                            <div class="payment-title">
+                                Cash on Delivery
                             </div>
 
-
-                            <div class="payment-content">
-
-                                <div class="payment-title">
-
-                                    Cash on Delivery
-
-                                </div>
-
-                                <div class="payment-description">
-
+                            <div class="payment-description">
+                                {% if total_amount > 10000 %}
+                                    Unavailable for orders above ₹10,000
+                                {% else %}
                                     Pay when your order is delivered
-
-                                </div>
-
+                                {% endif %}
                             </div>
+                        </div>
 
+                        {% if total_amount <= 10000 %}
+                            <div class="payment-check">✓</div>
+                        {% endif %}
+                    </label>
 
-                            <div class="payment-check">
-                                ✓
-                            </div>
-
-                        </label>
+                    {% if total_amount > 10000 %}
+                        <div class="cod-warning">
+                            <strong>COD unavailable</strong>
+                            <p>
+                                Cash on Delivery is not available for orders above ₹10,000.
+                                Please select Razorpay or Wallet to continue.
+                            </p>
+                        </div>
+                    {% endif %}
 
                         <!-- WALLET -->
                         <label
@@ -2257,29 +2290,12 @@ Checkout
 
 
                     <!-- SHIPPING -->
-
                     <div class="summary-row">
-
-                        <span>
-                            Shipping
+                        <span>Delivery Charge</span>
+                        <span id="shippingChargeValue">
+                            ₹{{ shipping_charge|floatformat:2 }}
                         </span>
-
-                        {% if shipping_charge == 0 %}
-
-                            <span class="free-delivery">
-                                FREE
-                            </span>
-
-                        {% else %}
-
-                            <span>
-                                ₹{{ shipping_charge|floatformat:2 }}
-                            </span>
-
-                        {% endif %}
-
                     </div>
-
 
                     <!-- PAYMENT METHOD -->
 
@@ -2302,17 +2318,11 @@ Checkout
 
 
                     <!-- TOTAL -->
-
                     <div class="summary-total">
-
-                        <span>
-                            Total Amount
-                        </span>
-
-                        <span>
+                        <span>Total Amount</span>
+                        <span id="totalAmountValue">
                             ₹{{ total_amount|floatformat:2 }}
                         </span>
-
                     </div>
 
 
@@ -2375,43 +2385,27 @@ const addressData = {
 
         "{{ address.id }}": {
 
-            type:
-                "{{ address.address_type|escapejs }}",
+            type: "{{ address.address_type|escapejs }}",
 
-            name:
-                "{{ request.user.get_full_name|escapejs }}",
+            name: "{{ request.user.get_full_name|escapejs }}",
 
-            building:
-                "{{ address.building|escapejs }}",
+            building: "{{ address.building|escapejs }}",
 
-            area:
-                "{{ address.area|escapejs }}",
+            area: "{{ address.area|escapejs }}",
 
-            landmark:
-                "{{ address.landmark|default:''|escapejs }}",
+            landmark: "{{ address.landmark|default:''|escapejs }}",
 
-            city:
-                "{{ address.city|escapejs }}",
+            city: "{{ address.city|escapejs }}",
 
-            state:
-                "{{ address.state|escapejs }}",
+            state: "{{ address.state|escapejs }}",
 
-            pincode:
-                "{{ address.pincode|escapejs }}",
+            pincode: "{{ address.pincode|escapejs }}",
 
-            country:
-                "{{ address.country|escapejs }}",
+            country: "{{ address.country|escapejs }}",
 
-            phone:
-                "{{ address.phone|default:''|escapejs }}",
+            phone: "{{ address.phone|default:''|escapejs }}",
 
-            isDefault:
-
-                {% if address.is_default %}
-                    true
-                {% else %}
-                    false
-                {% endif %}
+            isDefault: {% if address.is_default %}true{% else %}false{% endif %}
 
         }
 
@@ -2449,17 +2443,112 @@ function getSelectedAddressId() {
 function toggleAddresses() {
 
     const addressList =
-        document.getElementById(
-            "addressList"
-        );
+        document.getElementById("addressList");
 
     if (!addressList) {
         return;
     }
 
-    addressList.classList.toggle(
-        "show"
-    );
+    addressList.classList.toggle("show");
+
+}
+
+
+/* =========================================================
+   UPDATE SHIPPING CHARGE AND TOTAL
+========================================================= */
+
+function updateShippingAndTotal(address) {
+
+    if (!address) {
+        return;
+    }
+
+    /* COUNTRY NORMALIZATION */
+    const country = (address.country || "")
+        .trim()
+        .toLowerCase();
+
+    /* STATE NORMALIZATION */
+    const state = (address.state || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+
+    let shippingCharge;
+
+    /* OUTSIDE INDIA */
+    if (!["india", "in"].includes(country)) {
+
+        shippingCharge = 500;
+
+    }
+
+    /* KERALA */
+    else if (state === "kerala") {
+
+        shippingCharge = 100;
+
+    }
+
+    /* TAMIL NADU AND KARNATAKA */
+    else if (
+        ["tamil nadu", "karnataka"].includes(state)
+    ) {
+
+        shippingCharge = 200;
+
+    }
+
+    /* OTHER INDIAN STATES */
+    else {
+
+        shippingCharge = 320;
+
+    }
+
+    /* ORDER AMOUNTS */
+    const subtotal =
+        parseFloat("{{ subtotal }}") || 0;
+
+    const discount =
+        parseFloat("{{ discount_amount }}") || 0;
+
+    const couponDiscount =
+        parseFloat("{{ coupon_discount }}") || 0;
+
+    const tax =
+        parseFloat("{{ tax }}") || 0;
+
+    /* FINAL TOTAL */
+    const total =
+        subtotal
+        - discount
+        - couponDiscount
+        + tax
+        + shippingCharge;
+
+    /* UPDATE SHIPPING DISPLAY */
+    const shippingElement =
+        document.getElementById("shippingChargeValue");
+
+    if (shippingElement) {
+
+        shippingElement.textContent =
+            "₹" + shippingCharge.toFixed(2);
+
+    }
+
+    /* UPDATE TOTAL DISPLAY */
+    const totalElement =
+        document.getElementById("totalAmountValue");
+
+    if (totalElement) {
+
+        totalElement.textContent =
+            "₹" + total.toFixed(2);
+
+    }
 
 }
 
@@ -2474,20 +2563,16 @@ function selectAddress(radio) {
         return;
     }
 
+    /* GET SELECTED ADDRESS */
+    const addressId = radio.value;
 
-    const addressId =
-        radio.value;
-
-    const address =
-        addressData[addressId];
+    const address = addressData[addressId];
 
     if (!address) {
         return;
     }
 
-
     /* ADDRESS TYPE */
-
     const addressTypeText =
         document.getElementById(
             "selectedAddressTypeText"
@@ -2500,9 +2585,7 @@ function selectAddress(radio) {
 
     }
 
-
     /* DEFAULT BADGE */
-
     const defaultBadge =
         document.getElementById(
             "selectedDefaultBadge"
@@ -2524,9 +2607,7 @@ function selectAddress(radio) {
 
     }
 
-
     /* NAME */
-
     const selectedAddressName =
         document.getElementById(
             "selectedAddressName"
@@ -2539,53 +2620,33 @@ function selectAddress(radio) {
 
     }
 
-
     /* ADDRESS */
-
     let addressHTML = "";
 
     addressHTML +=
-        escapeHTML(
-            address.building
-        ) +
-        ", " +
-        escapeHTML(
-            address.area
-        );
-
+        escapeHTML(address.building)
+        + ", "
+        + escapeHTML(address.area);
 
     if (address.landmark) {
 
         addressHTML +=
-            "<br>" +
-            escapeHTML(
-                address.landmark
-            );
+            "<br>"
+            + escapeHTML(address.landmark);
 
     }
 
+    addressHTML +=
+        "<br>"
+        + escapeHTML(address.city)
+        + ", "
+        + escapeHTML(address.state)
+        + " - "
+        + escapeHTML(address.pincode);
 
     addressHTML +=
-        "<br>" +
-        escapeHTML(
-            address.city
-        ) +
-        ", " +
-        escapeHTML(
-            address.state
-        ) +
-        " - " +
-        escapeHTML(
-            address.pincode
-        );
-
-
-    addressHTML +=
-        "<br>" +
-        escapeHTML(
-            address.country
-        );
-
+        "<br>"
+        + escapeHTML(address.country);
 
     const selectedAddressText =
         document.getElementById(
@@ -2599,9 +2660,7 @@ function selectAddress(radio) {
 
     }
 
-
     /* PHONE */
-
     const phoneElement =
         document.getElementById(
             "selectedAddressPhone"
@@ -2612,16 +2671,14 @@ function selectAddress(radio) {
         if (address.phone) {
 
             phoneElement.textContent =
-                "📞 " +
-                address.phone;
+                "📞 " + address.phone;
 
             phoneElement.style.display =
                 "block";
 
         } else {
 
-            phoneElement.textContent =
-                "";
+            phoneElement.textContent = "";
 
             phoneElement.style.display =
                 "none";
@@ -2630,50 +2687,40 @@ function selectAddress(radio) {
 
     }
 
-
     /* HIGHLIGHT SELECTED ADDRESS */
-
     document.querySelectorAll(
         ".address-option"
-    ).forEach(
-        function(option) {
+    ).forEach(function(option) {
 
-            option.classList.remove(
-                "selected"
-            );
+        option.classList.remove("selected");
 
-        }
-    );
-
+    });
 
     const selectedOption =
-        radio.closest(
-            ".address-option"
-        );
+        radio.closest(".address-option");
 
     if (selectedOption) {
 
-        selectedOption.classList.add(
-            "selected"
-        );
+        selectedOption.classList.add("selected");
 
     }
 
-
-    /* CLOSE LIST */
-
+    /* CLOSE ADDRESS LIST */
     const addressList =
-        document.getElementById(
-            "addressList"
-        );
+        document.getElementById("addressList");
 
     if (addressList) {
 
-        addressList.classList.remove(
-            "show"
-        );
+        addressList.classList.remove("show");
 
     }
+
+    /* =====================================================
+       SHIPPING FIX
+       UPDATE CHARGE WHEN ADDRESS CHANGES
+    ===================================================== */
+
+    updateShippingAndTotal(address);
 
 }
 
@@ -2689,26 +2736,11 @@ function escapeHTML(value) {
     }
 
     return value
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
@@ -2723,34 +2755,22 @@ function selectPayment(element) {
         return;
     }
 
-
     /* REMOVE SELECTED */
-
     const options =
         document.querySelectorAll(
             ".payment-option"
         );
 
-    options.forEach(
-        function(option) {
+    options.forEach(function(option) {
 
-            option.classList.remove(
-                "selected"
-            );
+        option.classList.remove("selected");
 
-        }
-    );
-
+    });
 
     /* ADD SELECTED */
+    element.classList.add("selected");
 
-    element.classList.add(
-        "selected"
-    );
-
-
-    /* RADIO */
-
+    /* GET RADIO */
     const radio =
         element.querySelector(
             'input[name="payment_method"]'
@@ -2762,24 +2782,16 @@ function selectPayment(element) {
 
     radio.checked = true;
 
+    const paymentMethod = radio.value;
 
-    const paymentMethod =
-        radio.value;
+    /* UPDATE PAYMENT INFORMATION */
+    updatePaymentInformation(paymentMethod);
 
+    /* UPDATE PAYMENT BUTTON */
+    updatePaymentButton(paymentMethod);
 
-    /* UPDATE UI */
-
-    updatePaymentInformation(
-        paymentMethod
-    );
-
-    updatePaymentButton(
-        paymentMethod
-    );
-
-    updatePaymentSummary(
-        paymentMethod
-    );
+    /* UPDATE PAYMENT SUMMARY */
+    updatePaymentSummary(paymentMethod);
 
 }
 
@@ -2788,28 +2800,20 @@ function selectPayment(element) {
    UPDATE PAYMENT INFORMATION
 ========================================================= */
 
-function updatePaymentInformation(
-    paymentMethod
-) {
+function updatePaymentInformation(paymentMethod) {
 
     const paymentInfoText =
-        document.getElementById(
-            "paymentInfoText"
-        );
+        document.getElementById("paymentInfoText");
 
     if (!paymentInfoText) {
         return;
     }
 
-
-    if (
-        paymentMethod ===
-        "RAZORPAY"
-    ) {
+    if (paymentMethod === "RAZORPAY") {
 
         paymentInfoText.textContent =
-            "You will be redirected to Razorpay " +
-            "to complete your payment securely.";
+            "You will be redirected to Razorpay "
+            + "to complete your payment securely.";
 
     } else if (paymentMethod === "WALLET") {
 
@@ -2819,8 +2823,8 @@ function updatePaymentInformation(
     } else {
 
         paymentInfoText.textContent =
-            "Pay the total amount when your order " +
-            "is delivered.";
+            "Pay the total amount when your order "
+            + "is delivered.";
 
     }
 
@@ -2831,9 +2835,7 @@ function updatePaymentInformation(
    UPDATE PAYMENT BUTTON
 ========================================================= */
 
-function updatePaymentButton(
-    paymentMethod
-) {
+function updatePaymentButton(paymentMethod) {
 
     const buttonText =
         document.getElementById(
@@ -2844,18 +2846,15 @@ function updatePaymentButton(
         return;
     }
 
-
-    if (
-        paymentMethod ===
-        "RAZORPAY"
-    ) {
+    if (paymentMethod === "RAZORPAY") {
 
         buttonText.textContent =
             "Continue to Payment";
 
     } else if (paymentMethod === "WALLET") {
 
-        buttonText.textContent = "Pay with Wallet";
+        buttonText.textContent =
+            "Pay with Wallet";
 
     } else {
 
@@ -2871,9 +2870,7 @@ function updatePaymentButton(
    UPDATE PAYMENT SUMMARY
 ========================================================= */
 
-function updatePaymentSummary(
-    paymentMethod
-) {
+function updatePaymentSummary(paymentMethod) {
 
     const summaryPaymentMethod =
         document.getElementById(
@@ -2884,18 +2881,15 @@ function updatePaymentSummary(
         return;
     }
 
-
-    if (
-        paymentMethod ===
-        "RAZORPAY"
-    ) {
+    if (paymentMethod === "RAZORPAY") {
 
         summaryPaymentMethod.textContent =
             "Online Payment";
 
     } else if (paymentMethod === "WALLET") {
 
-        summaryPaymentMethod.textContent = "Wallet";
+        summaryPaymentMethod.textContent =
+            "Wallet";
 
     } else {
 
@@ -2913,58 +2907,36 @@ function updatePaymentSummary(
 
 document.querySelectorAll(
     'input[name="payment_method"]'
-).forEach(
-    function(radio) {
+).forEach(function(radio) {
 
-        radio.addEventListener(
-            "change",
-            function() {
+    radio.addEventListener("change", function() {
 
-                const selectedOption =
-                    this.closest(
-                        ".payment-option"
-                    );
+        const selectedOption =
+            this.closest(".payment-option");
 
+        document.querySelectorAll(
+            ".payment-option"
+        ).forEach(function(option) {
 
-                document.querySelectorAll(
-                    ".payment-option"
-                ).forEach(
-                    function(option) {
+            option.classList.remove("selected");
 
-                        option.classList.remove(
-                            "selected"
-                        );
+        });
 
-                    }
-                );
+        if (selectedOption) {
 
+            selectedOption.classList.add("selected");
 
-                if (selectedOption) {
+        }
 
-                    selectedOption.classList.add(
-                        "selected"
-                    );
+        updatePaymentInformation(this.value);
 
-                }
+        updatePaymentButton(this.value);
 
+        updatePaymentSummary(this.value);
 
-                updatePaymentInformation(
-                    this.value
-                );
+    });
 
-                updatePaymentButton(
-                    this.value
-                );
-
-                updatePaymentSummary(
-                    this.value
-                );
-
-            }
-        );
-
-    }
-);
+});
 
 
 /* =========================================================
@@ -2975,9 +2947,7 @@ document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-
-        /* ADDRESS */
-
+        /* INITIALIZE SELECTED ADDRESS */
         const selectedAddressRadio =
             document.querySelector(
                 'input[name="address"]:checked'
@@ -2985,15 +2955,11 @@ document.addEventListener(
 
         if (selectedAddressRadio) {
 
-            selectAddress(
-                selectedAddressRadio
-            );
+            selectAddress(selectedAddressRadio);
 
         }
 
-
-        /* PAYMENT */
-
+        /* INITIALIZE SELECTED PAYMENT */
         const selectedPaymentRadio =
             document.querySelector(
                 'input[name="payment_method"]:checked'
