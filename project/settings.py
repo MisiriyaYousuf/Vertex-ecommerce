@@ -11,6 +11,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
+    "skier-imprecise-detention.ngrok-free.dev"
 ]
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,6 +51,7 @@ RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+CSRF_TRUSTED_ORIGINS = ["https://skier-imprecise-detention.ngrok-free.dev"]
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

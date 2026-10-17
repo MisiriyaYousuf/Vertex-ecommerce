@@ -464,27 +464,19 @@ def delete_category(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
     category_id = request.POST.get("category_id")
-    category = Category.objects.filter(id=category_id,is_trashed=False).first()
+    category = Category.objects.filter(id=category_id,is_trashed=False,).first()
+    if category.products.exists():
+        messages.error(
+            request,
+            f'Cannot delete "{category.name}" because it contains products. '
+            'Please remove or move the products first.'
+        )
+        return redirect("customadmin:category_management")
     category.is_trashed = True
     category.trashed_at = timezone.now()
     category.save(update_fields=["is_trashed","trashed_at"])
     messages.success(request,f'"{category.name}" deleted successfully.')
     return redirect("customadmin:category_management")
-
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.shortcuts import redirect, render
-from django.views.decorators.cache import never_cache
-
-from .forms import ProductForm, ProductVariantForm
-from products.models import (
-    Product,
-    ProductImage,
-    ProductVariant,
-    ProductVariantImage,
-)
-
 
 @never_cache
 @login_required
@@ -3421,17 +3413,13 @@ def wallet_transaction_detail(request, transaction_id):
         "order_item__product",
     ).filter(pk=transaction_id).first()
 
-    # Do not use get_object_or_404().
+   
     if transaction is None:
         messages.error(request, "Wallet transaction not found.")
         return redirect("customadmin:wallet_management")
 
     user = transaction.wallet.user
-
-    # Find the order through the direct order field first.
     related_order = transaction.order
-
-    # If the direct order link is missing, try the linked order item.
     if related_order is None and transaction.order_item_id:
         related_order = transaction.order_item.order
 
