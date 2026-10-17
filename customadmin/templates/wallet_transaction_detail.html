@@ -1,0 +1,302 @@
+
+{% extends 'admin_base.html' %}
+
+{% block title %}Wallet Transaction Details - Admin Panel{% endblock %}
+{% block navbar_icon %}wallet{% endblock %}
+{% block navbar_title %}Transaction Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transaction-detail-page {
+        max-width: 1000px;
+        color: #e8edf5;
+    }
+
+    .detail-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 24px;
+    }
+
+    .detail-heading h2 {
+        margin: 0 0 6px;
+        color: #fff;
+        font-size: 24px;
+    }
+
+    .detail-heading p {
+        margin: 0;
+        color: #aab7c9;
+    }
+
+    .detail-card {
+        margin-bottom: 22px;
+        overflow: hidden;
+        border: 1px solid #2d3c50;
+        border-radius: 12px;
+        background: #111b2a;
+    }
+
+    .detail-card h3 {
+        margin: 0;
+        padding: 16px 20px;
+        border-bottom: 1px solid #2d3c50;
+        background: #1a293d;
+        color: #fff;
+        font-size: 17px;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .detail-item {
+        min-width: 0;
+        padding: 18px 20px;
+        border-bottom: 1px solid #27364a;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #aab7c9;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .detail-value {
+        color: #f0f5fc;
+        font-size: 15px;
+    }
+
+    .detail-value.amount {
+        color: #a9c9f2;
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    .detail-btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border: 0;
+        border-radius: 8px;
+        background: #315170;
+        color: #fff;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .detail-btn:hover {
+        background: #426b94;
+        color: #fff;
+    }
+
+    .secondary-btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border: 1px solid #394b64;
+        border-radius: 8px;
+        color: #dce7f5;
+        text-decoration: none;
+    }
+
+    .secondary-btn:hover {
+        background: #1a293d;
+        color: #fff;
+    }
+
+    .detail-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .detail-note {
+        margin-top: 15px;
+        color: #aab7c9;
+        font-size: 13px;
+    }
+
+    @media (max-width: 650px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="transaction-detail-page">
+
+    <div class="detail-heading">
+        <div>
+            <h2>Transaction #{{ transaction.id }}</h2>
+            <p>Complete information about this wallet transaction.</p>
+        </div>
+
+        <a
+            href="{% url 'customadmin:wallet_management' %}"
+            class="secondary-btn"
+        >
+            Back to Wallet Transactions
+        </a>
+    </div>
+
+    <section class="detail-card">
+        <h3>User Details</h3>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">User ID</span>
+                <div class="detail-value">
+                    {{ user_details.user_id }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Name</span>
+                <div class="detail-value">
+                    {{ user_details.name }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Username</span>
+                <div class="detail-value">
+                    {{ user_details.username }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <div class="detail-value">
+                    {{ user_details.email|default:"Not available" }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="detail-card">
+        <h3>Transaction Information</h3>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="detail-label">Transaction ID</span>
+                <div class="detail-value">#{{ transaction.id }}</div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Transaction Date</span>
+                <div class="detail-value">
+                    {{ transaction.created_at|date:"d M Y, h:i A" }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Transaction Type</span>
+                <div class="detail-value">
+                    {{ transaction.get_transaction_type_display }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Amount</span>
+                <div class="detail-value amount">
+                    ₹{{ transaction.amount|floatformat:2 }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Balance After Transaction</span>
+                <div class="detail-value">
+                    ₹{{ transaction.balance_after|floatformat:2 }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Source of Transaction</span>
+                <div class="detail-value">{{ source }}</div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Description</span>
+                <div class="detail-value">
+                    {{ transaction.description|default:"No description available" }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Related Order</span>
+                <div class="detail-value">
+                    {% if related_order %}
+                        Order #{{ related_order.id }}
+                    {% else %}
+                        No linked order available
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if transaction.order_item %}
+                <div class="detail-item">
+                    <span class="detail-label">Order Item</span>
+                    <div class="detail-value">
+                        Item #{{ transaction.order_item.id }}
+
+                        {% if transaction.order_item.product %}
+                            — {{ transaction.order_item.product }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="detail-actions">
+
+        {% if show_order_button %}
+            <form
+                method="post"
+                action="{% url 'customadmin:admin_order_detail' %}"
+            >
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="order_id"
+                    value="{{ related_order.id }}"
+                >
+
+                <button type="submit" class="detail-btn">
+                    View Related Order #{{ related_order.id }}
+                </button>
+            </form>
+        {% endif %}
+
+        <a
+            href="{% url 'customadmin:wallet_management' %}"
+            class="secondary-btn"
+        >
+            Back to Wallet Transactions
+        </a>
+    </div>
+
+    {% if transaction.transaction_type == "CANCEL_REFUND" or transaction.transaction_type == "RETURN_REFUND" %}
+        {% if not related_order %}
+            <p class="detail-note">
+                This refund has no available linked order, so the order
+                detail button cannot be displayed.
+            </p>
+        {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}

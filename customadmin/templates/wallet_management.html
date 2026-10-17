@@ -1,0 +1,306 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Wallet Management - Admin Panel{% endblock %}
+{% block navbar_icon %}wallet{% endblock %}
+{% block navbar_title %}Wallet Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wallet-page {
+        color: #e8edf5;
+    }
+
+    .wallet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .wallet-header h2 {
+        margin: 0 0 6px;
+        color: #fff;
+        font-size: 24px;
+    }
+
+    .wallet-header p {
+        margin: 0;
+        color: #aab7c9;
+    }
+
+    .wallet-search {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .wallet-search input {
+        min-width: 230px;
+        padding: 11px 13px;
+        border: 1px solid #394b64;
+        border-radius: 8px;
+        background: #111b2a;
+        color: #fff;
+        outline: none;
+    }
+
+    .wallet-search input:focus {
+        border-color: #668bb9;
+    }
+
+    .wallet-btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border: 0;
+        border-radius: 8px;
+        background: #315170;
+        color: #fff;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .wallet-btn:hover {
+        background: #426b94;
+        color: #fff;
+    }
+
+    .wallet-table-wrap {
+        overflow-x: auto;
+        border: 1px solid #2d3c50;
+        border-radius: 12px;
+        background: #111b2a;
+    }
+
+    .wallet-table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: collapse;
+    }
+
+    .wallet-table th {
+        padding: 15px;
+        background: #1a293d;
+        color: #b9c9dc;
+        text-align: left;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        white-space: nowrap;
+    }
+
+    .wallet-table td {
+        padding: 15px;
+        border-top: 1px solid #27364a;
+        color: #e8edf5;
+        vertical-align: middle;
+    }
+
+    .wallet-table tbody tr:hover {
+        background: #19283b;
+    }
+
+    .transaction-id {
+        color: #a9c9f2;
+        font-weight: 600;
+    }
+
+    .transaction-type {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 20px;
+        background: #243b55;
+        color: #c7ddfa;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .amount {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .wallet-email {
+        color: #aab7c9;
+        font-size: 12px;
+    }
+
+    .empty-state {
+        padding: 35px 15px !important;
+        text-align: center;
+        color: #aab7c9 !important;
+    }
+
+    .wallet-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+        color: #aab7c9;
+    }
+
+    .pagination-links {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .pagination-links a,
+    .pagination-links span {
+        padding: 8px 12px;
+        border: 1px solid #394b64;
+        border-radius: 7px;
+        color: #dce7f5;
+        text-decoration: none;
+    }
+
+    .pagination-links .current {
+        background: #315170;
+        border-color: #315170;
+        color: #fff;
+    }
+
+    @media (max-width: 600px) {
+        .wallet-search,
+        .wallet-search input {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-page">
+
+    <div class="wallet-header">
+        <div>
+            <h2>Wallet Transactions</h2>
+            <p>View wallet credits, debits, purchases and refunds.</p>
+        </div>
+
+        <form method="get" class="wallet-search">
+            <input
+                type="text"
+                name="q"
+                value="{{ search_query }}"
+                placeholder="Search ID, user or transaction..."
+                aria-label="Search wallet transactions"
+            >
+
+            <button type="submit" class="wallet-btn">
+                Search
+            </button>
+
+            {% if search_query %}
+                <a
+                    href="{% url 'customadmin:wallet_management' %}"
+                    class="wallet-btn"
+                >
+                    Clear
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="wallet-table-wrap">
+        <table class="wallet-table">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Transaction Date</th>
+                    <th>User</th>
+                    <th>Transaction Type</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for transaction in transactions %}
+                    <tr>
+                        <td class="transaction-id">
+                            #{{ transaction.id }}
+                        </td>
+
+                        <td>
+                            {{ transaction.created_at|date:"d M Y, h:i A" }}
+                        </td>
+
+                        <td>
+                            {{ transaction.wallet.user.get_username }}
+                            <br>
+                            <span class="wallet-email">
+                                {{ transaction.wallet.user.email }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="transaction-type">
+                                {{ transaction.get_transaction_type_display }}
+                            </span>
+                        </td>
+
+                        <td class="amount">
+                            ₹{{ transaction.amount|floatformat:2 }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{% url 'customadmin:wallet_transaction_detail' transaction.id %}"
+                                class="wallet-btn"
+                            >
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            No wallet transactions found.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+        <div class="wallet-pagination">
+            <span>
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            <div class="pagination-links">
+                {% if page_obj.has_previous %}
+                    <a href="?q={{ search_query|urlencode }}&page=1">
+                        First
+                    </a>
+
+                    <a href="?q={{ search_query|urlencode }}&page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                {% endif %}
+
+                <span class="current">{{ page_obj.number }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?q={{ search_query|urlencode }}&page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+
+                    <a href="?q={{ search_query|urlencode }}&page={{ page_obj.paginator.num_pages }}">
+                        Last
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

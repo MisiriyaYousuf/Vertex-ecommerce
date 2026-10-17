@@ -14,7 +14,7 @@ from products.models import (Product,ProductImage,ProductVariant,ProductVariantI
 from .forms import ProductForm,ProductVariantForm
 from django.http import JsonResponse
 from orders.models import Order, OrderItem
-from django.db.models import BooleanField, Case, Count, F, Prefetch, Q, Sum, Value, When
+from django.db.models import BooleanField, Case, Prefetch, Q, Sum, Value, When
 from django.db.models.functions import Coalesce
 from orders.views import update_status
 from orders.models import Coupon
@@ -29,35 +29,224 @@ from wallet.services import (
     reject_cancellation_request,
     reject_return_request,
 )
+import calendar
+import json
+from datetime import date, timedelta
+from django.db.models import Sum, Count, F
+from wallet.models import WalletTransaction
+from django.db.models.functions import TruncDay,TruncMonth
 
 @login_required
 @never_cache
 def dashboard(request):
-
+    today = timezone.localdate()
     user_count = UserProfile.objects.filter(
-            user__is_superuser=False
-        ).count()
-
+        user__is_superuser=False
+    ).count()
     product_count = Product.objects.filter(
         is_active=True,
         is_deleted=False
     ).count()
-
     category_count = Category.objects.filter(
         is_trashed=False
     ).count()
-
     order_count = Order.objects.count()
-
     return_count = OrderItem.objects.filter(
-        status ="Returned"
+        status="Returned"
     ).count()
+    total_sales = (
+        Order.objects
+        .exclude(status="Cancelled")
+        .aggregate(total=Sum("total_amount"))["total"]
+        or 0
+    )
+    period = request.GET.get("period", "yearly")
+    selected_year = today.year
+    selected_month = today.month
 
-    total_sales = Order.objects.exclude(
-        status="Cancelled"
-    ).aggregate(
-        total=Sum("total_amount")
-    )["total"] or 0
+    try:
+        selected_year = int(request.GET.get("year", today.year))
+        if not 2000 <= selected_year <= today.year + 1:
+            selected_year = today.year
+    except (TypeError, ValueError):
+        selected_year = today.year
+
+    try:
+        selected_month = int(request.GET.get("month", today.month))
+        if not 1 <= selected_month <= 12:
+            selected_month = today.month
+    except (TypeError, ValueError):
+        selected_month = today.month
+
+    if period not in {"yearly", "monthly", "weekly", "custom"}:
+        period = "yearly"
+
+    if period == "yearly":
+        start_date = date(selected_year, 1, 1)
+        end_date = date(selected_year, 12, 31)
+
+    elif period == "monthly":
+        start_date = date(selected_year, selected_month, 1)
+
+        if selected_month == 12:
+            end_date = date(selected_year, 12, 31)
+        else:
+            end_date = date(
+                selected_year,
+                selected_month + 1,
+                1
+            ) - timedelta(days=1)
+
+    elif period == "weekly":
+        end_date = today
+        start_date = today - timedelta(days=6)
+
+    else:
+        try:
+            start_date = date.fromisoformat(
+                request.GET.get("date_from", "")
+            )
+            end_date = date.fromisoformat(
+                request.GET.get("date_to", "")
+            )
+
+            if start_date > end_date:
+                start_date, end_date = end_date, start_date
+
+        except (TypeError, ValueError):
+            start_date = today.replace(day=1)
+            end_date = today
+
+    start_datetime = timezone.make_aware(
+        timezone.datetime.combine(
+            start_date,
+            timezone.datetime.min.time()
+        )
+    )
+    end_datetime = timezone.make_aware(
+        timezone.datetime.combine(
+            end_date + timedelta(days=1),
+            timezone.datetime.min.time()
+        )
+    )
+
+    sales_orders = Order.objects.filter(
+        status="Delivered",
+        created_at__gte=start_datetime,
+        created_at__lt=end_datetime
+    )
+
+    if period == "yearly":
+        chart_rows = (
+            sales_orders
+            .annotate(bucket=TruncMonth("created_at"))
+            .values("bucket")
+            .annotate(
+                revenue=Sum("total_amount"),
+                order_count=Count("id")
+            )
+            .order_by("bucket")
+        )
+
+        chart_labels = [
+            row["bucket"].strftime("%b")
+            for row in chart_rows
+        ]
+
+    else:
+        chart_rows = (
+            sales_orders
+            .annotate(bucket=TruncDay("created_at"))
+            .values("bucket")
+            .annotate(
+                revenue=Sum("total_amount"),
+                order_count=Count("id")
+            )
+            .order_by("bucket")
+        )
+
+        chart_labels = [
+            row["bucket"].strftime("%d %b")
+            for row in chart_rows
+        ]
+
+    chart_revenue = [
+        float(row["revenue"] or 0)
+        for row in chart_rows
+    ]
+
+    chart_order_counts = [
+        row["order_count"]
+        for row in chart_rows
+    ]
+
+    sold_items = OrderItem.objects.filter(
+        order__status="Delivered",
+        order__created_at__gte=start_datetime,
+        order__created_at__lt=end_datetime
+    ).exclude(
+        status__in=["Cancelled", "Returned"]
+    )
+
+    best_products = (
+        sold_items
+        .values("product_id", "product_name")
+        .annotate(
+            units_sold=Sum("quantity"),
+            revenue=Sum("item_total")
+        )
+        .order_by("-units_sold", "-revenue")[:10]
+    )
+
+    best_categories = (
+        sold_items
+        .values("product__category__name")
+        .annotate(
+            units_sold=Sum("quantity"),
+            revenue=Sum("item_total")
+        )
+        .order_by("-units_sold", "-revenue")[:10]
+    )
+
+    best_brands = []
+    product_brand_field = next(
+        (
+            field
+            for field in Product._meta.get_fields()
+            if field.name in {"brand", "brand_name"}
+            and getattr(field, "concrete", False)
+        ),
+        None
+    )
+
+    if product_brand_field:
+        if product_brand_field.is_relation:
+            related_model = product_brand_field.related_model
+
+            if any(
+                field.name == "name"
+                for field in related_model._meta.get_fields()
+            ):
+                brand_path = (
+                    f"product__{product_brand_field.name}__name"
+                )
+            else:
+                brand_path = (
+                    f"product__{product_brand_field.name}__pk"
+                )
+        else:
+            brand_path = f"product__{product_brand_field.name}"
+
+        best_brands = (
+            sold_items
+            .annotate(brand_label=F(brand_path))
+            .values("brand_label")
+            .annotate(
+                units_sold=Sum("quantity"),
+                revenue=Sum("item_total")
+            )
+            .order_by("-units_sold", "-revenue")[:10]
+        )
 
     context = {
         "user_count": user_count,
@@ -66,13 +255,27 @@ def dashboard(request):
         "order_count": order_count,
         "return_count": return_count,
         "total_sales": total_sales,
+        "period": period,
+        "selected_year": selected_year,
+        "selected_month": selected_month,
+        "date_from": start_date.isoformat(),
+        "date_to": end_date.isoformat(),
+        "chart_labels_json": json.dumps(chart_labels),
+        "chart_revenue_json": json.dumps(chart_revenue),
+        "chart_order_counts_json": json.dumps(chart_order_counts),
+        "best_products": best_products,
+        "best_categories": best_categories,
+        "best_brands": best_brands,
+        "year_choices": list(
+            range(2020, today.year + 1)
+        ),
+        "month_choices": [
+            (month_number, calendar.month_name[month_number])
+            for month_number in range(1, 13)
+        ],
     }
 
-    return render(
-        request,
-        "dashboard.html",
-        context
-    )
+    return render(request, "dashboard.html", context)
 
 @never_cache
 @login_required
@@ -2176,15 +2379,8 @@ def admin_order_detail(request):
             "customadmin:order_management"
         )
 
-    # -------------------------------------------------
-    # Prepare product / variant image information
-    # -------------------------------------------------
 
     for item in order.items.all():
-
-        # ---------------------------------------------
-        # VARIANT ORDER ITEM
-        # ---------------------------------------------
 
         if item.variant_id:
 
@@ -2192,7 +2388,6 @@ def admin_order_detail(request):
                 item.variant.images.all()
             )
 
-            # Variant main image
             main_variant_image = next(
                 (
                     image
@@ -3179,6 +3374,117 @@ def delete_coupon(request):
         "customadmin:coupon_management"
     )
 
+
+def wallet_management(request):
+    transactions = WalletTransaction.objects.select_related(
+        "wallet__user",
+        "order",
+        "order_item__order",
+        "order_item__product",
+    ).all()
+
+    search_query = request.GET.get("q", "").strip()
+
+    if search_query:
+        search_filter = (
+            Q(transaction_type__icontains=search_query)
+            | Q(description__icontains=search_query)
+            | Q(wallet__user__username__icontains=search_query)
+            | Q(wallet__user__email__icontains=search_query)
+        )
+
+        # Also allow searching by transaction ID.
+        if search_query.isdigit():
+            search_filter |= Q(id=int(search_query))
+
+        transactions = transactions.filter(search_filter)
+
+    paginator = Paginator(transactions, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    return render(
+        request,
+        "wallet_management.html",
+        {
+            "page_obj": page_obj,
+            "transactions": page_obj,
+            "search_query": search_query,
+        },
+    )
+
+
+def wallet_transaction_detail(request, transaction_id):
+    transaction = WalletTransaction.objects.select_related(
+        "wallet__user",
+        "order",
+        "order_item__order",
+        "order_item__product",
+    ).filter(pk=transaction_id).first()
+
+    # Do not use get_object_or_404().
+    if transaction is None:
+        messages.error(request, "Wallet transaction not found.")
+        return redirect("customadmin:wallet_management")
+
+    user = transaction.wallet.user
+
+    # Find the order through the direct order field first.
+    related_order = transaction.order
+
+    # If the direct order link is missing, try the linked order item.
+    if related_order is None and transaction.order_item_id:
+        related_order = transaction.order_item.order
+
+    transaction_type = transaction.transaction_type
+
+    if transaction_type == WalletTransaction.CANCEL_REFUND:
+        source = "Product cancellation refund"
+
+    elif transaction_type == WalletTransaction.RETURN_REFUND:
+        source = "Product return refund"
+
+    elif transaction_type == WalletTransaction.PURCHASE:
+        source = "Wallet payment for an order"
+
+    elif transaction_type == WalletTransaction.CREDIT:
+        source = "Wallet credit"
+
+    elif transaction_type == WalletTransaction.DEBIT:
+        source = "Wallet debit"
+
+    else:
+        source = "Wallet transaction"
+
+    if transaction.description:
+        source = f"{source} — {transaction.description}"
+
+    user_details = {
+        "name": user.get_full_name() or user.get_username(),
+        "username": user.get_username(),
+        "email": getattr(user, "email", ""),
+        "user_id": user.pk,
+    }
+
+    # Show the order button only for cancellation and return refunds.
+    show_order_button = (
+        transaction_type in (
+            WalletTransaction.CANCEL_REFUND,
+            WalletTransaction.RETURN_REFUND,
+        )
+        and related_order is not None
+    )
+
+    return render(
+        request,
+        "wallet_transaction_detail.html",
+        {
+            "transaction": transaction,
+            "user_details": user_details,
+            "source": source,
+            "related_order": related_order,
+            "show_order_button": show_order_button,
+        },
+    )
 
 
 @never_cache

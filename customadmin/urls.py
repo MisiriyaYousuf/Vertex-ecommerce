@@ -32,4 +32,7 @@ urlpatterns = [
     path("offers/<str:offer_type>/<int:offer_id>/toggle/", views.toggle_offer, name="toggle_offer"),
     path("offers/<str:offer_type>/<int:offer_id>/delete/", views.delete_offer, name="delete_offer"),
     path("inventory/",views.inventory_management,name="inventory_management"),
+    path("wallet/",views.wallet_management,name="wallet_management",),
+    path("wallet/transactions/<int:transaction_id>/",views.wallet_transaction_detail,name="wallet_transaction_detail",),
+    
 ]
