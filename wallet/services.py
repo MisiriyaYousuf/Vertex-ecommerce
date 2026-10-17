@@ -19,7 +19,7 @@ def get_wallet(user):
 
 
 def refund_amount_for_item(item):
-    """Allocate every cent of the paid total proportionally across order items."""
+    
     order = item.order
     items = sorted(order.items.all(), key=lambda row: row.pk)
     item_value = sum((row.item_total for row in items), Decimal("0.00"))

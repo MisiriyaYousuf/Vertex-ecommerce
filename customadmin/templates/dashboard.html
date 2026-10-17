@@ -1,3 +1,4 @@
+
 {% extends 'admin_base.html' %}
 {% load static %}
 
@@ -7,80 +8,408 @@
 
 {% block extra_css %}
 <style>
-    .stats-card {
-        background: white;
-        padding: 15px 20px; 
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: all 0.3s;
-        height: 100%;
+    :root {
+        --dashboard-blue: #315170;
+        --dashboard-black: #17191c;
+        --dashboard-muted: #737b85;
+        --dashboard-border: #e2e7ec;
+        --dashboard-bg: #ffffff;
+        --dashboard-soft: #f3f6f9;
     }
-    .stats-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
-    .stats-card h3 {
-        margin: 0;
-        font-size: 26px; 
-        font-weight: bold;
-        color: #2c3e50;
-        line-height: 1.2;
-    }
-    .stats-card p {
-        margin: 3px 0 0;
-        color: #7f8c8d;
-        font-size: 12px; 
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
-    .stats-card .icon {
-        font-size: 24px; 
-        margin-bottom: 5px;
-        display: block;
-    }
-    .stats-card.users { border-bottom: 3px solid #3498db; }
-    .stats-card.products { border-bottom: 3px solid #2ecc71; }
-    .stats-card.categories { border-bottom: 3px solid #f39c12; }
-    .stats-card.orders { border-bottom: 3px solid #9b59b6; }
-    .stats-card.returns { border-bottom: 3px solid #e74c3c; }
-    .stats-card.sales { border-bottom: 3px solid #1abc9c; }
 
+    /* Keep the original dashboard layout */
     .welcome-section {
         text-align: center;
-        padding: 10px 0 15px; 
+        padding: 10px 0 15px;
     }
+
     .welcome-section h2 {
-        color: #2c3e50;
-        font-weight: 300;
-        font-size: 1.5rem; 
+        color: var(--dashboard-black);
+        font-weight: 600;
+        font-size: 1.5rem;
         margin-bottom: 2px;
     }
+
     .welcome-section p {
-        color: #7f8c8d;
+        color: var(--dashboard-muted);
         margin-bottom: 0;
         font-size: 0.9rem;
     }
 
-    
     .row.g-4 {
         --bs-gutter-y: 0.75rem;
         --bs-gutter-x: 0.75rem;
     }
 
-    
+    /* Existing six summary cards */
+    .stats-card {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid var(--dashboard-border);
+        border-bottom: 3px solid var(--dashboard-blue);
+        box-shadow: 0 2px 4px rgba(0,0,0,.07);
+        transition: transform .25s ease, box-shadow .25s ease;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 7px 18px rgba(49,81,112,.16);
+    }
+
+    .stats-card h3 {
+        margin: 0;
+        font-size: 26px;
+        font-weight: bold;
+        color: var(--dashboard-black);
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+
+    .stats-card p {
+        margin: 3px 0 0;
+        color: var(--dashboard-muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+
+    .stats-card .icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .stats-card.users { border-bottom-color: #315170; }
+    .stats-card.products { border-bottom-color: #315170; }
+    .stats-card.categories { border-bottom-color: #315170; }
+    .stats-card.orders { border-bottom-color: #315170; }
+    .stats-card.returns { border-bottom-color: #315170; }
+    .stats-card.sales { border-bottom-color: #315170; }
+
+    /* Sales analysis panels */
+    .analysis-section {
+        margin-top: 28px;
+    }
+
+    .analysis-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+    }
+
+    .analysis-heading h3 {
+        color: var(--dashboard-black);
+        font-size: 21px;
+        font-weight: 700;
+        margin: 0 0 4px;
+    }
+
+    .analysis-heading p {
+        color: var(--dashboard-muted);
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .analysis-panel {
+        background: var(--dashboard-bg);
+        border: 1px solid var(--dashboard-border);
+        border-radius: 9px;
+        padding: 20px;
+        margin-bottom: 18px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.045);
+        transition: box-shadow .25s ease, transform .25s ease;
+    }
+
+    .analysis-panel:hover {
+        box-shadow: 0 6px 18px rgba(49,81,112,.10);
+    }
+
+    .panel-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .panel-title h4 {
+        color: var(--dashboard-black);
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 4px;
+    }
+
+    .panel-title p {
+        color: var(--dashboard-muted);
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .panel-icon {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        color: var(--dashboard-blue);
+        background: #edf2f6;
+        font-size: 17px;
+    }
+
+    /* Period filter */
+    .analysis-filter {
+        background: var(--dashboard-soft);
+        border: 1px solid var(--dashboard-border);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .filter-form {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-field {
+        flex: 1 1 145px;
+        min-width: 120px;
+    }
+
+    .filter-field label {
+        display: block;
+        color: var(--dashboard-black);
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .filter-control {
+        width: 100%;
+        height: 39px;
+        border: 1px solid #cbd4de;
+        border-radius: 6px;
+        background: #fff;
+        color: var(--dashboard-black);
+        padding: 7px 10px;
+        font-size: 13px;
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .filter-control:focus {
+        border-color: var(--dashboard-blue);
+        box-shadow: 0 0 0 3px rgba(49,81,112,.12);
+    }
+
+    .filter-hidden {
+        display: none !important;
+    }
+
+    .dashboard-btn {
+        height: 39px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 8px 15px;
+        border: 1px solid var(--dashboard-blue);
+        border-radius: 6px;
+        background: var(--dashboard-blue);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .2s, transform .2s;
+        white-space: nowrap;
+    }
+
+    .dashboard-btn:hover {
+        background: #243e57;
+        border-color: #243e57;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .dashboard-btn.secondary {
+        background: #fff;
+        color: var(--dashboard-blue);
+    }
+
+    .dashboard-btn.secondary:hover {
+        background: #e8eef4;
+    }
+
+    .period-badge {
+        display: inline-block;
+        padding: 6px 10px;
+        background: #edf2f6;
+        color: var(--dashboard-blue);
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    /* Charts */
+    .chart-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 300px;
+    }
+
+    /* Top-selling tables */
+    .ranking-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .ranking-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .ranking-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .ranking-table th {
+        text-align: left;
+        padding: 10px 7px;
+        background: #f3f6f9;
+        color: #526171;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--dashboard-border);
+    }
+
+    .ranking-table td {
+        padding: 11px 7px;
+        color: #3c4650;
+        border-bottom: 1px solid #edf0f3;
+        vertical-align: middle;
+    }
+
+    .ranking-table tbody tr {
+        transition: background .2s;
+    }
+
+    .ranking-table tbody tr:hover {
+        background: #f3f6f9;
+    }
+
+    .ranking-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .rank-number {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 25px;
+        height: 25px;
+        padding: 0 5px;
+        border-radius: 5px;
+        background: #e7edf3;
+        color: var(--dashboard-blue);
+        font-weight: 700;
+    }
+
+    .item-name {
+        color: var(--dashboard-black) !important;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .metric-value {
+        color: var(--dashboard-blue);
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .empty-ranking {
+        padding: 24px 8px;
+        text-align: center;
+        color: var(--dashboard-muted);
+    }
+
+    .empty-ranking i {
+        display: block;
+        font-size: 23px;
+        margin-bottom: 8px;
+        color: var(--dashboard-blue);
+    }
+
+    .ledger-note {
+        border-left: 4px solid var(--dashboard-blue);
+        padding: 13px 15px;
+        background: #f3f6f9;
+        color: #526171;
+        font-size: 13px;
+        border-radius: 0 6px 6px 0;
+    }
+
+    @media (max-width: 1100px) {
+        .ranking-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .chart-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
     @media (max-width: 768px) {
         .stats-card {
             padding: 12px 15px;
         }
+
         .stats-card h3 {
             font-size: 22px;
         }
+
         .stats-card .icon {
             font-size: 20px;
         }
+
         .welcome-section h2 {
             font-size: 1.3rem;
+        }
+
+        .ranking-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .analysis-panel {
+            padding: 14px;
+        }
+
+        .chart-container {
+            height: 260px;
+        }
+
+        .filter-field {
+            flex-basis: calc(50% - 10px);
         }
     }
 
@@ -88,43 +417,79 @@
         .stats-card {
             padding: 10px 12px;
         }
+
         .stats-card h3 {
             font-size: 18px;
         }
+
         .stats-card .icon {
             font-size: 18px;
         }
+
         .stats-card p {
             font-size: 10px;
         }
+
         .welcome-section h2 {
             font-size: 1.1rem;
         }
+
         .welcome-section p {
-            font-size: 0.8rem;
+            font-size: .8rem;
         }
+
         .row.g-4 {
-            --bs-gutter-y: 0.5rem;
-            --bs-gutter-x: 0.5rem;
+            --bs-gutter-y: .5rem;
+            --bs-gutter-x: .5rem;
+        }
+
+        .filter-field {
+            flex-basis: 100%;
+        }
+
+        .filter-actions {
+            display: flex;
+            width: 100%;
+        }
+
+        .filter-actions .dashboard-btn {
+            flex: 1;
+        }
+
+        .analysis-heading h3 {
+            font-size: 18px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: .01ms !important;
+            transition-duration: .01ms !important;
         }
     }
 </style>
 {% endblock %}
 
+
 {% block content %}
+
+<!-- EXISTING WELCOME SECTION -->
 <div class="welcome-section">
     <h2>Welcome back, {{ user.username }}!</h2>
     <p>Here's an overview of your e-commerce store</p>
 </div>
 
+<!-- EXISTING SIX SUMMARY CARDS -->
 <div class="row g-4">
-    <div class="col-6 col-md-4 col-lg-4"> 
+
+    <div class="col-6 col-md-4 col-lg-4">
         <div class="stats-card users">
             <span class="icon"><i class="fas fa-users text-primary"></i></span>
             <h3>{{ user_count|default:"0" }}</h3>
             <p>Registered Users</p>
         </div>
     </div>
+
     <div class="col-6 col-md-4 col-lg-4">
         <div class="stats-card products">
             <span class="icon"><i class="fas fa-box text-success"></i></span>
@@ -132,6 +497,7 @@
             <p>Products</p>
         </div>
     </div>
+
     <div class="col-6 col-md-4 col-lg-4">
         <div class="stats-card categories">
             <span class="icon"><i class="fas fa-tags text-warning"></i></span>
@@ -139,6 +505,7 @@
             <p>Categories</p>
         </div>
     </div>
+
     <div class="col-6 col-md-4 col-lg-4">
         <div class="stats-card orders">
             <span class="icon"><i class="fas fa-shopping-cart text-info"></i></span>
@@ -146,6 +513,7 @@
             <p>Orders</p>
         </div>
     </div>
+
     <div class="col-6 col-md-4 col-lg-4">
         <div class="stats-card returns">
             <span class="icon"><i class="fas fa-undo text-danger"></i></span>
@@ -153,6 +521,7 @@
             <p>Returns</p>
         </div>
     </div>
+
     <div class="col-6 col-md-4 col-lg-4">
         <div class="stats-card sales">
             <span class="icon"><i class="fas fa-chart-line text-success"></i></span>
@@ -160,5 +529,540 @@
             <p>Total Sales</p>
         </div>
     </div>
+
 </div>
+
+
+<!-- NEW SALES ANALYSIS SECTION -->
+<section class="analysis-section">
+
+    <div class="analysis-heading">
+        <div>
+            <h3><i class="fas fa-chart-line"></i> Sales Analysis</h3>
+            <p>Analyze revenue, orders and your best-selling items.</p>
+        </div>
+        
+    </div>
+
+    <!-- FILTER -->
+    <div class="analysis-filter">
+        <form method="get" action="" id="sales-filter-form" class="filter-form">
+
+            <div class="filter-field">
+                <label for="period">Filter By</label>
+                <select class="filter-control" name="period" id="period">
+                    <option value="yearly"
+                        {% if period == "yearly" %}selected{% endif %}>
+                        Yearly
+                    </option>
+                    <option value="monthly"
+                        {% if period == "monthly" %}selected{% endif %}>
+                        Monthly
+                    </option>
+                    <option value="weekly"
+                        {% if period == "weekly" %}selected{% endif %}>
+                        Weekly (Last 7 Days)
+                    </option>
+                    <option value="custom"
+                        {% if period == "custom" %}selected{% endif %}>
+                        Custom Date Range
+                    </option>
+                </select>
+            </div>
+
+            <!-- YEAR: visible for yearly and monthly -->
+            <div class="filter-field" id="year-field">
+                <label for="year">Select Year</label>
+                <select class="filter-control" name="year" id="year">
+                    {% for y in year_choices %}
+                    <option value="{{ y }}"
+                        {% if selected_year == y %}selected{% endif %}>
+                        {{ y }}
+                    </option>
+                    {% empty %}
+                    <option value="{{ selected_year }}" selected>
+                        {{ selected_year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- MONTH: visible only for monthly -->
+            <div class="filter-field filter-hidden" id="month-field">
+                <label for="month">Select Month</label>
+                <select class="filter-control" name="month" id="month">
+                    {% for month_number, month_name in month_choices %}
+                    <option value="{{ month_number }}"
+                        {% if selected_month == month_number %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- CUSTOM DATE FIELDS -->
+            <div class="filter-field filter-hidden" id="date-from-field">
+                <label for="date_from">From Date</label>
+                <input class="filter-control" type="date"
+                       name="date_from" id="date_from"
+                       value="{{ date_from }}">
+            </div>
+
+            <div class="filter-field filter-hidden" id="date-to-field">
+                <label for="date_to">To Date</label>
+                <input class="filter-control" type="date"
+                       name="date_to" id="date_to"
+                       value="{{ date_to }}">
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="dashboard-btn">
+                    <i class="fas fa-filter"></i> Apply
+                </button>
+
+                <a href="{{ request.path }}"
+                   class="dashboard-btn secondary">
+                    <i class="fas fa-redo"></i> Reset
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+
+    <!-- REVENUE AND ORDER CHARTS -->
+    <div class="chart-row">
+
+        <div class="analysis-panel">
+            <div class="panel-title">
+                <div>
+                    <h4><i class="fas fa-chart-area"></i> Revenue Overview</h4>
+                    <p>Revenue from delivered orders</p>
+                </div>
+                <span class="panel-icon">
+                    <i class="fa fa-inr" aria-hidden="true"></i>
+                </span>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+
+        <div class="analysis-panel">
+            <div class="panel-title">
+                <div>
+                    <h4><i class="fas fa-chart-bar"></i> Order Overview</h4>
+                    <p>Delivered orders by date</p>
+                </div>
+                <span class="panel-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </span>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="ordersChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- TOP 10 RANKINGS -->
+    <div class="analysis-heading">
+        <div>
+            <h3><i class="fas fa-trophy"></i> Best Sellers</h3>
+            <p>Top-performing items for the selected reporting period.</p>
+        </div>
+    </div>
+
+    <div class="ranking-grid">
+
+        <!-- TOP PRODUCTS -->
+        <div class="analysis-panel">
+            <div class="panel-title">
+                <div>
+                    <h4>Best Selling Products</h4>
+                    <p>Top 10 by units sold</p>
+                </div>
+                <span class="panel-icon"><i class="fas fa-box"></i></span>
+            </div>
+
+            <div class="ranking-table-wrap">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Units</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in best_products %}
+                        <tr>
+                            <td><span class="rank-number">{{ forloop.counter }}</span></td>
+                            <td class="item-name">
+                                {{ item.product_name|default:"Unnamed product" }}
+                            </td>
+                            <td>{{ item.units_sold|default:0 }}</td>
+                            <td class="metric-value">
+                                ₹{{ item.revenue|default:0|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-ranking">
+                                    <i class="fas fa-box-open"></i>
+                                    No product sales for this period.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- TOP CATEGORIES -->
+        <div class="analysis-panel">
+            <div class="panel-title">
+                <div>
+                    <h4>Best Selling Categories</h4>
+                    <p>Top 10 by units sold</p>
+                </div>
+                <span class="panel-icon"><i class="fas fa-tags"></i></span>
+            </div>
+
+            <div class="ranking-table-wrap">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Category</th>
+                            <th>Units</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in best_categories %}
+                        <tr>
+                            <td><span class="rank-number">{{ forloop.counter }}</span></td>
+                            <td class="item-name">
+                                {{ item.product__category__name|default:"Uncategorized" }}
+                            </td>
+                            <td>{{ item.units_sold|default:0 }}</td>
+                            <td class="metric-value">
+                                ₹{{ item.revenue|default:0|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-ranking">
+                                    <i class="fas fa-tags"></i>
+                                    No category sales for this period.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- TOP BRANDS -->
+        <div class="analysis-panel">
+            <div class="panel-title">
+                <div>
+                    <h4>Best Selling Brands</h4>
+                    <p>Top 10 by units sold</p>
+                </div>
+                <span class="panel-icon"><i class="fas fa-award"></i></span>
+            </div>
+
+            <div class="ranking-table-wrap">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Brand</th>
+                            <th>Units</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in best_brands %}
+                        <tr>
+                            <td><span class="rank-number">{{ forloop.counter }}</span></td>
+                            <td class="item-name">
+                                {{ item.brand_label|default:"Unknown brand" }}
+                            </td>
+                            <td>{{ item.units_sold|default:0 }}</td>
+                            <td class="metric-value">
+                                ₹{{ item.revenue|default:0|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-ranking">
+                                    <i class="fas fa-award"></i>
+                                    No brand data available.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- OPTIONAL LEDGER BOOK -->
+    <div class="analysis-panel">
+        <div class="panel-title">
+            <div>
+                <h4><i class="fas fa-book"></i> Ledger Book</h4>
+                <p>Optional accounting feature</p>
+            </div>
+            <span class="period-badge">Future enhancement</span>
+        </div>
+
+        <div class="ledger-note">
+            The ledger book can be added separately to show order transactions,
+            wallet credits and debits, refunds, and running balances.
+            No accounting records are changed by this dashboard.
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* Show only the filters relevant to the selected period */
+    const period = document.getElementById("period");
+    const yearField = document.getElementById("year-field");
+    const monthField = document.getElementById("month-field");
+    const fromField = document.getElementById("date-from-field");
+    const toField = document.getElementById("date-to-field");
+
+    const yearInput = document.getElementById("year");
+    const monthInput = document.getElementById("month");
+    const fromInput = document.getElementById("date_from");
+    const toInput = document.getElementById("date_to");
+
+    function updateFilterFields() {
+        const selected = period.value;
+
+        // Yearly: year only
+        // Monthly: year + month
+        // Weekly: no extra inputs
+        // Custom: date range only
+
+        yearField.classList.toggle(
+            "filter-hidden",
+            selected === "weekly" || selected === "custom"
+        );
+
+        monthField.classList.toggle(
+            "filter-hidden",
+            selected !== "monthly"
+        );
+
+        fromField.classList.toggle(
+            "filter-hidden",
+            selected !== "custom"
+        );
+
+        toField.classList.toggle(
+            "filter-hidden",
+            selected !== "custom"
+        );
+
+        yearInput.disabled = selected === "weekly" || selected === "custom";
+        monthInput.disabled = selected !== "monthly";
+        fromInput.disabled = selected !== "custom";
+        toInput.disabled = selected !== "custom";
+
+        fromInput.required = selected === "custom";
+        toInput.required = selected === "custom";
+    }
+
+    period.addEventListener("change", updateFilterFields);
+    updateFilterFields();
+
+    document.getElementById("sales-filter-form").addEventListener(
+        "submit",
+        function (event) {
+            if (
+                period.value === "custom" &&
+                fromInput.value &&
+                toInput.value &&
+                fromInput.value > toInput.value
+            ) {
+                event.preventDefault();
+                alert("From Date cannot be later than To Date.");
+            }
+        }
+    );
+
+    /* Chart data comes from the Django view */
+    const labels = {{ chart_labels_json|safe }};
+    const revenue = {{ chart_revenue_json|safe }};
+    const orderCounts = {{ chart_order_counts_json|safe }};
+
+    if (typeof Chart === "undefined") {
+        console.error("Chart.js did not load. Check the CDN connection.");
+        return;
+    }
+
+    Chart.defaults.color = "#737b85";
+    Chart.defaults.font.family = "Arial, sans-serif";
+
+    const tooltipStyle = {
+        backgroundColor: "#17191c",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        padding: 12,
+        cornerRadius: 6
+    };
+
+    const money = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
+    });
+
+    /* Revenue line chart */
+    const revenueCanvas = document.getElementById("revenueChart");
+
+    if (revenueCanvas) {
+        const ctx = revenueCanvas.getContext("2d");
+        const fill = ctx.createLinearGradient(0, 0, 0, 300);
+
+        fill.addColorStop(0, "rgba(49, 81, 112, 0.24)");
+        fill.addColorStop(1, "rgba(49, 81, 112, 0.01)");
+
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Revenue",
+                    data: revenue,
+                    borderColor: "#315170",
+                    backgroundColor: fill,
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 3,
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: "#ffffff",
+                    pointBorderColor: "#315170",
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: "index"
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        ...tooltipStyle,
+                        callbacks: {
+                            label: function (context) {
+                                return " Revenue: " +
+                                    money.format(context.parsed.y || 0);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        border: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        border: { display: false },
+                        grid: { color: "#e9edf1" },
+                        ticks: {
+                            callback: function (value) {
+                                return "₹" + Number(value).toLocaleString("en-IN");
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 800,
+                    easing: "easeOutQuart"
+                }
+            }
+        });
+    }
+
+    /* Order-count bar chart */
+    const ordersCanvas = document.getElementById("ordersChart");
+
+    if (ordersCanvas) {
+        new Chart(ordersCanvas, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Delivered Orders",
+                    data: orderCounts,
+                    backgroundColor: "rgba(49, 81, 112, 0.82)",
+                    hoverBackgroundColor: "#17191c",
+                    borderRadius: 4,
+                    maxBarThickness: 32
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: tooltipStyle
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        border: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        border: { display: false },
+                        grid: { color: "#e9edf1" },
+                        ticks: {
+                            precision: 0,
+                            stepSize: 1
+                        }
+                    }
+                },
+                animation: {
+                    duration: 800,
+                    easing: "easeOutQuart"
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
