@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Product(models.Model):
 
     category = models.ForeignKey(
