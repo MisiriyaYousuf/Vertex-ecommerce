@@ -451,6 +451,34 @@
             box-shadow: 0 0 0 3px rgba(49, 81, 112, .09);
         }
 
+        .page-content input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            flex: 0 0 16px;
+            margin: 0;
+            border: 1px solid #9aa9b7;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+
+        .page-content input[type="checkbox"]:checked {
+            border-color: #315170;
+            background-color: #315170;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m3 8 3 3 7-7'/%3E%3C/svg%3E");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 12px;
+        }
+
+        .page-content input[type="checkbox"]:focus-visible {
+            outline: 3px solid rgba(49, 81, 112, .2);
+            outline-offset: 2px;
+        }
+
         .page-content .btn-primary {
             border-color: var(--admin-primary);
             background: var(--admin-primary);
