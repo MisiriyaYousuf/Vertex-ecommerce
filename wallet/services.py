@@ -92,13 +92,10 @@ def restock_item(item):
     if item.variant_id:
         item.variant.quantity += item.quantity
         item.variant.save(update_fields=["quantity", "updated_at"])
-    else:
-        item.product.quantity += item.quantity
-        item.product.save(update_fields=["quantity", "updated_at"])
 
 
 @transaction.atomic
-def approve_return_request(return_request_id, admin_user):
+def approve_return_request(return_request_id, admin_user=None):
     request = (
         ReturnRequest.objects.select_for_update()
         .select_related("order_item__order", "order_item__product", "order_item__variant")
@@ -110,9 +107,6 @@ def approve_return_request(return_request_id, admin_user):
     order = item.order
     if item.status != "Delivered":
         return False, "The order item is no longer eligible for return."
-    if order.payment_status != "Paid":
-        return False, "The order is not marked paid, so no refund can be issued."
-
     item.status = "Returned"
     item.return_reason = request.reason
     item.save(update_fields=["status", "return_reason"])
@@ -120,17 +114,20 @@ def approve_return_request(return_request_id, admin_user):
 
     from orders.views import update_status
     update_status(order)
-    credit_item_refund(
-        item,
-        WalletTransaction.RETURN_REFUND,
-        f"Approved return refund for order #{order.pk}",
-    )
-    mark_fully_refunded(order)
+    if order.payment_status == "Paid":
+        credit_item_refund(
+            item,
+            WalletTransaction.RETURN_REFUND,
+            f"Approved return refund for order #{order.pk}",
+        )
+        mark_fully_refunded(order)
     request.status = ReturnRequest.APPROVED
     request.reviewed_by = admin_user
     request.reviewed_at = timezone.now()
     request.save(update_fields=["status", "reviewed_by", "reviewed_at"])
-    return True, f"Return for order #{order.pk} approved and refunded to wallet."
+    if order.payment_status == "Paid":
+        return True, f"Return for order #{order.pk} approved and refunded to wallet."
+    return True, f"Return for order #{order.pk} approved. No payment refund was due."
 
 
 @transaction.atomic
@@ -147,7 +144,7 @@ def reject_return_request(return_request_id, admin_user, note=""):
 
 
 @transaction.atomic
-def approve_cancellation_request(cancellation_request_id, admin_user):
+def approve_cancellation_request(cancellation_request_id, admin_user=None):
     request = (
         CancellationRequest.objects.select_for_update()
         .select_related(
@@ -195,7 +192,9 @@ def approve_cancellation_request(cancellation_request_id, admin_user):
     request.reviewed_by = admin_user
     request.reviewed_at = timezone.now()
     request.save(update_fields=["status", "reviewed_by", "reviewed_at"])
-    return True, f"Cancellation for order #{order.pk} approved and refunded to wallet."
+    if order.payment_status == "Paid":
+        return True, f"Cancellation for order #{order.pk} approved and refunded to wallet."
+    return True, f"Cancellation for order #{order.pk} approved. No payment refund was due."
 
 
 @transaction.atomic
