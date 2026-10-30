@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Product(models.Model):
 
     category = models.ForeignKey(
@@ -12,42 +13,13 @@ class Product(models.Model):
         max_length=200
     )
 
+    brand = models.CharField(
+        max_length=120,
+        blank=True,
+        db_index=True,
+    )
+
     description = models.TextField()
-
-    sale_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
-
-    discount_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True
-    )
-
-    color = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    size = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    product_code = models.CharField(
-        max_length=100,
-        unique=True,
-        blank=True,
-        null=True
-    )
-
-    quantity = models.PositiveIntegerField(
-        default=0
-    )
 
     is_active = models.BooleanField(
         default=True
@@ -61,14 +33,6 @@ class Product(models.Model):
         default=False
     )
 
-    main_image = models.ForeignKey(
-        'ProductImage',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='main_for_products'
-    )
-
     created_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -79,6 +43,16 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def primary_image(self):
+        if not hasattr(self, "_primary_image_cache"):
+            images = list(self.images.all())
+            self._primary_image_cache = next(
+                (image for image in images if image.image_type == "main"),
+                images[0] if images else None,
+            )
+        return self._primary_image_cache
 
 
 class ProductImage(models.Model):
@@ -127,7 +101,6 @@ class ProductImage(models.Model):
         return f"{self.product.name} - {self.image_type}"
 
 
-
 class ProductVariant(models.Model):
 
     product = models.ForeignKey(
@@ -147,6 +120,7 @@ class ProductVariant(models.Model):
         null=True,
         blank=True
     )
+
 
     color = models.CharField(
         max_length=100,
@@ -196,6 +170,7 @@ class ProductVariant(models.Model):
             return f"{self.product.name} - {' / '.join(variant_info)}"
 
         return self.product.name
+
 
 class ProductVariantImage(models.Model):
 

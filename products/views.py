@@ -2,11 +2,22 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
-from django.db.models import Exists, OuterRef, Q,Prefetch
+from django.db.models import Exists, OuterRef, Q, Prefetch, Min, Sum, Value, IntegerField, Subquery
+from django.db.models.functions import Coalesce
+from decimal import Decimal, InvalidOperation
 from cart.views import MAX_CART_QUANTITY
+from cart.models import Cart, Wishlist
 from customadmin.models import Category
 from .models import Product, ProductVariant,ProductImage,ProductVariantImage
 from offers.services import add_pricing
+
+
+active_variant_stock = ProductVariant.objects.filter(
+    product_id=OuterRef("pk"), is_active=True
+).values("product_id").annotate(total=Sum("quantity")).values("total")
+active_variant_price = ProductVariant.objects.filter(
+    product_id=OuterRef("pk"), is_active=True
+).values("product_id").annotate(minimum=Min("sale_price")).values("minimum")
 
 
 @never_cache
@@ -27,14 +38,12 @@ def products(request):
             category__is_trashed=False,
         )
         .annotate(
-            has_stock=(
-                Q(quantity__gt=0)
-                | Exists(available_variant)
-            ),
+            has_stock=Exists(available_variant),
+            total_stock=Coalesce(Subquery(active_variant_stock), Value(0), output_field=IntegerField()),
+            minimum_price=Subquery(active_variant_price),
         )
         .select_related(
             "category",
-            "main_image",
         )
         .prefetch_related(
             "images",
@@ -53,13 +62,15 @@ def products(request):
             |
             Q(description__icontains=search_query)
             |
-            Q(product_code__icontains=search_query)
+            Q(variants__color__icontains=search_query)
             |
-            Q(color__icontains=search_query)
+            Q(variants__size__icontains=search_query)
             |
-            Q(size__icontains=search_query)
+            Q(variants__product_code__icontains=search_query)
             |
             Q(category__name__icontains=search_query)
+            |
+            Q(brand__icontains=search_query)
         )
 
     categories = (
@@ -69,16 +80,29 @@ def products(request):
         )
         .order_by("name")
     )
-    selected_category = request.GET.get(
-        "category",
-        "",
-    ).strip()
+    selected_category = request.GET.get("category", "").strip()
+    selected_category_name = request.GET.get("category_name", "").strip()
 
-    if selected_category:
+    if selected_category_name:
+        category = categories.filter(name__iexact=selected_category_name).first()
+        if category:
+            selected_category = str(category.id)
+            product_list = product_list.filter(category_id=category.id)
+        else:
+            product_list = product_list.none()
+    elif selected_category:
+        product_list = product_list.filter(category_id=selected_category)
 
-        product_list = product_list.filter(
-            category_id=selected_category,
-        )
+    brands = list(
+        Product.objects.filter(
+            is_active=True,
+            is_deleted=False,
+            category__is_trashed=False,
+        ).exclude(brand="").values_list("brand", flat=True).distinct().order_by("brand")
+    )
+    selected_brand = request.GET.get("brand", "").strip()
+    if selected_brand:
+        product_list = product_list.filter(brand__iexact=selected_brand)
 
     min_price = request.GET.get(
         "min_price",
@@ -86,49 +110,25 @@ def products(request):
     ).strip()
 
 
-    if min_price:
-
-        try:
-
-            product_list = product_list.filter(
-                Q(
-                    discount_price__gte=min_price,
-                )
-                |
-                Q(
-                    discount_price__isnull=True,
-                    sale_price__gte=min_price,
-                )
-            )
-
-        except (ValueError, TypeError):
-
-            pass
-
     max_price = request.GET.get(
         "max_price",
         "",
     ).strip()
 
 
-    if max_price:
-
-        try:
-
-            product_list = product_list.filter(
-                Q(
-                    discount_price__lte=max_price,
-                )
-                |
-                Q(
-                    discount_price__isnull=True,
-                    sale_price__lte=max_price,
-                )
-            )
-
-        except (ValueError, TypeError):
-
-            pass
+    price_filter = Q()
+    has_price_filter = False
+    try:
+        if min_price:
+            price_filter &= Q(variants__sale_price__gte=Decimal(min_price))
+            has_price_filter = True
+        if max_price:
+            price_filter &= Q(variants__sale_price__lte=Decimal(max_price))
+            has_price_filter = True
+    except (InvalidOperation, ValueError, TypeError):
+        has_price_filter = False
+    if has_price_filter:
+        product_list = product_list.filter(price_filter)
 
     selected_stock = request.GET.get(
         "stock",
@@ -156,18 +156,12 @@ def products(request):
 
     if selected_sort == "price_low":
 
-        product_list = product_list.order_by(
-            "discount_price",
-            "sale_price",
-        )
+        product_list = product_list.order_by("minimum_price", "id")
 
 
     elif selected_sort == "price_high":
 
-        product_list = product_list.order_by(
-            "-discount_price",
-            "-sale_price",
-        )
+        product_list = product_list.order_by("-minimum_price", "-id")
 
 
     elif selected_sort == "name_asc":
@@ -187,8 +181,11 @@ def products(request):
     else:
 
         product_list = product_list.order_by(
+            "-updated_at",
             "-id",
         )
+
+    product_list = product_list.distinct()
 
     paginator = Paginator(
         product_list,
@@ -205,15 +202,40 @@ def products(request):
         page_number,
     )
 
+    wishlisted_product_ids = set(
+        Wishlist.objects.filter(
+            user=request.user,
+            product_id__in=[product.id for product in products_page],
+        ).values_list("product_id", flat=True)
+    )
+    cart_product_ids = set(
+        Cart.objects.filter(
+            user=request.user,
+            product_id__in=[product.id for product in products_page],
+        ).values_list("product_id", flat=True)
+    )
+
     for product in products_page:
-        add_pricing(product)
+        priced_variants = []
         for variant in product.variants.all():
             add_pricing(product, variant)
+            if variant.is_active:
+                priced_variants.append(variant)
+        product.display_variant = min(priced_variants, key=lambda variant: variant.pricing.unit_price) if priced_variants else None
+        product.pricing = product.display_variant.pricing if product.display_variant else None
     context = {
 
         "products": products_page,
 
+        "wishlisted_product_ids": wishlisted_product_ids,
+
+        "cart_product_ids": cart_product_ids,
+
         "categories": categories,
+
+        "brands": brands,
+
+        "selected_brand": selected_brand,
 
         "selected_category": selected_category,
 
@@ -249,7 +271,6 @@ def products_details(request, name):
         )
         .select_related(
             "category",
-            "main_image",
         )
         .prefetch_related(
             Prefetch(
@@ -298,7 +319,6 @@ def products_details(request, name):
         )
         .select_related(
             "category",
-            "main_image",
         )
         .prefetch_related(
             "images",
@@ -306,17 +326,27 @@ def products_details(request, name):
         .distinct()[:8]
     )
 
-    add_pricing(product)
     for variant in variants:
         add_pricing(product, variant)
+    product.display_variant = min(variants, key=lambda variant: variant.pricing.unit_price) if variants else None
+    product.pricing = product.display_variant.pricing if product.display_variant else None
     for related_product in related_products:
-        add_pricing(related_product)
+        related_variants = [v for v in related_product.variants.all() if v.is_active]
+        for variant in related_variants:
+            add_pricing(related_product, variant)
+        related_product.display_variant = min(related_variants, key=lambda variant: variant.pricing.unit_price) if related_variants else None
+        related_product.pricing = related_product.display_variant.pricing if related_product.display_variant else None
 
     return render(
         request,
         "products_details.html",
         {
             "product": product,
+
+            "is_wishlisted": Wishlist.objects.filter(
+                user=request.user,
+                product=product,
+            ).exists(),
 
             "variants": variants,
 

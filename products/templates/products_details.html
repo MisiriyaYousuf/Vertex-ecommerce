@@ -709,11 +709,17 @@
 }
 
 .wishlist-detail-btn:hover {
-    color: #ff8fa0 !important;
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,.35) !important;
+    background: rgba(73,46,91,.82) !important;
+}
 
-    border-color: rgba(255,143,160,.50) !important;
-
-    background: rgba(80,30,45,.45) !important;
+.wishlist-detail-btn.is-wishlisted,
+.wishlist-detail-btn.is-wishlisted:hover {
+    color: #a855f7 !important;
+    border-color: rgba(168,85,247,.75) !important;
+    background: rgba(45,27,61,.82) !important;
+    box-shadow: 0 0 14px rgba(168,85,247,.42);
 }
 
 
@@ -1397,11 +1403,11 @@
     id="productImageBox"
 >
 
-{% if product.main_image %}
+{% if product.primary_image %}
 
 <img
     id="mainProductImage"
-    src="{{ product.main_image.image.url }}"
+    src="{{ product.primary_image.image.url }}"
     alt="{{ product.name }}"
     class="product-main-image"
 >
@@ -1462,10 +1468,10 @@
     id="productThumbnails"
 >
 
-{% if product.main_image %}
+{% if product.primary_image %}
 
 <img
-    src="{{ product.main_image.image.url }}"
+    src="{{ product.primary_image.image.url }}"
     alt="{{ product.name }}"
     class="product-thumb active"
     onclick="changeProductImage(this)"
@@ -1475,7 +1481,7 @@
 
 {% for image in product.images.all %}
 
-    {% if not product.main_image or image.id != product.main_image.id %}
+    {% if not product.primary_image or image.id != product.primary_image.id %}
 
         <img
             src="{{ image.image.url }}"
@@ -1539,10 +1545,12 @@
     id="display-product-price"
     class="product-price"
 >
-    {% if product.pricing.has_discount %}
+    {% if product.pricing and product.pricing.has_discount %}
+        ₹{{ product.pricing.unit_price }}
+    {% elif product.pricing %}
         ₹{{ product.pricing.unit_price }}
     {% else %}
-        ₹{{ product.pricing.unit_price }}
+        Unavailable
     {% endif %}
 </span>
 
@@ -1550,11 +1558,11 @@
 <del
     id="display-old-price"
     class="old-price"
-    {% if not product.pricing.has_discount %}
+    {% if not product.pricing or not product.pricing.has_discount %}
         style="display:none;"
     {% endif %}
 >
-    {% if product.pricing.has_discount %}
+    {% if product.pricing and product.pricing.has_discount %}
         ₹{{ product.pricing.original_price }}
     {% endif %}
 </del>
@@ -1563,7 +1571,7 @@
 <span
     id="display-discount-label"
     class="discount-label"
-    {% if not product.pricing.has_discount %}
+    {% if not product.pricing or not product.pricing.has_offer %}
         style="display:none;"
     {% endif %}
 >
@@ -1580,7 +1588,7 @@
 <div
     id="offer-box"
     class="offer-box"
-    {% if not product.pricing.has_discount %}
+    {% if not product.pricing or not product.pricing.has_offer %}
         style="display:none;"
     {% endif %}
 >
@@ -1590,7 +1598,7 @@
 </div>
 
 <div class="offer-text">
-    {{ product.pricing.offer_name }} gives you {{ product.pricing.discount_percentage }}% off.
+    {% if product.pricing and product.pricing.has_offer %}{{ product.pricing.offer_name }} gives you {{ product.pricing.discount_percentage }}% off.{% endif %}
 </div>
 
 </div>
@@ -1652,6 +1660,15 @@
 
 {% endif %}
 
+{% if product.brand %}
+<div class="col-6 col-md-4">
+<div class="highlight-box">
+<span class="highlight-label">Brand</span>
+<span class="highlight-value">{{ product.brand }}</span>
+</div>
+</div>
+{% endif %}
+
 
 <div class="col-6 col-md-4">
 
@@ -1676,83 +1693,6 @@
 
 </div>
 
-
-<div
-    id="highlight-color-box"
-    class="col-6 col-md-4"
-    {% if not product.color %}
-        style="display:none;"
-    {% endif %}
->
-
-<div class="highlight-box">
-
-<span class="highlight-label">
-    Color
-</span>
-
-<span
-    id="highlight-color"
-    class="highlight-value"
->
-    {{ product.color }}
-</span>
-
-</div>
-
-</div>
-
-
-<div
-    id="highlight-size-box"
-    class="col-6 col-md-4"
-    {% if not product.size %}
-        style="display:none;"
-    {% endif %}
->
-
-<div class="highlight-box">
-
-<span class="highlight-label">
-    Size
-</span>
-
-<span
-    id="highlight-size"
-    class="highlight-value"
->
-    {{ product.size }}
-</span>
-
-</div>
-
-</div>
-
-
-<div
-    id="highlight-code-box"
-    class="col-6 col-md-4"
-    {% if not product.product_code %}
-        style="display:none;"
-    {% endif %}
->
-
-<div class="highlight-box">
-
-<span class="highlight-label">
-    Product Code
-</span>
-
-<span
-    id="highlight-code"
-    class="highlight-value"
->
-    {{ product.product_code }}
-</span>
-
-</div>
-
-</div>
 
 </div>
 
@@ -1794,7 +1734,7 @@
     id="selected-item-label"
     class="stock-success ms-1 small"
 >
-    Base Product
+    Select a variant
 </span>
 
 </div>
@@ -1888,10 +1828,12 @@ Add to Cart
 
 <button
     type="submit"
-    class="wishlist-detail-btn"
-    title="Add to Wishlist"
+    class="wishlist-detail-btn{% if is_wishlisted %} is-wishlisted{% endif %}"
+    title="{% if is_wishlisted %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
+    aria-label="{% if is_wishlisted %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
+    aria-pressed="{% if is_wishlisted %}true{% else %}false{% endif %}"
 >
-    ♡
+    {% if is_wishlisted %}♥{% else %}♡{% endif %}
 </button>
 
 </form>
@@ -1916,72 +1858,15 @@ Add to Cart
 <div class="variant-section">
 
 <h6 class="section-heading">
-    Choose Product / Variant
+    Choose a variant
 </h6>
 
 <p class="text-muted small mb-2">
-    Select the base product or a variant before adding it to your cart.
+    Select an available variant before adding this product to your cart.
 </p>
 
 
 <div class="variant-buttons">
-
-
-<!-- =====================================================
-     BASE PRODUCT
-     ===================================================== -->
-
-<button
-    type="button"
-    class="variant-button base-product-button"
-    id="base-product-button"
-
-    data-type="base"
-
-    data-variant-id=""
-
-    data-quantity="{{ product.quantity|default:0 }}"
-
-    data-active="{% if product.is_active %}true{% else %}false{% endif %}"
-
-    data-label="{% if product.color and product.size %}{{ product.color|escapejs }} - {{ product.size|escapejs }}{% elif product.color %}{{ product.color|escapejs }}{% elif product.size %}{{ product.size|escapejs }}{% else %}Base Product{% endif %}"
-
-    data-color="{{ product.color|default:''|escapejs }}"
-
-    data-size="{{ product.size|default:''|escapejs }}"
-
-    data-code="{{ product.product_code|default:''|escapejs }}"
-
-    data-price="{{ product.pricing.unit_price }}"
-
-    data-old-price="{% if product.pricing.has_discount %}{{ product.pricing.original_price }}{% endif %}"
-
-    data-discounted="{% if product.pricing.has_discount %}true{% else %}false{% endif %}"
-
-    onclick="showBaseProduct(this)"
-
-    aria-pressed="false"
->
-
-{% if product.color and product.size %}
-
-    {{ product.color }} - {{ product.size }}
-
-{% elif product.color %}
-
-    {{ product.color }}
-
-{% elif product.size %}
-
-    {{ product.size }}
-
-{% else %}
-
-    Base Product
-
-{% endif %}
-
-</button>
 
 
 <!-- =====================================================
@@ -2016,6 +1901,12 @@ Add to Cart
     data-old-price="{% if variant.pricing.has_discount %}{{ variant.pricing.original_price }}{% endif %}"
 
     data-discounted="{% if variant.pricing.has_discount %}true{% else %}false{% endif %}"
+
+    data-has-offer="{% if variant.pricing.has_offer %}true{% else %}false{% endif %}"
+
+    data-offer-name="{{ variant.pricing.offer_name|default:''|escapejs }}"
+
+    data-offer-percentage="{{ variant.pricing.discount_percentage|default:'' }}"
 
     onclick="showVariant(this)"
 
@@ -2311,10 +2202,10 @@ Add to Cart
     class="text-decoration-none"
 >
 
-{% if related_product.main_image %}
+{% if related_product.primary_image %}
 
 <img
-    src="{{ related_product.main_image.image.url }}"
+    src="{{ related_product.primary_image.image.url }}"
     alt="{{ related_product.name }}"
     class="related-image"
 >
@@ -2363,7 +2254,7 @@ Add to Cart
 
 <div class="mb-2">
 
-{% if related_product.pricing.has_discount %}
+{% if related_product.pricing and related_product.pricing.has_discount %}
 
 <span class="related-price">
     ₹{{ related_product.pricing.unit_price }}
@@ -2373,11 +2264,15 @@ Add to Cart
     ₹{{ related_product.pricing.original_price }}
 </del>
 
-{% else %}
+{% elif related_product.pricing %}
 
 <span class="related-price">
     ₹{{ related_product.pricing.unit_price }}
 </span>
+
+{% else %}
+
+    Unavailable
 
 {% endif %}
 
@@ -2544,10 +2439,10 @@ function getBaseGallery() {
 
     const images = [];
 
-    {% if product.main_image %}
+    {% if product.primary_image %}
 
     images.push({
-        src: "{{ product.main_image.image.url }}",
+        src: "{{ product.primary_image.image.url }}",
         alt: "{{ product.name|escapejs }}"
     });
 
@@ -2556,7 +2451,7 @@ function getBaseGallery() {
 
     {% for image in product.images.all %}
 
-    {% if not product.main_image or image.id != product.main_image.id %}
+    {% if not product.primary_image or image.id != product.primary_image.id %}
 
     images.push({
         src: "{{ image.image.url }}",
@@ -2795,6 +2690,9 @@ function updatePrice(button) {
     const discounted =
         button.dataset.discounted === "true";
 
+    const hasOffer =
+        button.dataset.hasOffer === "true";
+
 
     const priceElement =
         getElement(
@@ -2866,7 +2764,7 @@ function updatePrice(button) {
     if (discountLabel) {
 
         discountLabel.style.display =
-            discounted
+            hasOffer
                 ? ""
                 : "none";
 
@@ -2880,9 +2778,16 @@ function updatePrice(button) {
     if (offerBox) {
 
         offerBox.style.display =
-            discounted
+            hasOffer
                 ? ""
                 : "none";
+
+        if (hasOffer) {
+            const offerText = offerBox.querySelector(".offer-text");
+            if (offerText) {
+                offerText.textContent = `${button.dataset.offerName} gives you ${button.dataset.offerPercentage}% off.`;
+            }
+        }
 
     }
 
@@ -4099,22 +4004,57 @@ document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-        const baseButton =
-            getElement(
-                "base-product-button"
-            );
+        const firstVariantButton =
+            document.querySelector(".variant-button[data-type='variant']");
 
-
-        if (baseButton) {
-
-            showBaseProduct(
-                baseButton
-            );
-
+        if (firstVariantButton) {
+            showVariant(firstVariantButton);
+        } else {
+            const label = getElement("selected-item-label");
+            const stockText = getElement("selected-stock-text");
+            if (label) label.textContent = "No variants available";
+            if (stockText) stockText.textContent = "Unavailable";
         }
 
     }
 );
 
+</script>
+
+<script>
+document.querySelectorAll(".wishlist-form").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = form.querySelector(".wishlist-detail-btn");
+        if (!button) return;
+        button.disabled = true;
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+                credentials: "same-origin",
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Unable to update your wishlist.");
+            }
+            const wishlisted = result.in_wishlist;
+            button.textContent = wishlisted ? "♥" : "♡";
+            button.classList.toggle("is-wishlisted", wishlisted);
+            button.title = wishlisted ? "Remove from Wishlist" : "Add to Wishlist";
+            button.setAttribute("aria-label", button.title);
+            button.setAttribute("aria-pressed", String(wishlisted));
+        } catch (error) {
+            if (typeof showToast === "function") {
+                showToast(error.message || "Unable to update your wishlist.", "glass");
+            } else {
+                window.alert(error.message || "Unable to update your wishlist.");
+            }
+        } finally {
+            button.disabled = false;
+        }
+    });
+});
 </script>
 {% endblock %}

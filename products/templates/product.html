@@ -663,6 +663,14 @@
         scale(1.08);
 }
 
+.wishlist-btn.is-wishlisted,
+.wishlist-btn.is-wishlisted:hover {
+    color: #a855f7 !important;
+    background: rgba(45, 27, 61, 0.82);
+    border-color: rgba(168, 85, 247, 0.75);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.42);
+}
+
 
 /* =========================================================
    PRODUCT BODY
@@ -695,6 +703,13 @@
     text-transform: uppercase;
 
     letter-spacing: 0.4px;
+}
+
+.product-brand {
+    margin: 0 0 5px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 11px;
+    font-weight: 700;
 }
 
 .product-name {
@@ -768,6 +783,10 @@
     padding-top: 5px;
 }
 
+.product-price.unavailable {
+    color: #ffffff;
+}
+
 .current-price {
 
     font-size: 18px;
@@ -829,6 +848,13 @@
     font-size: 10px;
 
     font-weight: 500;
+}
+
+.product-stock-badge {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(91, 44, 131, 0.24);
+    color: #5b2c83 !important;
+    font-weight: 700;
 }
 
 
@@ -1362,7 +1388,7 @@
                     type="text"
                     name="search"
                     class="search-input"
-                    placeholder="Search by product name, code, category, color or size..."
+                    placeholder="Search by product name, brand, code, category, color or size..."
                     value="{{ search_query }}"
                 >
 
@@ -1446,6 +1472,16 @@
 
                 </select>
 
+            </div>
+
+            <div class="filter-field filter-category">
+                <label class="filter-label">Brand</label>
+                <select name="brand" class="form-select">
+                    <option value="">All Brands</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand }}" {% if selected_brand == brand %}selected{% endif %}>{{ brand }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
 
@@ -1654,11 +1690,11 @@
                             class="product-image-link"
                         >
 
-                            {% if product.main_image %}
+                            {% if product.primary_image %}
 
                                 <img
                                     class="product-image product-card-image"
-                                    src="{{ product.main_image.image.url }}"
+                                    src="{{ product.primary_image.image.url }}"
                                     alt="{{ product.name }}"
                                 >
 
@@ -1677,6 +1713,7 @@
 
                         <!-- Wishlist -->
 
+                        {% if product.id not in cart_product_ids %}
                         <form
                             method="POST"
                             action="{% url 'cart:add_to_wishlist' %}"
@@ -1693,14 +1730,16 @@
 
                             <button
                                 type="submit"
-                                class="wishlist-btn"
-                                title="Add to Wishlist"
-                                aria-label="Add {{ product.name }} to wishlist"
+                                class="wishlist-btn{% if product.id in wishlisted_product_ids %} is-wishlisted{% endif %}"
+                                title="{% if product.id in wishlisted_product_ids %}Added to Wishlist{% else %}Add to Wishlist{% endif %}"
+                                aria-label="{% if product.id in wishlisted_product_ids %}{{ product.name }} is in your wishlist{% else %}Add {{ product.name }} to wishlist{% endif %}"
+                                aria-pressed="{% if product.id in wishlisted_product_ids %}true{% else %}false{% endif %}"
                             >
-                                ♡
+                                {% if product.id in wishlisted_product_ids %}♥{% else %}♡{% endif %}
                             </button>
 
                         </form>
+                        {% endif %}
 
                     </div>
 
@@ -1719,6 +1758,10 @@
 
                         {% endif %}
 
+                        {% if product.brand %}
+                            <div class="product-brand">{{ product.brand }}</div>
+                        {% endif %}
+
 
                         <div class="product-name">
 
@@ -1732,6 +1775,7 @@
 
                         <!-- Price -->
                     
+                    {% if product.pricing %}
                     <div class="product-price">
 
                         <span class="current-price product-current-price">
@@ -1746,7 +1790,7 @@
 
                     </div>
 
-                    {% if product.pricing.has_discount %}
+                    {% if product.pricing.has_offer %}
                         <div class="product-offer-info mt-2">
                             <span class="product-offer-badge">
                                 {{ product.pricing.discount_percentage }}% OFF
@@ -1756,6 +1800,11 @@
                                 {{ product.pricing.offer_name }}
                             </div>
                         </div>
+                    {% endif %}
+                    {% else %}
+                    {% if product.has_stock %}
+                        <div class="product-price unavailable">Unavailable</div>
+                    {% endif %}
                     {% endif %}
 
 
@@ -1839,48 +1888,6 @@
 
 
                                 <!-- =====================================
-                                     BASE PRODUCT
-                                     ===================================== -->
-
-                                <option
-                                    value=""
-                                    selected
-
-                                    data-type="product"
-
-                                    data-price="{{ product.pricing.unit_price }}"
-
-                                    data-mrp="{{ product.pricing.original_price }}"
-
-                                    data-stock="{% if product.quantity > 0 %}1{% else %}0{% endif %}"
-
-                                    data-image="{% if product.main_image %}{{ product.main_image.image.url }}{% endif %}"
-                                >
-
-                                    {% if product.color %}
-                                        {{ product.color }}
-                                    {% endif %}
-
-                                    {% if product.color and product.size %}
-                                        /
-                                    {% endif %}
-
-                                    {% if product.size %}
-                                        {{ product.size }}
-                                    {% endif %}
-
-                                    {% if not product.color and not product.size %}
-                                        Base Product
-                                    {% endif %}
-
-                                    {% if product.quantity <= 0 %}
-                                        - Out of Stock
-                                    {% endif %}
-
-                                </option>
-
-
-                                <!-- =====================================
                                      VARIANTS
                                      ===================================== -->
 
@@ -1892,6 +1899,8 @@
 
                                             <option
                                                 value="{{ variant.id }}"
+
+                                                {% if variant.id == product.display_variant.id %}selected{% endif %}
 
                                                 data-type="variant"
 
@@ -1960,6 +1969,7 @@
                                 <button
                                     type="submit"
                                     class="btn btn-dark add-to-cart-button"
+                                    {% if not product.has_stock %}disabled{% endif %}
                                 >
 
                                     {% if product.has_stock %}
@@ -2022,7 +2032,7 @@
                 {% if products.has_previous %}
 
                     <a
-                        href="?search={{ search_query|urlencode }}&category={{ selected_category }}&min_price={{ min_price }}&max_price={{ max_price }}&stock={{ selected_stock }}&sort={{ selected_sort }}&page={{ products.previous_page_number }}"
+                        href="?search={{ search_query|urlencode }}&category={{ selected_category }}&brand={{ selected_brand|urlencode }}&min_price={{ min_price }}&max_price={{ max_price }}&stock={{ selected_stock }}&sort={{ selected_sort }}&page={{ products.previous_page_number }}"
                         class="pagination-btn"
                     >
                         ← Previous
@@ -2051,7 +2061,7 @@
                 {% if products.has_next %}
 
                     <a
-                        href="?search={{ search_query|urlencode }}&category={{ selected_category }}&min_price={{ min_price }}&max_price={{ max_price }}&stock={{ selected_stock }}&sort={{ selected_sort }}&page={{ products.next_page_number }}"
+                        href="?search={{ search_query|urlencode }}&category={{ selected_category }}&brand={{ selected_brand|urlencode }}&min_price={{ min_price }}&max_price={{ max_price }}&stock={{ selected_stock }}&sort={{ selected_sort }}&page={{ products.next_page_number }}"
                         class="pagination-btn"
                     >
                         Next →
@@ -2373,6 +2383,49 @@ document.addEventListener(
     }
 );
 
+</script>
+
+
+<script>
+document.querySelectorAll(".wishlist-form").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = form.querySelector(".wishlist-btn");
+        if (!button) return;
+
+        button.disabled = true;
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+                credentials: "same-origin",
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Unable to update your wishlist.");
+            }
+
+            if (result.in_wishlist) {
+                button.textContent = "♥";
+                button.classList.add("is-wishlisted");
+                button.title = "Remove from Wishlist";
+                button.setAttribute("aria-label", "Remove product from your wishlist");
+                button.setAttribute("aria-pressed", "true");
+            } else {
+                button.textContent = "♡";
+                button.classList.remove("is-wishlisted");
+                button.title = "Add to Wishlist";
+                button.setAttribute("aria-label", "Add product to your wishlist");
+                button.setAttribute("aria-pressed", "false");
+            }
+        } catch (error) {
+            window.alert(error.message || "Unable to update your wishlist.");
+        } finally {
+            button.disabled = false;
+        }
+    });
+});
 </script>
 
 
