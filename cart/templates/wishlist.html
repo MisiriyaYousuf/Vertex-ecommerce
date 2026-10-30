@@ -330,41 +330,12 @@
 }
 
 
-/* In Stock */
-
-.wishlist-in-stock {
-    color: #ffffff !important;
-
-    background:
-        rgba(255, 255, 255, 0.08);
-
-    border:
-        1px solid rgba(255, 255, 255, 0.14);
-}
-
-
-.wishlist-in-stock:hover {
-    background:
-        rgba(255, 255, 255, 0.15);
-
-    border-color:
-        rgba(255, 255, 255, 0.25);
-
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.18);
-}
-
-
-/* Out of Stock */
-
+/* Match stock labels to the white and purple catalog badges. */
+.wishlist-in-stock,
 .wishlist-out-stock {
-    color: #ffffff !important;
-
-    background:
-        rgba(255, 255, 255, 0.06);
-
-    border:
-        1px solid rgba(255, 255, 255, 0.12);
+    color: #5b2c83 !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(91, 44, 131, 0.24);
 }
 .wishlist-actions {
     display: flex;
@@ -674,6 +645,13 @@
     color: #ffffff !important;
 }
 
+.wishlist-page .wishlist-stock.wishlist-in-stock,
+.wishlist-page .wishlist-stock.wishlist-out-stock {
+    color: #5b2c83 !important;
+    background: #ffffff !important;
+    border-color: rgba(91, 44, 131, 0.24);
+}
+
 @media (min-width: 1200px) {
 
     .wishlist-grid {
@@ -797,10 +775,10 @@
                     class="text-decoration-none"
                 >
 
-                    {% if item.product.main_image %}
+                    {% if item.product.primary_image %}
 
                         <img
-                            src="{{ item.product.main_image.image.url }}"
+                            src="{{ item.product.primary_image.image.url }}"
                             alt="{{ item.product.name }}"
                             class="wishlist-image"
                         >
@@ -869,7 +847,7 @@
 
                 <div class="wishlist-price">
 
-                    {% if item.product.pricing.has_discount %}
+                    {% if item.product.pricing and item.product.pricing.has_discount %}
 
                         <span class="wishlist-current-price">
 
@@ -878,7 +856,7 @@
                         </span>
 
 
-                        {% if item.product.pricing.has_discount %}
+                        {% if item.product.pricing and item.product.pricing.has_discount %}
 
                             <del class="wishlist-old-price">
 
@@ -888,13 +866,17 @@
 
                         {% endif %}
 
-                    {% else %}
+                    {% elif item.product.pricing %}
 
                         <span class="wishlist-current-price">
 
                             ₹{{ item.product.pricing.unit_price }}
 
                         </span>
+
+                    {% elif item.display_variant %}
+
+                        <span class="wishlist-current-price">Unavailable</span>
 
                     {% endif %}
 
@@ -908,7 +890,7 @@
 
                 <div>
 
-                    {% if item.product.quantity > 0 %}
+                    {% if item.display_variant %}
 
                         <span class="wishlist-stock wishlist-in-stock">
 
@@ -920,7 +902,7 @@
 
                         <span class="wishlist-stock wishlist-out-stock">
 
-                            ✕ Out of Stock
+                            Out of Stock
 
                         </span>
 
@@ -960,7 +942,7 @@
 
                     <!-- ADD TO CART -->
 
-                    {% if item.product.quantity > 0 %}
+                    {% if item.display_variant %}
 
                         <form
                             method="POST"
@@ -974,6 +956,8 @@
                                 name="product_id"
                                 value="{{ item.product.id }}"
                             >
+
+                            <input type="hidden" name="variant_id" value="{{ item.display_variant.id }}">
 
                             <button
                                 type="submit"

@@ -123,62 +123,6 @@
     transform: scale(1.04);
 }
 
-.wishlist-button {
-    position: absolute;
-
-    top: 10px;
-    right: 10px;
-
-    width: 34px;
-    height: 34px;
-
-    border:
-        1px solid rgba(255, 255, 255, 0.18);
-
-    border-radius: 50%;
-
-    background:
-        rgba(255, 255, 255, 0.08);
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-
-    font-size: 21px;
-
-    line-height: 1;
-
-    color: #ffffff !important;
-
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.20);
-
-    backdrop-filter: blur(7px);
-    -webkit-backdrop-filter: blur(7px);
-
-    transition:
-        all 0.25s ease;
-}
-
-.wishlist-button:hover {
-    color: #ff4d67 !important;
-
-    background:
-        rgba(255, 255, 255, 0.18);
-
-    border-color:
-        rgba(255, 255, 255, 0.35);
-
-    transform: scale(1.08);
-
-    box-shadow:
-        0 6px 18px rgba(0, 0, 0, 0.25),
-        0 0 12px rgba(255, 77, 103, 0.12);
-}
-
 .product-details {
     min-width: 0;
 
@@ -1004,10 +948,6 @@
 .cart-page .shop-btn,
 .cart-page .empty-cart h2,
 .cart-page .remove-btn,
-.cart-page .wishlist-button {
-    color: #ffffff !important;
-}
-
 @media (max-width: 1100px) {
 
     .cart-item {
@@ -1222,7 +1162,6 @@
         My Cart
     </h1>
 
-
     {% if cart_items %}
 
         <div class="cart-layout">
@@ -1231,7 +1170,7 @@
 
                 {% for item in cart_items %}
 
-                    <div class="cart-item {% if item.is_invalid %}invalid-item{% endif %}">
+                    <div class="cart-item {% if item.is_invalid %}invalid-item{% endif %}" data-cart-id="{{ item.id }}">
 
                         <div class="product-image-wrapper">
 
@@ -1304,44 +1243,6 @@
                                     src="{% static 'images/no-image.png' %}"
                                     alt="Product unavailable"
                                 >
-
-                            {% endif %}
-
-                            {% if item.product %}
-
-                                <form
-                                    method="POST"
-                                    action="{% url 'cart:add_to_wishlist' %}"
-                                >
-
-                                    {% csrf_token %}
-
-                                    <input
-                                        type="hidden"
-                                        name="product_id"
-                                        value="{{ item.product.id }}"
-                                    >
-
-                                    {% if item.variant %}
-
-                                        <input
-                                            type="hidden"
-                                            name="variant_id"
-                                            value="{{ item.variant.id }}"
-                                        >
-
-                                    {% endif %}
-
-                                    <button
-                                        type="submit"
-                                        class="wishlist-button"
-                                        title="Add to wishlist"
-                                        aria-label="Add to wishlist"
-                                    >
-                                        ♡
-                                    </button>
-
-                                </form>
 
                             {% endif %}
 
@@ -1495,6 +1396,7 @@
                                         <form
                                             method="POST"
                                             action="{% url 'cart:decrement_cart' %}"
+                                            class="js-cart-quantity"
                                         >
 
                                             {% csrf_token %}
@@ -1508,22 +1410,20 @@
                                             <button
                                                 type="submit"
                                                 class="quantity-btn"
-                                                {% if item.is_out_of_stock %}
-                                                    disabled
-                                                {% endif %}
                                             >
                                                 −
                                             </button>
 
                                         </form>
 
-                                        <span class="quantity-value">
+                                        <span class="quantity-value" data-cart-quantity>
                                             {{ item.quantity }}
                                         </span>
 
                                         <form
                                             method="POST"
                                             action="{% url 'cart:increment_cart' %}"
+                                            class="js-cart-quantity"
                                         >
 
                                             {% csrf_token %}
@@ -1598,7 +1498,7 @@
                                         Item Count
                                     </span>
 
-                                    <span class="calculation-value">
+                                    <span class="calculation-value" data-item-subtotal>
                                         {{ item.quantity }}
                                     </span>
 
@@ -1626,15 +1526,7 @@
 
                                         {% else %}
 
-                                            {% if item.product.discount_price %}
-
-                                                ₹{{ item.product.discount_price }}
-
-                                            {% else %}
-
-                                                ₹{{ item.product.sale_price }}
-
-                                            {% endif %}
+                                            —
 
                                         {% endif %}
 
@@ -1663,7 +1555,7 @@
 
                                 <!-- FORMULA -->
 
-                                <div class="calculation-formula">
+                                <div class="calculation-formula" data-item-formula>
 
                                     {{ item.quantity }} ×
 
@@ -1681,15 +1573,7 @@
 
                                     {% else %}
 
-                                        {% if item.product.discount_price %}
-
-                                            ₹{{ item.product.discount_price }}
-
-                                        {% else %}
-
-                                            ₹{{ item.product.sale_price }}
-
-                                        {% endif %}
+                                        —
 
                                     {% endif %}
 
@@ -1717,11 +1601,11 @@
 
                 <div class="summary-row">
 
-                    <span>
+                    <span data-cart-total-items>
                         Subtotal ({{ total_items }} items)
                     </span>
 
-                    <span>
+                    <span data-cart-subtotal>
                         ₹{{ cart_total }}
                     </span>
 
@@ -1730,21 +1614,17 @@
 
                 <!-- DISCOUNT -->
 
-                {% if discount_amount > 0 %}
-
-                    <div class="summary-row discount-row">
+                    <div class="summary-row discount-row" data-cart-discount-row {% if discount_amount <= 0 %}hidden{% endif %}>
 
                         <span>
                             Discount
                         </span>
 
-                        <span class="discount-price">
+                        <span class="discount-price" data-cart-discount>
                             -₹{{ discount_amount }}
                         </span>
 
                     </div>
-
-                {% endif %}
 
 
                 <!-- DELIVERY -->
@@ -1780,7 +1660,7 @@
                         Total Amount
                     </span>
 
-                    <span>
+                    <span data-cart-grand-total>
                         ₹{{ grand_total }}
                     </span>
 
@@ -1791,13 +1671,14 @@
 
                 {% if has_invalid_items or has_out_of_stock_items or has_exceeded_stock_items %}
 
-                    <button
-                        type="button"
+                    <a
                         class="checkout-btn disabled-btn"
-                        disabled
+                        aria-disabled="true"
+                        data-cart-checkout
+                        data-checkout-url="{% url 'orders:checkout' %}"
                     >
                         Cannot Proceed
-                    </button>
+                    </a>
 
                     <p
                         style="
@@ -1817,6 +1698,8 @@
                     <a
                         href="{% url 'orders:checkout' %}"
                         class="checkout-btn"
+                        data-cart-checkout
+                        data-checkout-url="{% url 'orders:checkout' %}"
                     >
                         Proceed to Buy
                     </a>
@@ -1857,5 +1740,74 @@
 
 
 </div>
+
+<script>
+const productsCatalogUrl = "{% url 'products:products' %}";
+document.querySelectorAll(".js-cart-quantity").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = form.querySelector("button[type='submit']");
+        if (button?.disabled) return;
+        if (button) button.disabled = true;
+        let completed = false;
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.message || "Unable to update quantity.");
+            completed = true;
+
+            const row = document.querySelector(`[data-cart-id="${result.cart_item_id}"]`);
+            if (result.removed) {
+                row?.remove();
+            } else if (row) {
+                row.querySelector("[data-cart-quantity]").textContent = result.quantity;
+                row.querySelector("[data-item-subtotal]").textContent = `₹${result.item_subtotal}`;
+                const formula = row.querySelector("[data-item-formula]");
+                if (formula) formula.innerHTML = formula.innerHTML.replace(/^\s*\d+\s*×/, `${result.quantity} ×`);
+                const plus = row.querySelector("form[action$='/increment/'] button");
+                if (plus) plus.disabled = false;
+            }
+
+            document.querySelectorAll("[data-cart-total-items]").forEach((node) => node.textContent = `Subtotal (${result.total_items} items)`);
+            document.querySelectorAll("[data-cart-subtotal]").forEach((node) => node.textContent = `₹${result.cart_total}`);
+            document.querySelectorAll("[data-cart-grand-total]").forEach((node) => node.textContent = `₹${result.grand_total}`);
+            document.querySelectorAll("[data-cart-discount]").forEach((node) => node.textContent = `-₹${result.discount_amount}`);
+            document.querySelectorAll("[data-cart-discount-row]").forEach((node) => node.hidden = Number(result.discount_amount) <= 0);
+
+            const checkout = document.querySelector("[data-cart-checkout]");
+            if (checkout) {
+                if (result.can_checkout) {
+                    checkout.href = checkout.dataset.checkoutUrl;
+                    checkout.classList.remove("disabled-btn");
+                    checkout.removeAttribute("aria-disabled");
+                } else {
+                    checkout.removeAttribute("href");
+                    checkout.classList.add("disabled-btn");
+                    checkout.setAttribute("aria-disabled", "true");
+                }
+            }
+            if (result.total_items === 0) {
+                const layout = document.querySelector(".cart-layout");
+                if (layout) {
+                    layout.innerHTML = `<div class="empty-cart"><div class="empty-cart-icon">🛒</div><h2>Your cart is empty</h2><p>You haven’t added any products to your cart yet.</p><a href="${productsCatalogUrl}" class="shop-btn">Continue Shopping</a></div>`;
+                }
+            }
+        } catch (error) {
+            const message = error.message || "Unable to update quantity.";
+            if (typeof showToast === "function") {
+                showToast(message, "glass");
+            } else {
+                window.alert(message);
+            }
+        } finally {
+            if (button?.isConnected && !completed) button.disabled = false;
+        }
+    });
+});
+</script>
 
 {% endblock %}
