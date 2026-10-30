@@ -219,21 +219,38 @@ Order Details
 ========================================================= */
 
 .products-table-wrapper {
-    overflow-x: auto;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .products-table {
-    min-width: 900px;
+    width: 100%;
+    table-layout: fixed;
     margin: 0;
     vertical-align: middle;
 }
+
+.products-table th:first-child,
+.products-table td:first-child { width: 36%; }
+.products-table th:nth-child(2),
+.products-table td:nth-child(2) { width: 14%; }
+.products-table th:nth-child(2) { width: 14%; }
+.products-table th:nth-child(3),
+.products-table td:nth-child(3) { width: 12%; }
+.products-table th:nth-child(3) { width: 12%; }
+.products-table th:nth-child(4),
+.products-table td:nth-child(4) { width: 17%; }
+.products-table th:nth-child(4) { width: 17%; }
+.products-table th:nth-child(5),
+.products-table td:nth-child(5) { width: 21%; }
+.products-table th:nth-child(5) { width: 21%; }
 
 .products-table thead {
     background: #f7f9fb;
 }
 
 .products-table th {
-    padding: 11px 12px;
+    padding: 10px 8px;
     border: 0;
     border-bottom: 1px solid #e7ebef;
     color: #7b8794;
@@ -241,11 +258,11 @@ Order Details
     font-weight: 800;
     letter-spacing: .7px;
     text-transform: uppercase;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 .products-table td {
-    padding: 14px 12px;
+    padding: 11px 8px;
     border-bottom: 1px solid #edf0f3;
     color: #53616e;
     font-size: 11px;
@@ -271,13 +288,13 @@ Order Details
 .product-wrapper {
     display: flex;
     align-items: center;
-    gap: 11px;
-    min-width: 245px;
+    gap: 8px;
+    min-width: 0;
 }
 
 .product-image {
-    width: 58px;
-    height: 58px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
     object-fit: contain;
     padding: 5px;
@@ -287,8 +304,8 @@ Order Details
 }
 
 .product-placeholder {
-    width: 58px;
-    height: 58px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -305,13 +322,11 @@ Order Details
 }
 
 .product-name {
-    max-width: 230px;
-    overflow: hidden;
+    max-width: 100%;
     color: #344454;
     font-size: 12px;
     font-weight: 750;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
 }
 
 .product-discount {
@@ -358,7 +373,8 @@ Order Details
 ========================================================= */
 
 .item-status-form {
-    min-width: 145px;
+    min-width: 0;
+    width: 100%;
 }
 
 .item-status-select {
@@ -570,14 +586,6 @@ Order Details
    RESPONSIVE
 ========================================================= */
 
-@media (max-width: 1199.98px) {
-
-    .products-table {
-        min-width: 900px;
-    }
-
-}
-
 @media (max-width: 991.98px) {
 
     .order-detail-page {
@@ -628,12 +636,50 @@ Order Details
         min-height: auto;
     }
 
-    .product-wrapper {
-        min-width: 220px;
+    .products-table th,
+    .products-table td {
+        padding: 9px 5px;
     }
 
-    .products-table {
-        min-width: 900px;
+    .products-table th:first-child,
+    .products-table td:first-child { width: 29%; }
+    .products-table th:nth-child(2),
+    .products-table td:nth-child(2) { width: 14%; }
+    .products-table th:nth-child(2) { width: 14%; }
+    .products-table th:nth-child(3),
+    .products-table td:nth-child(3) { width: 13%; }
+    .products-table th:nth-child(3) { width: 13%; }
+    .products-table th:nth-child(4),
+    .products-table td:nth-child(4) { width: 17%; }
+    .products-table th:nth-child(4) { width: 17%; }
+    .products-table th:nth-child(5),
+    .products-table td:nth-child(5) { width: 27%; }
+    .products-table th:nth-child(5) { width: 27%; }
+
+    .product-image,
+    .product-placeholder {
+        width: 36px;
+        height: 36px;
+    }
+
+    .product-wrapper {
+        gap: 5px;
+    }
+
+    .product-name {
+        font-size: 10px;
+    }
+
+    .item-status-select {
+        padding-right: 20px;
+        padding-left: 5px;
+        font-size: 9px;
+    }
+
+    .item-update-btn {
+        min-height: 28px;
+        margin-top: 4px;
+        padding: 4px;
     }
 
 }
@@ -1149,16 +1195,6 @@ Order Details
                                             {% endif %}
                                         >
                                             Pending
-                                        </option>
-
-
-                                        <option
-                                            value="Processing"
-                                            {% if item.status == "Processing" %}
-                                                selected
-                                            {% endif %}
-                                        >
-                                            Processing
                                         </option>
 
 

@@ -1,0 +1,110 @@
+{% extends "admin_base.html" %}
+{% block title %}List Coupons - Admin Panel{% endblock %}
+{% block navbar_icon %}ticket-alt{% endblock %}
+{% block navbar_title %}List Coupons{% endblock %}
+
+{% block content %}
+<style>
+.coupons-page { padding:18px 24px 40px; color:#263442; }
+.coupons-header { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
+.coupons-eyebrow { display:inline-flex; align-items:center; gap:7px; margin-bottom:6px; color:#315170; font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; }
+.coupons-header h2 { margin:0 0 6px; color:#1f2937; font-size:25px; font-weight:750; }
+.coupons-header p { margin:0; color:#7b8794; font-size:13px; }
+.coupon-count,.coupon-add { min-height:38px; display:inline-flex; align-items:center; justify-content:center; gap:8px; flex-shrink:0; padding:8px 13px; border:1px solid #dce5ec; border-radius:8px; background:#fff; color:#315170; font-size:11px; font-weight:700; text-decoration:none; }
+.coupon-add { border-color:#315170; background:#315170; color:#fff; }
+.coupon-add:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.coupon-filter { margin-bottom:22px; padding:18px; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.coupon-filter-title { display:flex; align-items:center; gap:10px; margin-bottom:15px; }
+.coupon-filter-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#eef3f7; color:#315170; }
+.coupon-filter-title h6 { margin:0; color:#344454; font-size:13px; font-weight:750; }
+.coupon-filter-title span { display:block; margin-top:2px; color:#9aa4ad; font-size:10px; }
+.coupon-search { position:relative; }
+.coupon-search i { position:absolute; top:50%; left:13px; z-index:2; color:#9aa5af; font-size:12px; transform:translateY(-50%); pointer-events:none; }
+.coupon-search .form-control { min-height:42px; padding-left:36px; border:1px solid #dce2e8; border-radius:8px; color:#344454; font-size:12px; box-shadow:none; }
+.coupon-search .form-control:focus { border-color:#315170; box-shadow:0 0 0 3px rgba(49,81,112,.09); }
+.coupon-search-btn,.coupon-clear-btn { width:100%; min-height:42px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; }
+.coupon-search-btn { border:0; background:#315170; color:#fff; }
+.coupon-search-btn:hover { background:#263f58; color:#fff; }
+.coupon-clear-btn { border:1px solid #dce2e8; background:#fff; color:#66727d; }
+.coupon-clear-btn:hover { border-color:#315170; background:#f7f9fb; color:#315170; }
+.coupons-card { overflow:hidden; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.coupons-table { width:100%; margin:0; vertical-align:middle; }
+.coupons-table thead { background:#f7f9fb; }
+.coupons-table th { padding:13px 14px; border:0; border-bottom:1px solid #e7ebef; color:#7b8794; font-size:9px; font-weight:800; letter-spacing:.7px; text-transform:uppercase; white-space:nowrap; }
+.coupons-table td { padding:12px 14px; border-bottom:1px solid #edf0f3; color:#4d5a67; font-size:11px; vertical-align:middle; }
+.coupons-table tbody tr:hover { background:#fbfcfd; }
+.coupons-table tbody tr:last-child td { border-bottom:0; }
+.coupon-code { color:#315170; font-weight:800; letter-spacing:.3px; }
+.coupon-discount { color:#263442; font-weight:750; white-space:nowrap; }
+.coupon-dates { color:#596674; white-space:nowrap; }
+.coupon-dates small { display:block; margin-top:2px; color:#9aa4ad; }
+.coupon-status { display:inline-flex; padding:5px 9px; border-radius:20px; background:#eef3f7; color:#315170; font-size:10px; font-weight:700; white-space:nowrap; }
+.coupon-status.expired { background:#f1f3f5; color:#697681; }
+.coupon-status.inactive { background:#fff5e8; color:#8a6210; }
+.coupon-actions { display:flex; justify-content:flex-end; align-items:center; gap:6px; }
+.coupon-action-form { margin:0; }
+.coupon-action-btn { min-height:30px; display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:5px 9px; border:1px solid #315170; border-radius:7px; background:#315170; color:#fff; font-size:10px; font-weight:700; text-decoration:none; white-space:nowrap; }
+.coupon-action-btn:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.coupon-delete-btn { background:#fff; color:#315170; }
+.coupon-empty { padding:55px 20px !important; text-align:center; color:#7b8794 !important; }
+.coupon-pagination { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:14px 18px; border-top:1px solid #edf0f3; background:#fff; }
+.coupon-pagination-summary { color:#89949e; font-size:11px; }
+.coupon-pagination-summary strong { color:#4b5966; }
+.coupon-pagination-nav { display:flex; align-items:center; gap:5px; }
+.coupon-page-link { min-width:31px; height:31px; display:inline-flex; align-items:center; justify-content:center; padding:0 9px; border:1px solid #dfe5ea; border-radius:8px; background:#fff; color:#315170; font-size:11px; font-weight:700; text-decoration:none; }
+.coupon-page-link:hover,.coupon-page-link.active { border-color:#315170; background:#315170; color:#fff; }
+.coupon-page-link.disabled { color:#b6bec5; background:#f8f9fa; }
+@media(max-width:1199.98px) { .coupons-table { min-width:920px; } .coupons-card { overflow-x:auto; } }
+@media(max-width:991.98px) { .coupons-page { padding:16px 15px 30px; } .coupons-header { align-items:flex-start; flex-direction:column; } .coupon-count { align-self:flex-start; } }
+@media(max-width:767.98px) { .coupons-page { padding:14px 10px 25px; } .coupons-header h2 { font-size:21px; } .coupons-header p { font-size:12px; } .coupon-add { width:100%; } .coupon-filter { padding:15px; } .coupon-pagination { flex-direction:column; justify-content:center; } }
+@media(max-width:480px) { .coupons-page { padding:12px 10px 25px; } .coupons-header h2 { font-size:19px; } .coupon-count { width:100%; justify-content:center; } .coupon-filter { padding:14px; border-radius:11px; } .coupons-card { border-radius:11px; } }
+</style>
+
+<div class="container-fluid coupons-page">
+    <div class="coupons-header">
+        <div><div class="coupons-eyebrow"><i class="fas fa-ticket-alt"></i> COUPON MANAGEMENT</div><h2>Manage coupons</h2><p>Browse, view, edit, and remove discount coupons.</p></div>
+        <div class="d-flex flex-wrap gap-2 align-items-center"><div class="coupon-count"><i class="fas fa-tags"></i>{{ coupons.paginator.count }} Coupons</div><a href="{% url 'customadmin:coupon_management' %}" class="coupon-add"><i class="fas fa-plus"></i> Add Coupon</a></div>
+    </div>
+
+    <div class="coupon-filter">
+        <div class="coupon-filter-title"><div class="coupon-filter-icon"><i class="fas fa-sliders-h"></i></div><div><h6>Search &amp; Filter</h6><span>Find a coupon by its code</span></div></div>
+        <form method="get"><div class="row g-3 align-items-end">
+            <div class="col-lg-8 col-md-8"><label class="form-label small fw-semibold text-secondary">Search coupons</label><div class="coupon-search"><i class="fas fa-search"></i><input class="form-control" type="search" name="search" value="{{ search }}" placeholder="Enter coupon code" autocomplete="off"></div></div>
+            <div class="col-lg-2 col-md-2"><button class="coupon-search-btn" type="submit"><i class="fas fa-search"></i> Search</button></div>
+            <div class="col-lg-2 col-md-2"><a class="coupon-clear-btn" href="{% url 'customadmin:coupon_list' %}"><i class="fas fa-times"></i> Clear</a></div>
+        </div></form>
+    </div>
+
+    <div class="coupons-card"><div class="table-responsive">
+        <table class="table coupons-table"><thead><tr><th>Coupon Code</th><th>Discount</th><th>Minimum Purchase</th><th>Maximum Discount</th><th>Validity</th><th>Usage Limit</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            {% for coupon in coupons %}
+                <tr>
+                    <td><span class="coupon-code">{{ coupon.code }}</span></td>
+                    <td><span class="coupon-discount">{% if coupon.discount_type == "PERCENTAGE" %}{{ coupon.discount_value|floatformat:0 }}%{% else %}₹{{ coupon.discount_value|floatformat:2 }}{% endif %}</span></td>
+                    <td>₹{{ coupon.minimum_purchase|floatformat:2 }}</td>
+                    <td>{% if coupon.maximum_discount %}₹{{ coupon.maximum_discount|floatformat:2 }}{% else %}—{% endif %}</td>
+                    <td><span class="coupon-dates">{{ coupon.start_date|date:"d M Y" }}<small>to {{ coupon.end_date|date:"d M Y" }}</small></span></td>
+                    <td>{{ coupon.usage_limit }}</td>
+                    <td>{% if not coupon.is_active %}<span class="coupon-status inactive">Inactive</span>{% elif coupon.is_expired %}<span class="coupon-status expired">Expired</span>{% else %}<span class="coupon-status">Active</span>{% endif %}</td>
+                    <td><div class="coupon-actions">
+                        <form method="post" action="{% url 'customadmin:view_coupon' %}" class="coupon-action-form">{% csrf_token %}<input type="hidden" name="coupon_id" value="{{ coupon.id }}"><button type="submit" class="coupon-action-btn"><i class="fas fa-eye"></i> View</button></form>
+                        <form method="post" action="{% url 'customadmin:edit_coupon' %}" class="coupon-action-form">{% csrf_token %}<input type="hidden" name="coupon_id" value="{{ coupon.id }}"><input type="hidden" name="action" value="load"><button type="submit" class="coupon-action-btn"><i class="fas fa-edit"></i> Edit</button></form>
+                        <form method="post" action="{% url 'customadmin:delete_coupon' %}" class="coupon-action-form" onsubmit="return confirm('Are you sure you want to delete this coupon?');">{% csrf_token %}<input type="hidden" name="coupon_id" value="{{ coupon.id }}"><button type="submit" class="coupon-action-btn coupon-delete-btn"><i class="fas fa-trash"></i></button></form>
+                    </div></td>
+                </tr>
+            {% empty %}<tr><td colspan="8" class="coupon-empty">No coupons match your search.</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if coupons.paginator.num_pages > 1 %}<div class="coupon-pagination">
+        <div class="coupon-pagination-summary">Showing <strong>{{ coupons.start_index }}</strong>–<strong>{{ coupons.end_index }}</strong> of <strong>{{ coupons.paginator.count }}</strong> coupons</div>
+        <nav class="coupon-pagination-nav" aria-label="Coupon pages">
+            {% if coupons.has_previous %}<a class="coupon-page-link" href="?search={{ search|urlencode }}&amp;page={{ coupons.previous_page_number }}" aria-label="Previous page"><i class="fas fa-chevron-left"></i></a>{% else %}<span class="coupon-page-link disabled"><i class="fas fa-chevron-left"></i></span>{% endif %}
+            {% for page_num in coupons.paginator.page_range %}<a class="coupon-page-link {% if coupons.number == page_num %}active{% endif %}" href="?search={{ search|urlencode }}&amp;page={{ page_num }}">{{ page_num }}</a>{% endfor %}
+            {% if coupons.has_next %}<a class="coupon-page-link" href="?search={{ search|urlencode }}&amp;page={{ coupons.next_page_number }}" aria-label="Next page"><i class="fas fa-chevron-right"></i></a>{% else %}<span class="coupon-page-link disabled"><i class="fas fa-chevron-right"></i></span>{% endif %}
+        </nav>
+    </div>{% endif %}
+    </div>
+</div>
+{% endblock %}

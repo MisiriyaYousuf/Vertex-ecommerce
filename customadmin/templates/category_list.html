@@ -1,0 +1,90 @@
+{% extends 'admin_base.html' %}
+{% block title %}List Categories - Admin Panel{% endblock %}
+{% block navbar_icon %}tags{% endblock %}
+{% block navbar_title %}List Categories{% endblock %}
+{% block content %}
+<style>
+.categories-page { padding:18px 24px 40px; color:#263442; }
+.categories-header { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:22px; }
+.categories-eyebrow { display:inline-flex; align-items:center; gap:7px; margin-bottom:6px; color:#315170; font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; }
+.categories-header h2 { margin:0 0 6px; color:#1f2937; font-size:25px; font-weight:750; }
+.categories-header p { margin:0; color:#7b8794; font-size:13px; }
+.categories-count,.categories-add { min-height:38px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 13px; border:1px solid #dce5ec; border-radius:8px; background:#fff; color:#315170; font-size:11px; font-weight:700; text-decoration:none; white-space:nowrap; }
+.categories-add { border-color:#315170; background:#315170; color:#fff; }
+.categories-add:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.categories-filter { margin-bottom:22px; padding:18px; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.categories-filter-heading { display:flex; align-items:center; gap:10px; margin-bottom:15px; }
+.categories-filter-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#eef3f7; color:#315170; }
+.categories-filter-heading h6 { margin:0; color:#344454; font-size:13px; font-weight:750; }
+.categories-filter-heading span { display:block; margin-top:2px; color:#9aa4ad; font-size:10px; }
+.categories-search { position:relative; }
+.categories-search i { position:absolute; top:50%; left:13px; z-index:2; color:#9aa5af; font-size:12px; transform:translateY(-50%); pointer-events:none; }
+.categories-search .form-control { min-height:42px; padding-left:36px; font-size:12px; }
+.categories-search-btn,.categories-clear-btn { width:100%; min-height:42px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; }
+.categories-search-btn { border:0; background:#315170; color:#fff; }
+.categories-search-btn:hover { background:#263f58; color:#fff; }
+.categories-clear-btn { border:1px solid #dce2e8; background:#fff; color:#66727d; }
+.categories-clear-btn:hover { border-color:#315170; color:#315170; }
+.categories-card { overflow:hidden; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.categories-table { width:100%; margin:0; vertical-align:middle; }
+.categories-table thead { background:#f7f9fb; }
+.categories-table th { padding:13px 16px; border:0; border-bottom:1px solid #e7ebef; color:#7b8794; font-size:9px; font-weight:800; letter-spacing:.7px; text-transform:uppercase; }
+.categories-table td { padding:13px 16px; border-bottom:1px solid #edf0f3; color:#4d5a67; font-size:12px; vertical-align:middle; }
+.categories-table tbody tr:hover { background:#fbfcfd; }
+.categories-table tbody tr:last-child td { border-bottom:0; }
+.category-row-number { color:#89949e; font-size:11px; }
+.category-row-name { color:#344454; font-weight:750; }
+.category-actions { display:flex; align-items:center; justify-content:flex-end; gap:7px; }
+.category-action-form { margin:0; }
+.category-action-btn { min-height:31px; display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:5px 10px; border:1px solid #315170; border-radius:7px; background:#315170; color:#fff; font-size:10px; font-weight:700; text-decoration:none; }
+.category-action-btn:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.category-delete-btn { background:#fff; color:#315170; }
+.category-empty { padding:55px 20px !important; text-align:center; color:#7b8794 !important; }
+.categories-pagination { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:14px 18px; border-top:1px solid #edf0f3; }
+.categories-pagination-summary { color:#89949e; font-size:11px; }
+.categories-pagination-summary strong { color:#4b5966; }
+.categories-pagination-nav { display:flex; align-items:center; gap:5px; }
+.categories-page-link { min-width:31px; height:31px; display:inline-flex; align-items:center; justify-content:center; padding:0 9px; border:1px solid #dfe5ea; border-radius:8px; color:#315170; font-size:11px; font-weight:700; text-decoration:none; }
+.categories-page-link:hover,.categories-page-link.active { border-color:#315170; background:#315170; color:#fff; }
+.categories-page-link.disabled { color:#b6bec5; background:#f8f9fa; }
+@media(max-width:991.98px) { .categories-page { padding:16px 15px 30px; } .categories-header { align-items:flex-start; flex-direction:column; } }
+@media(max-width:767.98px) { .categories-page { padding:14px 10px 25px; } .categories-header h2 { font-size:21px; } .categories-header p { font-size:12px; } .categories-add { width:100%; } .categories-filter { padding:15px; } .categories-pagination { flex-direction:column; } }
+@media(max-width:480px) { .categories-page { padding:12px 10px 25px; } .categories-header h2 { font-size:19px; } .categories-count { width:100%; } .categories-filter { padding:14px; } .categories-card { border-radius:11px; } .categories-table th,.categories-table td { padding:11px 10px; } }
+</style>
+
+<div class="container-fluid categories-page">
+    <div class="categories-header">
+        <div><div class="categories-eyebrow"><i class="fas fa-layer-group"></i> CATEGORY MANAGEMENT</div><h2>List Categories</h2><p>Browse, edit, and remove product categories.</p></div>
+        <div class="d-flex flex-wrap gap-2"><div class="categories-count"><i class="fas fa-tags"></i>{{ categories.paginator.count }} Categories</div><a href="{% url 'customadmin:add_category' %}" class="categories-add"><i class="fas fa-plus"></i> Add Category</a></div>
+    </div>
+
+    <div class="categories-filter">
+        <div class="categories-filter-heading"><div class="categories-filter-icon"><i class="fas fa-sliders-h"></i></div><div><h6>Search &amp; Filter</h6><span>Find a category by name</span></div></div>
+        <form method="get"><div class="row g-3 align-items-end">
+            <div class="col-lg-8 col-md-8"><label class="form-label small fw-semibold text-secondary">Search categories</label><div class="categories-search"><i class="fas fa-search"></i><input class="form-control" type="search" name="search" value="{{ search }}" placeholder="Enter category name"></div></div>
+            <div class="col-lg-2 col-md-2"><button class="categories-search-btn" type="submit"><i class="fas fa-search"></i> Search</button></div>
+            <div class="col-lg-2 col-md-2"><a class="categories-clear-btn" href="{% url 'customadmin:category_management' %}"><i class="fas fa-times"></i> Clear</a></div>
+        </div></form>
+    </div>
+
+    <div class="categories-card"><div class="table-responsive">
+        <table class="table categories-table"><thead><tr><th style="width:80px">#</th><th>Category Name</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            {% for category in categories %}<tr>
+                <td class="category-row-number">{{ categories.start_index|add:forloop.counter0 }}</td><td class="category-row-name">{{ category.name }}</td>
+                <td><div class="category-actions"><a href="{% url 'customadmin:edit_category' %}?category_id={{ category.id }}" class="category-action-btn"><i class="fas fa-edit"></i> Edit</a><form method="post" action="{% url 'customadmin:delete_category' %}" class="category-action-form" onsubmit="return confirm('Delete this category?');">{% csrf_token %}<input type="hidden" name="category_id" value="{{ category.id }}"><button class="category-action-btn category-delete-btn" type="submit" aria-label="Delete {{ category.name }}"><i class="fas fa-trash"></i> Delete</button></form></div></td>
+            </tr>{% empty %}<tr><td colspan="3" class="category-empty">{% if search %}No categories match your search.{% else %}No categories have been added yet.{% endif %}</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if categories.paginator.num_pages > 1 %}<div class="categories-pagination">
+        <div class="categories-pagination-summary">Showing <strong>{{ categories.start_index }}</strong>–<strong>{{ categories.end_index }}</strong> of <strong>{{ categories.paginator.count }}</strong> categories</div>
+        <nav class="categories-pagination-nav" aria-label="Category pages">
+            {% if categories.has_previous %}<a class="categories-page-link" href="?search={{ search|urlencode }}&amp;page={{ categories.previous_page_number }}" aria-label="Previous page"><i class="fas fa-chevron-left"></i></a>{% else %}<span class="categories-page-link disabled"><i class="fas fa-chevron-left"></i></span>{% endif %}
+            {% for page_num in categories.paginator.page_range %}<a class="categories-page-link {% if categories.number == page_num %}active{% endif %}" href="?search={{ search|urlencode }}&amp;page={{ page_num }}">{{ page_num }}</a>{% endfor %}
+            {% if categories.has_next %}<a class="categories-page-link" href="?search={{ search|urlencode }}&amp;page={{ categories.next_page_number }}" aria-label="Next page"><i class="fas fa-chevron-right"></i></a>{% else %}<span class="categories-page-link disabled"><i class="fas fa-chevron-right"></i></span>{% endif %}
+        </nav>
+    </div>{% endif %}
+    </div>
+</div>
+{% endblock %}

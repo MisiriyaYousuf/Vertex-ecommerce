@@ -222,7 +222,6 @@
         <a href="#" data-bs-toggle="collapse" data-bs-target="#productManagementMenu" 
            class="{% if request.resolver_match.url_name in 'list_product,add_product,edit_product' %}active{% endif %}">
             <i class="fas fa-box"></i>Product Management
-            <i class="fas fa-chevron-down float-end mt-1" style="font-size: 12px;"></i>
         </a>
         <div class="collapse {% if request.resolver_match.url_name in 'list_product,add_product,edit_product' %}show{% endif %}" id="productManagementMenu">
             <a href="{% url 'customadmin:list_product' %}" class="{% if request.resolver_match.url_name == 'list_product' %}active{% endif %}">
@@ -233,17 +232,44 @@
             </a>
         </div>
 
-         <a href="{% url 'customadmin:coupon_management' %}" class="{% if request.resolver_match.url_name == 'coupon_management' %}active{% endif %}">
+        <a href="#" data-bs-toggle="collapse" data-bs-target="#couponManagementMenu"
+           class="{% if request.resolver_match.url_name in 'coupon_management,coupon_list,edit_coupon' %}active{% endif %}">
             <i class="fas fa-ticket-alt"></i>Coupon Management
         </a>
+        <div class="collapse {% if request.resolver_match.url_name in 'coupon_management,coupon_list,edit_coupon' %}show{% endif %}" id="couponManagementMenu">
+            <a href="{% url 'customadmin:coupon_management' %}" class="{% if request.resolver_match.url_name == 'coupon_management' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i>Add Coupon
+            </a>
+            <a href="{% url 'customadmin:coupon_list' %}" class="{% if request.resolver_match.url_name == 'coupon_list' %}active{% endif %}">
+                <i class="fas fa-list"></i>List Coupons
+            </a>
+        </div>
 
-        <a href="{% url 'customadmin:offer_management' %}" class="{% if request.resolver_match.url_name == 'offer_management' %}active{% endif %}">
+        <a href="#" data-bs-toggle="collapse" data-bs-target="#offerManagementMenu"
+           class="{% if request.resolver_match.url_name in 'offer_management,offer_list,edit_offer' %}active{% endif %}">
             <i class="fas fa-tags"></i>Offer Management
         </a>
+        <div class="collapse {% if request.resolver_match.url_name in 'offer_management,offer_list,edit_offer' %}show{% endif %}" id="offerManagementMenu">
+            <a href="{% url 'customadmin:offer_management' %}" class="{% if request.resolver_match.url_name == 'offer_management' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i>Add Offers
+            </a>
+            <a href="{% url 'customadmin:offer_list' %}" class="{% if request.resolver_match.url_name == 'offer_list' %}active{% endif %}">
+                <i class="fas fa-list"></i>List Offers
+            </a>
+        </div>
 
-        <a href="{% url 'customadmin:category_management' %}" class="{% if request.resolver_match.url_name in 'category_management,edit_category' %}active{% endif %}">
+        <a href="#" data-bs-toggle="collapse" data-bs-target="#categoryManagementMenu"
+           class="{% if request.resolver_match.url_name in 'category_management,add_category,edit_category' %}active{% endif %}">
             <i class="fas fa-layer-group"></i>Category Management
         </a>
+        <div class="collapse {% if request.resolver_match.url_name in 'category_management,add_category,edit_category' %}show{% endif %}" id="categoryManagementMenu">
+            <a href="{% url 'customadmin:add_category' %}" class="{% if request.resolver_match.url_name == 'add_category' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i>Add Category
+            </a>
+            <a href="{% url 'customadmin:category_management' %}" class="{% if request.resolver_match.url_name in 'category_management,edit_category' %}active{% endif %}">
+                <i class="fas fa-list"></i>List Categories
+            </a>
+        </div>
 
         <a
             href="{% url 'customadmin:order_management' %}"
@@ -341,6 +367,119 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --admin-primary: #315170;
+            --admin-primary-hover: #263f58;
+            --admin-text: #263442;
+            --admin-muted: #7b8794;
+            --admin-border: #e5eaee;
+            --admin-surface: #ffffff;
+            --admin-page: #f4f6f9;
+        }
+
+        body {
+            color: var(--admin-text);
+            background: var(--admin-page);
+        }
+
+        .sidebar {
+            background: #263f58;
+        }
+
+        .sidebar hr {
+            border-color: rgba(255, 255, 255, .16);
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #315170;
+        }
+
+        .admin-navbar {
+            background: var(--admin-primary) !important;
+        }
+
+        .main-card {
+            border: 1px solid var(--admin-border);
+            box-shadow: 0 5px 20px rgba(31, 41, 55, .05);
+        }
+
+        .page-content {
+            padding: 24px;
+        }
+
+        .page-content .card {
+            border-color: var(--admin-border);
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(31, 41, 55, .045);
+        }
+
+        .page-content .table {
+            color: var(--admin-text);
+        }
+
+        .page-content .table thead th {
+            background: #f7f9fb;
+            color: var(--admin-muted);
+            border-color: #e7ebef;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .65px;
+            text-transform: uppercase;
+        }
+
+        .page-content .table tbody td {
+            border-color: #edf0f3;
+        }
+
+        .page-content .table tbody tr:hover > * {
+            background: #fbfcfd;
+        }
+
+        .page-content .form-control,
+        .page-content .form-select {
+            border-color: #dce2e8;
+            border-radius: 8px;
+            color: #344454;
+        }
+
+        .page-content .form-control:focus,
+        .page-content .form-select:focus {
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 3px rgba(49, 81, 112, .09);
+        }
+
+        .page-content .btn-primary {
+            border-color: var(--admin-primary);
+            background: var(--admin-primary);
+        }
+
+        .page-content .btn-primary:hover,
+        .page-content .btn-primary:focus {
+            border-color: var(--admin-primary-hover);
+            background: var(--admin-primary-hover);
+        }
+
+        .page-content .page-link {
+            color: var(--admin-primary);
+        }
+
+        .page-content .page-item.active .page-link {
+            border-color: var(--admin-primary);
+            background: var(--admin-primary);
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .page-content { padding: 16px; }
+        }
+
+        @media (max-width: 576px) {
+            .page-content { padding: 12px; }
+        }
+    </style>
     
     <script>
     

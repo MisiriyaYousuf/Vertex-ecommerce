@@ -1073,7 +1073,7 @@
                             class="gallery-source"
                             id="gallerySource"
                         >
-                            Base Product
+                            Product Images
                         </span>
 
 
@@ -1099,8 +1099,7 @@
 
 
                     <div class="gallery-hint">
-                        Select the base product or a variant below
-                        to preview its images. Use + / − or mouse wheel to zoom.
+                        Select a variant below to preview its images. Use + / − or mouse wheel to zoom.
                     </div>
 
                 </div>
@@ -1153,37 +1152,7 @@
                         {% endif %}
 
 
-                        <!-- PRICE -->
-
-                        <div class="product-price-box">
-
-                            <div class="price-row">
-
-                                {% if product.discount_price %}
-
-                                    <span class="current-price">
-                                        ₹{{ product.discount_price }}
-                                    </span>
-
-                                    <span class="original-price">
-                                        ₹{{ product.sale_price }}
-                                    </span>
-
-                                    <span class="discount-price-label">
-                                        Discounted
-                                    </span>
-
-                                {% else %}
-
-                                    <span class="current-price">
-                                        ₹{{ product.sale_price }}
-                                    </span>
-
-                                {% endif %}
-
-                            </div>
-
-                        </div>
+                        <p class="text-muted">Price, stock and option details are managed on each variant below.</p>
 
 
                         <!-- STATUS -->
@@ -1264,11 +1233,11 @@
                             <div class="stock-box">
 
                                 <div class="stock-box-label">
-                                    Product Stock
+                                    Stock across variants
                                 </div>
 
                                 <div class="stock-box-value">
-                                    {{ product.quantity|default:"0" }}
+                                    {{ total_variant_stock|default:"0" }}
                                 </div>
 
                             </div>
@@ -1314,6 +1283,14 @@
 
                             <div class="meta-item">
 
+                                <div class="meta-label">Brand</div>
+                                <div class="meta-value">{{ product.brand|default:"—" }}</div>
+
+                            </div>
+
+
+                            <div class="meta-item">
+
                                 <div class="meta-label">
                                     Product ID
                                 </div>
@@ -1333,11 +1310,7 @@
 
                                 <div class="meta-value">
 
-                                    {% if product.product_code %}
-                                        {{ product.product_code }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
+                                    Managed on each variant
 
                                 </div>
 
@@ -1371,11 +1344,7 @@
 
                                 <div class="meta-value">
 
-                                    {% if product.color %}
-                                        {{ product.color }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
+                                    Managed on each variant
 
                                 </div>
 
@@ -1390,11 +1359,7 @@
 
                                 <div class="meta-value">
 
-                                    {% if product.size %}
-                                        {{ product.size }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
+                                    Managed on each variant
 
                                 </div>
 
@@ -1408,7 +1373,7 @@
                                 </div>
 
                                 <div class="meta-value">
-                                    {{ product.quantity|default:"0" }}
+                                    {{ total_variant_stock|default:"0" }}
                                 </div>
 
                             </div>
@@ -1502,8 +1467,7 @@
                         </h3>
 
                         <p>
-                            Select the base product or a variant
-                            to preview its images, price and inventory.
+                            Select a variant to preview its images, price and inventory.
                         </p>
 
                     </div>
@@ -1511,8 +1475,8 @@
 
                     <div class="variant-count">
 
-                        {{ variants|length|add:"1" }}
-                        item{{ variants|length|add:"1"|pluralize }}
+                        {{ variants|length }}
+                        variant{{ variants|length|pluralize }}
 
                     </div>
 
@@ -1523,76 +1487,6 @@
                     class="variant-list"
                     id="variantList"
                 >
-
-
-                    <!-- =====================================
-                         BASE PRODUCT BUTTON
-                         ===================================== -->
-
-                    <button
-                        type="button"
-                        class="variant-button base-product active"
-                        data-variant-type="base"
-                        data-variant-index="-1"
-                    >
-
-                        <div class="variant-button-title">
-
-                            {% if product.color and product.size %}
-
-                                {{ product.color }} / {{ product.size }}
-
-                            {% elif product.color %}
-
-                                {{ product.color }}
-
-                            {% elif product.size %}
-
-                                {{ product.size }}
-
-                            {% else %}
-
-                                Base Product
-
-                            {% endif %}
-
-                        </div>
-
-
-                        <div class="variant-button-meta">
-
-                            <span class="base-product-label">
-                                Base Product
-                            </span>
-
-
-                            {% if product.product_code %}
-
-                                <span>
-                                    {{ product.product_code }}
-                                </span>
-
-                            {% endif %}
-
-
-                            <span
-                                class="
-                                    {% if product.quantity > 0 %}
-                                        variant-stock
-                                    {% else %}
-                                        variant-stock-out
-                                    {% endif %}
-                                "
-                            >
-
-                                Stock:
-                                {{ product.quantity|default:"0" }}
-
-                            </span>
-
-                        </div>
-
-                    </button>
 
 
                     <!-- =====================================
@@ -1688,7 +1582,7 @@
                     <div class="selected-variant-heading">
 
                         <strong id="selectedVariantTitle">
-                            Base Product
+                            Select a variant
                         </strong>
                     </div>
 
@@ -1863,46 +1757,6 @@ document.addEventListener("DOMContentLoaded", function () {
         {% endfor %}
 
     ];
-
-
-    /* =====================================================
-       BASE PRODUCT DATA
-       ===================================================== */
-
-    const baseProduct = {
-
-        name:
-            "{% if product.color and product.size %}{{ product.color|escapejs }} / {{ product.size|escapejs }}{% elif product.color %}{{ product.color|escapejs }}{% elif product.size %}{{ product.size|escapejs }}{% else %}Base Product{% endif %}",
-
-        color:
-            "{{ product.color|default:''|escapejs }}",
-
-        size:
-            "{{ product.size|default:''|escapejs }}",
-
-        code:
-            "{{ product.product_code|default:''|escapejs }}",
-
-        salePrice:
-            "{{ product.sale_price|default:''|escapejs }}",
-
-        discountPrice:
-            "{{ product.discount_price|default:''|escapejs }}",
-
-        stock:
-            {{ product.quantity|default:0 }},
-
-        active:
-            {% if product.is_active %}
-                true
-            {% else %}
-                false
-            {% endif %},
-
-        images:
-            productImages
-
-    };
 
 
     /* =====================================================
@@ -2672,26 +2526,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       SELECT BASE PRODUCT
-       ===================================================== */
-
-    function selectBaseProduct(
-        button
-    ) {
-
-        setActiveButton(button);
-
-        loadBaseProductGallery();
-
-        updateSelectedDetails(
-            baseProduct,
-            "Base Product"
-        );
-
-    }
-
-
-    /* =====================================================
        SELECT VARIANT
        ===================================================== */
 
@@ -2752,32 +2586,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       BASE PRODUCT BUTTON
-       ===================================================== */
-
-    const baseProductButton =
-        document.querySelector(
-            '.variant-button[data-variant-type="base"]'
-        );
-
-
-    if (baseProductButton) {
-
-        baseProductButton.addEventListener(
-            "click",
-            function () {
-
-                selectBaseProduct(
-                    baseProductButton
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
        VARIANT BUTTON EVENTS
        ===================================================== */
 
@@ -2808,14 +2616,12 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
-    /* =====================================================
-       INITIAL LOAD
-       BASE PRODUCT IS SELECTED BY DEFAULT
-       ===================================================== */
-
-    selectBaseProduct(
-        baseProductButton
+    const firstVariantButton = document.querySelector(
+        '.variant-button[data-variant-type="variant"]'
     );
+    if (firstVariantButton) {
+        selectVariant(firstVariantButton, Number(firstVariantButton.dataset.variantIndex));
+    }
 
 });
 
