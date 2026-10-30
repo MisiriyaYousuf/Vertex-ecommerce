@@ -29,15 +29,24 @@ class PriceBreakdown:
     def has_discount(self):
         return self.discount_amount > 0
 
+    @property
+    def has_offer(self):
+        return self.offer_type in {"product", "category"}
+
 
 def _valid_offer(queryset, today):
     return queryset.filter(is_active=True, start_date__lte=today, end_date__gte=today).first()
 
 
 def get_effective_price(product, variant=None, on_date=None):
-  
+    if variant is None:
+        # A product is a catalog parent. Its display price comes from one of its
+        # active variants; checkout must always pass the selected variant.
+        variant = product.variants.filter(is_active=True).order_by("sale_price", "id").first()
+        if variant is None:
+            return None
     today = on_date or timezone.localdate()
-    source = variant or product
+    source = variant
     original_price = Decimal(source.sale_price).quantize(MONEY)
     candidates = []
 
@@ -84,6 +93,9 @@ def add_pricing(product, variant=None):
     pricing = get_effective_price(product, variant)
     if variant is None:
         product.pricing = pricing
+        product.display_variant = product.variants.filter(is_active=True).order_by("sale_price", "id").first()
+        if product.display_variant:
+            product.display_variant.pricing = pricing
     else:
         variant.pricing = pricing
     return pricing

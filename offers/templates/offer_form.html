@@ -1,23 +1,52 @@
 {% extends "admin_base.html" %}
-
-{% block title %}Edit {{ offer_label }} Offer{% endblock %}
+{% block title %}Edit {{ offer_label }} Offer - Admin Panel{% endblock %}
+{% block navbar_icon %}tags{% endblock %}
 {% block navbar_title %}Edit {{ offer_label }} Offer{% endblock %}
-
 {% block content %}
-<div class="card" style="max-width: 720px;">
-    <div class="card-body p-4">
-        <form method="post">
-            {% csrf_token %}
+<style>
+.offer-edit-page { max-width:920px; padding:18px 24px 40px; color:#263442; }
+.offer-edit-header { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:22px; }
+.offer-edit-eyebrow { display:block; margin-bottom:6px; color:#315170; font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; }
+.offer-edit-header h2 { margin:0 0 6px; color:#1f2937; font-size:25px; font-weight:750; }
+.offer-edit-header p { margin:0; color:#7b8794; font-size:13px; }
+.offer-edit-back { min-height:38px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:8px 13px; border:1px solid #315170; border-radius:8px; background:#315170; color:#fff; font-size:11px; font-weight:700; text-decoration:none; white-space:nowrap; }
+.offer-edit-back:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.offer-edit-card { overflow:hidden; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.offer-edit-card-heading { display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid #edf0f3; }
+.offer-edit-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#eef3f7; color:#315170; }
+.offer-edit-card-heading h3 { margin:0; color:#344454; font-size:13px; font-weight:750; }
+.offer-edit-body { padding:20px; }
+.offer-edit-field { margin-bottom:15px; }
+.offer-edit-field:last-of-type { margin-bottom:18px; }
+.offer-edit-field .form-label { display:block; margin-bottom:6px; color:#596674; font-size:11px; font-weight:700; }
+.offer-edit-field .form-control,.offer-edit-field .form-select { min-height:40px; border-color:#dce2e8; border-radius:8px; color:#344454; font-size:12px; }
+.offer-edit-field .form-control:focus,.offer-edit-field .form-select:focus { border-color:#315170; box-shadow:0 0 0 3px rgba(49,81,112,.09); }
+.offer-edit-check { display:flex; align-items:center; gap:8px; margin:6px 0 16px; }
+.offer-edit-check .form-check-input { float:none; margin:0; }
+.offer-edit-check label { color:#596674; font-size:11px; font-weight:650; }
+.offer-edit-actions { display:flex; gap:8px; padding-top:17px; border-top:1px solid #edf0f3; }
+.offer-edit-save,.offer-edit-cancel { min-height:38px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 13px; border-radius:8px; font-size:11px; font-weight:700; text-decoration:none; }
+.offer-edit-save { border:1px solid #315170; background:#315170; color:#fff; }
+.offer-edit-save:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.offer-edit-cancel { border:1px solid #dce2e8; background:#fff; color:#596674; }
+.offer-edit-cancel:hover { border-color:#315170; color:#315170; }
+.offer-edit-error { margin-top:4px; color:#c0392b; font-size:10px; }
+@media(max-width:767.98px) { .offer-edit-page { padding:14px 10px 25px; } .offer-edit-header { align-items:flex-start; flex-direction:column; } .offer-edit-header h2 { font-size:21px; } .offer-edit-back { width:100%; } .offer-edit-body { padding:15px; } }
+@media(max-width:480px) { .offer-edit-page { padding:12px 10px 25px; } .offer-edit-header h2 { font-size:19px; } .offer-edit-actions { flex-direction:column; } .offer-edit-actions > * { width:100%; } }
+</style>
+
+<div class="container-fluid offer-edit-page">
+    <div class="offer-edit-header"><div><span class="offer-edit-eyebrow">OFFER MANAGEMENT</span><h2>Edit {{ offer_label }} Offer</h2><p>Update offer details and availability.</p></div><a href="{% url 'customadmin:offer_list' %}" class="offer-edit-back"><i class="fas fa-list"></i> List Offers</a></div>
+    <section class="offer-edit-card">
+        <div class="offer-edit-card-heading"><div class="offer-edit-icon"><i class="fas fa-tags"></i></div><h3>{{ offer_label }} Offer Details</h3></div>
+        <div class="offer-edit-body"><form method="post">{% csrf_token %}
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
             {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                </div>
+                {% if field.name == "is_active" %}<div class="offer-edit-check">{{ field }}<label for="{{ field.id_for_label }}">{{ field.label }}</label></div>{% for error in field.errors %}<div class="offer-edit-error">{{ error }}</div>{% endfor %}
+                {% else %}<div class="offer-edit-field"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="offer-edit-error">{{ error }}</div>{% endfor %}</div>{% endif %}
             {% endfor %}
-            <button class="btn btn-primary" type="submit">Save changes</button>
-            <a class="btn btn-outline-secondary" href="{% url 'customadmin:offer_management' %}">Cancel</a>
-        </form>
-    </div>
+            <div class="offer-edit-actions"><button class="offer-edit-save" type="submit"><i class="fas fa-save"></i> Save Changes</button><a class="offer-edit-cancel" href="{% url 'customadmin:offer_list' %}">Cancel</a></div>
+        </form></div>
+    </section>
 </div>
 {% endblock %}

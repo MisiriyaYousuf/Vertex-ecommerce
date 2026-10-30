@@ -1,8 +1,67 @@
 {% extends "user_base.html" %}
 
 {% block content %}
-<div class="container py-5" style="max-width: 960px; color: #fff;">
-    <div class="p-4 rounded-3 mb-4" style="background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.16);">
+<style>
+    .referrals-page {
+        width: min(960px, 94%);
+        margin: 35px auto 60px;
+        color: #fff;
+    }
+
+    .referral-card {
+        margin-bottom: 22px;
+        padding: 22px;
+        border-radius: 16px;
+        background: linear-gradient(145deg, rgba(73,46,91,.58), rgba(45,27,61,.50));
+        border: 1px solid rgba(255,255,255,.15);
+        box-shadow: 0 15px 40px rgba(20,12,30,.28), inset 0 1px 0 rgba(255,255,255,.05);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .referrals-page h1,
+    .referrals-page h2 { color: #fff; }
+
+    .referrals-page p { color: rgba(255,255,255,.62); }
+
+    .referrals-page .form-control {
+        background: rgba(20,12,30,.55);
+        border-color: rgba(255,255,255,.15);
+        color: #fff;
+    }
+
+    .referrals-page .form-control:focus {
+        border-color: rgba(190,150,255,.65);
+        box-shadow: 0 0 0 .2rem rgba(170,120,255,.15);
+    }
+
+    .referrals-page .referral-table {
+        --bs-table-bg: transparent;
+        --bs-table-color: rgba(255,255,255,.82);
+        --bs-table-hover-bg: rgba(170,120,255,.10);
+        --bs-table-hover-color: #fff;
+        --bs-table-border-color: rgba(255,255,255,.09);
+        margin-bottom: 0;
+    }
+
+    .referrals-page .referral-table thead th {
+        color: rgba(220,198,255,.85);
+        background: rgba(116,76,153,.20);
+        border-bottom-color: rgba(255,255,255,.14);
+        font-size: 11px;
+        letter-spacing: .55px;
+        text-transform: uppercase;
+    }
+
+    .referrals-page .referral-table td { vertical-align: middle; }
+
+    @media (max-width: 520px) {
+        .referral-card { padding: 16px; }
+    }
+</style>
+
+<div class="referrals-page">
+    <div class="referral-card">
         <h1 class="h3 mb-3">Invite friends and earn rewards</h1>
         <p class="mb-3">Share your link or referral code. When a friend verifies a new account with it, you receive a single-use coupon.</p>
         <label class="form-label" for="referral-code">Your referral code</label>
@@ -17,10 +76,10 @@
         </div>
     </div>
 
-    <div class="p-4 rounded-3" style="background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.16);">
+    <div class="referral-card">
         <h2 class="h4 mb-3">Your referral coupons</h2>
         <div class="table-responsive">
-            <table class="table table-dark table-hover align-middle mb-0">
+            <table class="table table-hover align-middle referral-table">
                 <thead><tr><th>Friend</th><th>Coupon</th><th>Reward</th><th>Expires</th></tr></thead>
                 <tbody>
                     {% for reward in rewards %}
