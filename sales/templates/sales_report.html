@@ -249,14 +249,30 @@ Sales Report
     }
 
     .report-table .table-responsive {
-        overflow-x: auto;
+        overflow-x: hidden;
     }
 
     .report-table table {
+        width: 100%;
         margin-bottom: 0;
-
-        min-width: 1050px;
+        min-width: 0;
+        table-layout: fixed;
     }
+
+    .report-table th,
+    .report-table td {
+        overflow-wrap: anywhere;
+    }
+
+    .report-table th:nth-child(1) { width: 7%; }
+    .report-table th:nth-child(2) { width: 12%; }
+    .report-table th:nth-child(3) { width: 10%; }
+    .report-table th:nth-child(4) { width: 9%; }
+    .report-table th:nth-child(5) { width: 10%; }
+    .report-table th:nth-child(6) { width: 14%; }
+    .report-table th:nth-child(7) { width: 12%; }
+    .report-table th:nth-child(8) { width: 13%; }
+    .report-table th:nth-child(9) { width: 13%; }
 
     .report-table thead {
         background: #f8fafc;
@@ -265,7 +281,7 @@ Sales Report
     }
 
     .report-table thead th {
-        padding: 14px 16px;
+        padding: 9px 6px;
 
         border-bottom: 1px solid #e2e8f0;
 
@@ -277,17 +293,17 @@ Sales Report
 
         letter-spacing: 0.45px;
 
-        white-space: nowrap;
+        white-space: normal;
     }
 
     .report-table tbody td {
-        padding: 15px 16px;
+        padding: 10px 6px;
 
         border-bottom: 1px solid #f1f5f9;
 
         color: #475569;
 
-        font-size: 13px;
+        font-size: 11px;
 
         vertical-align: middle;
     }
@@ -362,6 +378,8 @@ Sales Report
         display: inline-flex;
 
         align-items: center;
+        justify-content: center;
+        text-align: center;
 
         padding: 5px 9px;
 
@@ -371,7 +389,7 @@ Sales Report
 
         font-weight: 700;
 
-        white-space: nowrap;
+        white-space: normal;
 
         background: #f1f5f9;
 
@@ -437,7 +455,47 @@ Sales Report
             flex-wrap: wrap;
         }
 
+        .report-table thead th {
+            font-size: 9px;
+            letter-spacing: 0;
+        }
+
+        .report-table tbody td {
+            font-size: 10px;
+            padding: 8px 4px;
+        }
+
+        .order-id {
+            padding: 3px 5px;
+            font-size: 10px;
+        }
+
     }
+
+    /* Match the shared admin order theme */
+    .sales-header { margin-bottom:20px; }
+    .sales-header h2 { color:#1f2937; font-size:25px; font-weight:750; }
+    .sales-header p { margin-top:6px; color:#7b8794 !important; font-size:13px; }
+    .filter-card { padding:20px; margin-bottom:22px; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+    .filter-card label { color:#596674; font-size:11px; }
+    .filter-card input,.filter-card select { min-height:40px; border-color:#dce2e8; border-radius:8px; font-size:12px; }
+    .filter-card input:focus,.filter-card select:focus { border-color:#315170; box-shadow:0 0 0 3px rgba(49,81,112,.09); }
+    .filter-card .btn-primary { background:#315170; box-shadow:none; border-radius:8px; font-size:12px; }
+    .filter-card .btn-primary:hover { background:#263f58; box-shadow:none; }
+    .summary-card { padding:18px; border-color:#e5eaee; border-radius:12px; box-shadow:0 5px 18px rgba(31,41,55,.045); }
+    .summary-card::before { background:#315170; }
+    .summary-card:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(31,41,55,.08); }
+    .summary-label { color:#7b8794; font-size:10px; }
+    .summary-value { color:#263442; font-size:21px; }
+    .download-buttons .btn { border:1px solid #315170; border-radius:7px; background:#315170; color:#fff; font-size:11px; }
+    .download-buttons .btn:hover { border-color:#263f58; background:#263f58; color:#fff; }
+    .report-table { border-color:#e5eaee; border-radius:13px; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+    .report-table > .p-3 { padding:16px 18px !important; border-color:#e7ebef; }
+    .report-table h5 { color:#344454; font-size:14px; }
+    .report-table thead { background:#f7f9fb; color:#7b8794; }
+    .report-table thead th { border-color:#e7ebef; color:#7b8794; font-size:9px; }
+    .report-table tbody tr:hover { background:#fbfcfd; }
+    @media(max-width:767.98px) { .sales-header h2 { font-size:21px; } .filter-card { padding:15px; } .download-buttons .btn { padding:7px 11px; } }
 
 </style>
 
