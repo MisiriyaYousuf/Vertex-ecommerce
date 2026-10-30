@@ -1,13 +1,70 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 from products.models import Product, ProductVariant
 from .models import Cart, Wishlist
 from offers.services import get_effective_price
+from decimal import Decimal
 
 MAX_CART_QUANTITY = 5
+
+
+def _cart_quantity_json(user, cart_item_id, removed=False):
+    items = Cart.objects.filter(user=user).select_related("product", "product__category", "variant")
+    total_items = 0
+    cart_total = Decimal("0.00")
+    original_total = Decimal("0.00")
+    can_checkout = True
+    current_quantity = 0
+    item_subtotal = Decimal("0.00")
+    max_quantity = 0
+
+    for item in items:
+        total_items += item.quantity
+        product, variant = item.product, item.variant
+        if item.pk == cart_item_id:
+            current_quantity = item.quantity
+        if (
+            not product or not variant or not product.is_active or product.is_deleted
+            or getattr(product, "is_blocked", False)
+            or not product.category or product.category.is_trashed
+            or getattr(product.category, "is_blocked", False)
+            or not variant.is_active or variant.quantity < item.quantity
+            or item.quantity > MAX_CART_QUANTITY
+        ):
+            can_checkout = False
+            continue
+        pricing = get_effective_price(product, variant)
+        subtotal = pricing.unit_price * item.quantity
+        cart_total += subtotal
+        original_total += pricing.original_price * item.quantity
+        if item.pk == cart_item_id:
+            item_subtotal = subtotal
+            max_quantity = min(MAX_CART_QUANTITY, variant.quantity)
+
+    return JsonResponse({
+        "success": True,
+        "removed": removed,
+        "cart_item_id": cart_item_id,
+        "quantity": current_quantity,
+        "max_quantity": max_quantity,
+        "item_subtotal": str(item_subtotal),
+        "total_items": total_items,
+        "cart_total": str(cart_total),
+        "discount_amount": str(original_total - cart_total),
+        "grand_total": str(cart_total),
+        "can_checkout": can_checkout,
+    })
+
+
+def _cart_quantity_error(request, message):
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"success": False, "message": message}, status=400)
+    messages.warning(request, message)
+    return redirect("cart:cart")
 
 @never_cache
 @login_required
@@ -92,11 +149,10 @@ def cart_view(request):
             discount_price = variant.discount_price
 
         else:
-
-            item.purchase_source = "product"
-            stock_quantity = product.quantity
-            sale_price = product.sale_price
-            discount_price = product.discount_price
+            item.purchase_source = "variant"
+            item.is_invalid = True
+            has_invalid_items = True
+            continue
 
         if stock_quantity <= 0:
 
@@ -313,20 +369,8 @@ def add_to_cart(request):
         available_quantity = variant.quantity
 
     else:
-
-        if product.quantity <= 0:
-
-            messages.error(
-                request,
-                "This product is out of stock."
-            )
-
-            return redirect(
-                "products:products_details",
-                product.name
-            )
-
-        available_quantity = product.quantity
+        messages.error(request, "Choose an available product variant.")
+        return redirect("products:products_details", product.name)
 
     cart_item = (
         Cart.objects
@@ -558,52 +602,19 @@ def increment_cart(request):
             )
 
         if cart_item.quantity >= MAX_CART_QUANTITY:
-
-            messages.warning(
+            return _cart_quantity_error(
                 request,
-                f"You can add a maximum of "
-                f"{MAX_CART_QUANTITY} items of this variant."
-            )
-
-            return redirect(
-                "cart:cart"
+                f"You can add a maximum of {MAX_CART_QUANTITY} items of this variant.",
             )
 
     else:
-
-        available_quantity = product.quantity
-        if available_quantity <= 0:
-
-            messages.error(
-                request,
-                "This product is out of stock."
-            )
-
-            return redirect(
-                "cart:cart"
-            )
-
-        if cart_item.quantity >= MAX_CART_QUANTITY:
-
-            messages.warning(
-                request,
-                f"You can add a maximum of "
-                f"{MAX_CART_QUANTITY} items of this product."
-            )
-
-            return redirect(
-                "cart:cart"
-            )
+        messages.error(request, "This cart item has no variant. Remove it and select a variant.")
+        return redirect("cart:cart")
 
     if cart_item.quantity >= available_quantity:
-
-        messages.warning(
+        return _cart_quantity_error(
             request,
-            "The selected item is not available in the requested quantity."
-        )
-
-        return redirect(
-            "cart:cart"
+            "The selected item is not available in the requested quantity.",
         )
 
     cart_item.quantity += 1
@@ -613,6 +624,9 @@ def increment_cart(request):
             "quantity"
         ]
     )
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return _cart_quantity_json(request.user, cart_item.pk)
 
     messages.success(
         request,
@@ -679,6 +693,9 @@ def decrement_cart(request):
             ]
         )
 
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return _cart_quantity_json(request.user, cart_item.pk)
+
         messages.success(
             request,
             "Quantity decreased."
@@ -686,7 +703,11 @@ def decrement_cart(request):
 
     else:
 
+        cart_item_id = cart_item.pk
         cart_item.delete()
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return _cart_quantity_json(request.user, cart_item_id, removed=True)
 
         messages.success(
             request,
@@ -755,7 +776,12 @@ def remove_from_cart(request):
 @login_required
 def add_to_wishlist(request):
 
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
     if request.method != "POST":
+
+        if is_ajax:
+            return JsonResponse({"success": False, "message": "Use POST to add a product to your wishlist."}, status=405)
 
         return redirect(
             "cart:cart"
@@ -766,6 +792,9 @@ def add_to_wishlist(request):
     )
 
     if not product_id:
+
+        if is_ajax:
+            return JsonResponse({"success": False, "message": "Invalid product."}, status=400)
 
         messages.error(
             request,
@@ -786,6 +815,9 @@ def add_to_wishlist(request):
 
     if not product:
 
+        if is_ajax:
+            return JsonResponse({"success": False, "message": "Product not found."}, status=404)
+
         messages.error(
             request,
             "Product not found."
@@ -796,19 +828,38 @@ def add_to_wishlist(request):
         )
 
 
-    Wishlist.objects.get_or_create(
+    wishlist_item = Wishlist.objects.filter(
         user=request.user,
-        product=product
-    )
+        product=product,
+    ).first()
 
-    Cart.objects.filter(
-        user=request.user,
-        product=product
-    ).delete()
+    if wishlist_item:
+        wishlist_item.delete()
+        in_wishlist = False
+        message = "Product removed from wishlist."
+    else:
+        Wishlist.objects.create(
+            user=request.user,
+            product=product,
+        )
+        if request.POST.get("source") != "cart":
+            Cart.objects.filter(
+                user=request.user,
+                product=product,
+            ).delete()
+        in_wishlist = True
+        message = "Product added to wishlist."
+
+    if is_ajax:
+        return JsonResponse({
+            "success": True,
+            "in_wishlist": in_wishlist,
+            "message": message,
+        })
 
     messages.success(
         request,
-        "Product added to wishlist."
+        message,
     )
 
     return redirect(
@@ -828,6 +879,7 @@ def wishlist_view(request):
             "product",
             "product__category"
         )
+        .prefetch_related("product__images")
     )
 
     cart_product_ids = (
@@ -846,7 +898,9 @@ def wishlist_view(request):
     )
 
     for item in wishlist_items:
-        item.product.pricing = get_effective_price(item.product)
+        variant = item.product.variants.filter(is_active=True, quantity__gt=0).order_by("sale_price").first()
+        item.display_variant = variant
+        item.product.pricing = get_effective_price(item.product, variant) if variant else None
 
     return render(
         request,
