@@ -10,6 +10,7 @@ from django.core.paginator import Paginator
 from users.models import UserProfile
 from .forms import CategoryForm,CouponForm
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from products.models import (Product,ProductImage,ProductVariant,ProductVariantImage)
 from .forms import ProductForm,ProductVariantForm
 from django.http import JsonResponse
@@ -2990,7 +2991,19 @@ def delete_coupon(request):
 
     code = coupon.code
 
-    coupon.delete()
+    try:
+        coupon.delete()
+    except ProtectedError:
+        # Referral rewards retain a protected reference to their issued coupon.
+        # Deactivate it rather than removing the reward's audit/history record.
+        coupon.is_active = False
+        coupon.save(update_fields=["is_active", "updated_at"])
+        messages.warning(
+            request,
+            f'Coupon "{code}" is linked to a referral reward and cannot be deleted. '
+            "It has been deactivated instead."
+        )
+        return redirect("customadmin:coupon_list")
 
     messages.success(
         request,
