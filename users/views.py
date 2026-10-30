@@ -600,7 +600,7 @@ def home(request):
 
         return redirect("users:signin")
 
-    # Active products with stock calculated from product and variant quantities.
+    # A catalog product is in stock when at least one active variant is available.
     products = (
         Product.objects
         .filter(
@@ -610,7 +610,6 @@ def home(request):
         )
         .select_related(
             "category",
-            "main_image",
         )
         .prefetch_related(
             "images",
@@ -626,7 +625,7 @@ def home(request):
             ),
         )
         .annotate(
-            total_stock=F("quantity") + F("variant_stock"),
+            total_stock=F("variant_stock"),
         )
         .distinct()
         .order_by("-id")
@@ -640,7 +639,7 @@ def home(request):
     # Keep only discounted products for the Top Sale Watches section.
     products = [
         product for product in products
-        if product.pricing.has_discount
+        if product.pricing and product.pricing.has_discount
     ][:6]
 
     # Coupons valid today.

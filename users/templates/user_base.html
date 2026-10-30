@@ -999,6 +999,15 @@
         max-width: calc(100% - 30px);
     }
 
+    #toastContainer.toast-centered {
+        top: 120px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+        min-width: 280px;
+    }
+
 
     #toastContainer .vertex-toast {
 
@@ -1015,6 +1024,14 @@
 
         animation:
             toastSlideIn 0.3s ease;
+    }
+
+    #toastContainer .vertex-toast.glass-toast {
+        background: linear-gradient(135deg, rgba(73, 46, 91, 0.88), rgba(45, 27, 61, 0.82)) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 25px rgba(20, 12, 30, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
     }
 
 
@@ -2138,7 +2155,7 @@ body {
 
                 <a
                     class="nav-link"
-                    href="#">
+                    href="{% url 'products:products' %}?category_name=Casual%20Watches">
 
                     <i class="fas fa-clock"></i>
 
@@ -2153,7 +2170,7 @@ body {
 
                 <a
                     class="nav-link"
-                    href="#">
+                    href="{% url 'products:products' %}?category_name=Formal%20Watches">
 
                     <i class="fas fa-user-tie"></i>
 
@@ -2168,7 +2185,7 @@ body {
 
                 <a
                     class="nav-link"
-                    href="#">
+                    href="{% url 'products:products' %}?category_name=Premium%20Watches">
 
                     <i class="fas fa-gem"></i>
 
@@ -2183,7 +2200,7 @@ body {
 
                 <a
                     class="nav-link"
-                    href="#">
+                    href="{% url 'products:products' %}?category_name=Limited%20Editions">
 
                     <i class="fas fa-star"></i>
 
@@ -2474,6 +2491,13 @@ body {
             icon = 'fa-exclamation-triangle';
         }
 
+        else if (type === 'glass') {
+
+            bgClass = 'glass-toast';
+
+            icon = 'fa-exclamation-triangle';
+        }
+
 
         toast.className =
             `vertex-toast ${bgClass} text-white`;
@@ -2497,11 +2521,13 @@ body {
 
                 </div>
 
-                <button
-                    type="button"
-                    class="btn-close btn-close-white me-3"
-                    aria-label="Close">
-                </button>
+                ${type === 'glass' ? '' : `
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white me-3"
+                        aria-label="Close">
+                    </button>
+                `}
 
             </div>
 
@@ -2510,15 +2536,24 @@ body {
 
         container.appendChild(toast);
 
+        if (type === 'glass') {
+            container.classList.add('toast-centered');
+        }
+
 
         const closeButton =
             toast.querySelector('.btn-close');
 
 
-        closeButton.addEventListener(
-            'click',
-            () => toast.remove()
-        );
+        if (closeButton) {
+            closeButton.addEventListener(
+                'click',
+                () => {
+                    toast.remove();
+                    if (type === 'glass') container.classList.remove('toast-centered');
+                }
+            );
+        }
 
 
         setTimeout(() => {
@@ -2526,6 +2561,7 @@ body {
             if (toast.parentNode) {
 
                 toast.remove();
+                if (type === 'glass') container.classList.remove('toast-centered');
             }
 
         }, 4000);
