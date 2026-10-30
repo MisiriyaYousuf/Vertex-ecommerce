@@ -3,6 +3,8 @@
 {% block title %}
     Coupon Details
 {% endblock %}
+{% block navbar_icon %}ticket-alt{% endblock %}
+{% block navbar_title %}Coupon Details{% endblock %}
 
 {% block content %}
 
@@ -148,6 +150,28 @@
     }
 }
 
+/* Order detail page palette and card layout */
+.coupon-detail-page { padding:18px 24px 40px; background:transparent; color:#263442; min-height:0; }
+.coupon-detail-wrapper { max-width:1050px; }
+.coupon-detail-card { padding:0; overflow:hidden; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.coupon-detail-header { justify-content:flex-start; gap:12px; margin:0; padding:20px 22px; border-bottom:1px solid #e7ebef; background:#fff; }
+.coupon-detail-icon { width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex:none; border-radius:9px; background:#eef3f7; color:#315170; font-size:14px; }
+.coupon-detail-eyebrow { display:block; margin-bottom:4px; color:#315170; font-size:9px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; }
+.coupon-detail-title { color:#1f2937; font-size:22px; font-weight:750; }
+.coupon-detail-subtitle { color:#7b8794; font-size:12px; }
+.coupon-detail-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:0; border:0; border-radius:0; background:#fff; }
+.detail-item { min-width:0; padding:15px 20px; border-bottom:1px solid #edf0f3; overflow-wrap:anywhere; }
+.detail-label { color:#89949e; font-size:9px; letter-spacing:.65px; }
+.detail-value { color:#344454; font-size:12px; font-weight:650; }
+.coupon-code-detail { color:#315170; font-size:15px; font-weight:800; }
+.status-badge { padding:5px 9px; font-size:10px; }
+.status-active { background:#eef3f7; color:#315170; }
+.status-inactive,.status-expired { background:#f1f3f5; color:#697681; }
+.coupon-detail-actions { margin:0; padding:15px 20px; border-top:1px solid #edf0f3; background:#fff; }
+.back-btn { min-height:36px; display:inline-flex; align-items:center; padding:8px 13px; border:1px solid #315170; border-radius:7px; background:#315170; color:#fff; font-size:11px; }
+.back-btn:hover { border-color:#263f58; background:#263f58; color:#fff; }
+@media(max-width:767.98px) { .coupon-detail-page { padding:14px 10px 25px; } .coupon-detail-header { padding:16px; } .coupon-detail-title { font-size:20px; } .coupon-detail-grid { grid-template-columns:1fr; } .detail-item { padding:13px 16px; } .coupon-detail-actions { padding:13px 16px; } .back-btn { width:100%; justify-content:center; } }
+
 </style>
 
 
@@ -159,7 +183,11 @@
 
             <div class="coupon-detail-header">
 
+                <div class="coupon-detail-icon"><i class="fas fa-ticket-alt"></i></div>
+
                 <div>
+
+                    <span class="coupon-detail-eyebrow">COUPON MANAGEMENT</span>
 
                     <h1 class="coupon-detail-title">
                         Coupon Details
@@ -368,7 +396,7 @@
             <div class="coupon-detail-actions">
 
                 <a
-                    href="{% url 'customadmin:coupon_management' %}"
+                    href="{% url 'customadmin:coupon_list' %}"
                     class="back-btn"
                 >
                     ← Back to Coupons

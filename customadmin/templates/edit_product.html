@@ -221,6 +221,26 @@ input:focus {
     gap: 9px;
 }
 
+.image-slot-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.image-slot { min-width: 0; padding: 11px; border: 1px solid #e3e6eb; border-radius: 9px; background: #fafbfc; }
+.image-slot-label { display: block; margin-bottom: 8px; color: #454b56; font-size: 12px; font-weight: 700; }
+.image-slot .image-card { width: 100%; height: 125px; margin-bottom: 9px; }
+.image-slot .delete-image-btn { opacity: 1; width: 26px; height: 26px; font-size: 11px; }
+.image-slot input[type="file"] { width: 100%; font-size: 10px; }
+.image-slot .slot-preview { margin-top: 8px; }
+.product-image-upload-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; }
+.product-image-preview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-top: 18px; }
+.product-image-preview-slot { position: relative; min-width: 0; min-height: 145px; }
+.product-image-preview-slot::before { content: attr(data-image-label); display: block; margin-bottom: 7px; color: #4b5967; font-size: 10px; font-weight: 700; }
+.product-image-preview-slot .image-card { width: 100%; height: 145px; }
+.product-image-preview-slot .image-card img,
+.product-image-preview-slot .preview-image img { object-fit: contain; padding: 7px; }
+.product-image-preview-slot .preview-image { width: 100%; height: 145px; border-radius: 10px; }
+.product-image-preview-slot .image-preview-empty { height: 145px; display: flex; align-items: center; justify-content: center; border: 1px dashed #d3dbe3; border-radius: 10px; background: #fafbfd; color: #9aa5b0; font-size: 10px; text-align: center; }
+.product-image-preview-slot .delete-image-btn { opacity: 1; width: 26px; height: 26px; font-size: 11px; }
+@media (max-width: 768px) { .product-image-upload-grid, .product-image-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 768px) { .image-slot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 .image-card {
     position: relative;
     width: 60px;
@@ -634,6 +654,53 @@ body.crop-modal-open {
     }
 }
 
+/* Match the Add Product form layout and palette */
+.edit-product-page { padding:28px 30px 45px; background:#f6f8fb; }
+.edit-product-container { max-width:1250px; }
+.edit-product-card { border-color:#e8ecf1; border-radius:18px; box-shadow:0 8px 30px rgba(25,35,50,.06); }
+.edit-product-header { display:flex; align-items:center; justify-content:flex-start; gap:16px; padding:28px 32px; border-bottom:1px solid #e9edf2; background:linear-gradient(135deg,#fff 0%,#f8fafc 100%); }
+.edit-header-icon { width:48px; height:48px; display:flex; align-items:center; justify-content:center; flex:0 0 48px; border-radius:12px; background:#26384a; color:#fff; font-size:19px; box-shadow:0 5px 14px rgba(38,56,74,.18); }
+.edit-header-copy .form-eyebrow { display:block; margin-bottom:4px; color:#7a8794; font-size:10px; font-weight:700; letter-spacing:1.6px; }
+.edit-product-header h2 { margin:0; color:#243447; font-size:24px; font-weight:700; }
+.edit-product-header p { margin:4px 0 0; color:#7b8794; font-size:13px; }
+.edit-product-body { padding:30px 32px 34px; }
+.section { margin-bottom:20px; padding:20px; border-color:#e8ecf1; border-radius:12px; background:#fff; }
+.section-title { gap:13px; margin-bottom:18px; padding-bottom:14px; border-color:#edf0f3; }
+.section-number { width:36px; height:36px; flex:0 0 36px; border-radius:10px; background:#eef2f6; color:#26384a; font-size:11px; font-weight:800; }
+.section-title h5 { color:#26384a; font-size:16px; font-weight:700; }
+.section-title p { color:#8894a0; font-size:12px; }
+.edit-product-page .form-label,.edit-product-page .modern-label { margin-bottom:7px; color:#354052; font-size:12px; font-weight:700; }
+.edit-product-page .form-control,.edit-product-page .form-select,.edit-product-page select,.edit-product-page textarea,.edit-product-page input[type="text"],.edit-product-page input[type="number"],.edit-product-page input[type="email"] { border-color:#dce2e8; border-radius:8px; color:#273444; font-size:13px; }
+.edit-product-page .form-control,.edit-product-page .form-select,.edit-product-page select,.edit-product-page input[type="text"],.edit-product-page input[type="number"],.edit-product-page input[type="email"] { min-height:43px; padding:9px 12px; }
+.edit-product-page .form-control:focus,.edit-product-page .form-select:focus,.edit-product-page select:focus,.edit-product-page textarea:focus,.edit-product-page input:focus { border-color:#9aa9b8; box-shadow:0 0 0 3px rgba(38,56,74,.08); }
+.add-variant-btn { min-height:36px; padding:7px 13px; border-color:#ccd5de; border-radius:8px; color:#344454; font-size:12px; font-weight:700; }
+.add-variant-btn:hover { border-color:#26384a; background:#26384a; color:#fff; }
+.form-actions { margin-top:30px; padding-top:22px; border-color:#edf0f3; }
+.back-btn,.save-btn { min-height:40px; padding:8px 18px; border-radius:8px; font-size:12px; font-weight:700; }
+.back-btn { border-color:#d9dfe5; color:#5e6a76; }
+.back-btn:hover { background:#f5f7f9; color:#334155; }
+.save-btn { border:0; background:#26384a; color:#fff; box-shadow:0 4px 12px rgba(38,56,74,.14); }
+.save-btn:hover { background:#1d2d3c; color:#fff; }
+.crop-existing-image { background:#26384a !important; }
+.edit-product-page .image-info-box { margin-bottom:18px; padding:12px 15px; border:1px solid #e1e7ed; border-radius:9px; background:#f8fafc; color:#697684; font-size:11px; line-height:1.6; }
+.edit-product-page .image-info-box strong { color:#344454; }
+.product-image-upload-grid { gap:15px; }
+.product-image-upload-grid .image-upload-card { padding:14px; border:1px solid #e0e6ec; border-radius:12px; background:#fafbfd; transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease; }
+.product-image-upload-grid .image-upload-card:hover { border-color:#cbd5df; box-shadow:0 5px 15px rgba(25,35,50,.04); transform:translateY(-1px); }
+.product-image-upload-grid .image-type-label { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; color:#344454; font-size:12px; font-weight:700; }
+.product-image-upload-grid .image-upload-input { width:100%; min-height:40px; padding:7px; border:1px solid #dce2e8; border-radius:8px; background:#fff; font-size:11px; }
+.product-image-upload-grid .image-upload-help { margin:7px 0 0; color:#8b96a2; font-size:9px; line-height:1.5; }
+.product-image-preview-grid { gap:15px; margin-top:18px; }
+.product-image-preview-slot { min-height:145px; }
+.product-image-preview-slot::before { position:absolute; z-index:2; right:0; bottom:0; left:0; margin:0; padding:6px; background:rgba(35,48,62,.9); color:#fff; font-size:8px; font-weight:700; letter-spacing:.6px; text-align:center; }
+.product-image-preview-slot .image-card { height:145px; margin:0; border:1px solid #dfe5eb; border-radius:10px; background:#f7f9fb; }
+.product-image-preview-slot .image-card img { object-fit:contain; padding:7px; }
+.product-image-preview-slot .image-preview-empty { height:145px; min-height:145px; border-color:#d3dbe3; border-radius:10px; background:#fafbfd; color:#9aa5b0; font-size:10px; }
+.product-image-preview-slot .delete-image-btn { opacity:1; width:26px; height:26px; font-size:11px; }
+@media(max-width:768px) { .edit-product-page { padding:18px 15px 30px; } .edit-product-header { padding:20px; } .edit-product-body { padding:20px; } }
+@media(max-width:576px) { .edit-product-page { padding:10px; } .edit-product-header { align-items:flex-start; padding:16px; } .edit-header-icon { width:40px; height:40px; flex-basis:40px; font-size:16px; } .edit-product-header h2 { font-size:20px; } .edit-product-body { padding:14px; } .section { padding:14px; } }
+@media(max-width:768px) { .product-image-upload-grid,.product-image-preview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } }
+
 </style>
 
 {% endblock %}
@@ -648,6 +715,10 @@ body.crop-modal-open {
 
         <div class="edit-product-header">
 
+            <div class="edit-header-icon"><i class="fas fa-box-open"></i></div>
+            <div class="edit-header-copy">
+                <span class="form-eyebrow">PRODUCT MANAGEMENT</span>
+
             <h2>
                 Edit Product
             </h2>
@@ -655,6 +726,8 @@ body.crop-modal-open {
             <p>
                 Update product details, images and variants.
             </p>
+
+            </div>
 
         </div>
 
@@ -727,6 +800,14 @@ body.crop-modal-open {
 
 
                     <div class="row">
+
+                        <!-- BRAND -->
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Brand</label>
+                            {{ form.brand }}
+                            {% if form.brand.errors %}<div class="text-danger small mt-1">{{ form.brand.errors }}</div>{% endif %}
+                        </div>
 
                         <!-- CATEGORY -->
 
@@ -962,77 +1043,31 @@ body.crop-modal-open {
                     </div>
 
 
-                    {% if product_images %}
-
-                        <div class="mb-4">
-
-                            <label class="form-label">
-                                Existing Images
-                            </label>
-
-                            <div class="existing-images">
-
-                                {% for image in product_images %}
-
-                                    <div
-                                        class="image-card existing-product-image"
-                                        data-image-id="{{ image.id }}"
-                                    >
-
-                                        <img
-                                            src="{{ image.image.url }}"
-                                            alt="{{ product.name }}"
-                                        >
-
-                                        <button
-                                            type="button"
-                                            class="delete-image-btn delete-product-image"
-                                            data-image-id="{{ image.id }}"
-                                            title="Delete image"
-                                        >
-
-                                            <i class="fas fa-trash"></i>
-
-                                        </button>
-
-                                    </div>
-
-                                {% endfor %}
-
+                    <div class="image-info-box"><strong>Image structure:</strong> Each image stays in its labeled position. Choose a new image to replace the current one; crop or delete existing images below.</div>
+                    <div class="product-image-upload-grid">
+                        {% for slot in product_image_slots %}
+                            <div class="image-upload-card">
+                                <div class="image-type-label"><strong>{{ slot.label }} image</strong></div>
+                                <input type="file" name="product_image_{{ slot.type }}" class="form-control image-upload-input product-slot-input" data-image-type="{{ slot.type }}" accept="image/jpeg,image/png,image/webp">
+                                <p class="image-upload-help">Upload or replace the {{ slot.label|lower }} view.</p>
                             </div>
-
-                        </div>
-
-                    {% endif %}
-
-
-                    <div class="upload-box">
-
-                        <h6>
-                            Add More Product Images
-                        </h6>
-
-                        <p>
-                            JPG, PNG or WEBP · Maximum 5 MB each
-                            · Main / Front / Side / Back
-                        </p>
-
-                        <input
-                            type="file"
-                            name="product_images"
-                            id="productImages"
-                            class="form-control"
-                            multiple
-                            accept="image/jpeg,image/png,image/webp"
-                        >
-
+                        {% endfor %}
                     </div>
-
-
-                    <div
-                        id="productImagePreview"
-                        class="image-preview-container mt-3"
-                    ></div>
+                    <div id="productImagePreview" class="product-image-preview-grid">
+                        {% for slot in product_image_slots %}
+                            <div class="product-image-preview-slot" data-product-preview-type="{{ slot.type }}" data-image-label="{{ slot.label }} image">
+                                {% if slot.image %}
+                                    <div class="image-card existing-product-image" data-image-id="{{ slot.image.id }}">
+                                        <img src="{{ slot.image.image.url }}" alt="{{ product.name }} {{ slot.label }}">
+                                        <button type="button" class="delete-image-btn delete-product-image" data-image-id="{{ slot.image.id }}" title="Delete image"><i class="fas fa-trash"></i></button>
+                                        <button type="button" class="delete-image-btn crop-existing-image" data-image-url="{{ slot.image.image.url }}" data-file-name="{{ slot.type }}.jpg" title="Crop image" style="right:34px;background:#563b68"><i class="fas fa-crop-alt"></i></button>
+                                    </div>
+                                {% else %}
+                                    <div class="image-preview-empty">{{ slot.label|upper }} IMAGE</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
 
                 </div>
 
@@ -1285,72 +1320,22 @@ body.crop-modal-open {
                                     </div>
 
 
-                                    {% if variant.images.all %}
-
-                                        <div class="mb-3">
-
-                                            <label class="modern-label">
-                                                Existing Variant Images
-                                            </label>
-
-                                            <div class="variant-existing-images">
-
-                                                {% for image in variant.images.all %}
-
-                                                    <div
-                                                        class="image-card existing-variant-image"
-                                                        data-image-id="{{ image.id }}"
-                                                    >
-
-                                                        <img
-                                                            src="{{ image.image.url }}"
-                                                            alt="{{ variant.color|default:'Variant' }}"
-                                                        >
-
-                                                        <button
-                                                            type="button"
-                                                            class="delete-image-btn delete-variant-image"
-                                                            data-image-id="{{ image.id }}"
-                                                            title="Delete variant image"
-                                                        >
-
-                                                            <i class="fas fa-trash"></i>
-
-                                                        </button>
-
+                                    <div class="image-slot-grid variant-image-slots">
+                                        {% for slot in variant.image_slots %}
+                                            <div class="image-slot" data-image-type="{{ slot.type }}">
+                                                <label class="image-slot-label">{{ slot.label }} image</label>
+                                                {% if slot.image %}
+                                                    <div class="image-card existing-variant-image" data-image-id="{{ slot.image.id }}">
+                                                        <img src="{{ slot.image.image.url }}" alt="{{ variant.color|default:'Variant' }} {{ slot.label }}">
+                                                        <button type="button" class="delete-image-btn delete-variant-image" data-image-id="{{ slot.image.id }}" title="Delete image"><i class="fas fa-trash"></i></button>
+                                                        <button type="button" class="delete-image-btn crop-existing-image" data-image-url="{{ slot.image.image.url }}" data-file-name="{{ slot.type }}.jpg" title="Crop image" style="right:34px;background:#563b68"><i class="fas fa-crop-alt"></i></button>
                                                     </div>
-
-                                                {% endfor %}
-
+                                                {% endif %}
+                                                <input type="file" name="variant_image_existing_{{ variant.id }}_{{ slot.type }}" class="form-control variant-slot-input" data-image-type="{{ slot.type }}" accept="image/jpeg,image/png,image/webp">
+                                                <div class="slot-preview"></div>
                                             </div>
-
-                                        </div>
-
-                                    {% endif %}
-
-
-                                    <div class="variant-upload-area">
-
-                                        <label class="modern-label">
-                                            Add Variant Images
-                                        </label>
-
-                                        <input
-                                            type="file"
-                                            name="variant_images_existing_{{ variant.id }}"
-                                            class="form-control variant-image-input"
-                                            multiple
-                                            accept="image/jpeg,image/png,image/webp"
-                                        >
-
-                                        <small class="text-muted">
-                                            Main / Front / Side / Back · Maximum 5 MB each
-                                        </small>
-
+                                        {% endfor %}
                                     </div>
-
-
-                                    <div class="variant-image-preview image-preview-container mt-3"></div>
 
                                 </div>
 
@@ -1589,17 +1574,12 @@ body.crop-modal-open {
                 Variant Images <span>*</span>
             </label>
 
-            <input
-                type="file"
-                class="form-control variant-image-input"
-                multiple
-                accept="image/jpeg,image/png,image/webp"
-                required
-            >
-
-            <small class="text-muted">
-                Main / Front / Side / Back · Maximum 5 MB each
-            </small>
+            <div class="image-slot-grid variant-image-slots">
+                <div class="image-slot"><label class="image-slot-label">Main image</label><input type="file" class="form-control variant-slot-input" data-image-type="main" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+                <div class="image-slot"><label class="image-slot-label">Front image</label><input type="file" class="form-control variant-slot-input" data-image-type="front" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+                <div class="image-slot"><label class="image-slot-label">Side image</label><input type="file" class="form-control variant-slot-input" data-image-type="side" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+                <div class="image-slot"><label class="image-slot-label">Back image</label><input type="file" class="form-control variant-slot-input" data-image-type="back" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+            </div>
 
         </div>
 
@@ -1836,10 +1816,9 @@ document
                 `variant_is_active_${index}`;
 
 
-            card.querySelector(
-                ".variant-image-input"
-            ).name =
-                `variant_images_${index}`;
+            card.querySelectorAll(".variant-slot-input").forEach((input) => {
+                input.name = `variant_image_${index}_${input.dataset.imageType}`;
+            });
 
 
             variantContainer.appendChild(
@@ -1937,6 +1916,12 @@ function getFileSignature(file) {
 
 function getPreviewContainer(input) {
 
+    const slot = input.closest(".image-slot");
+    if (slot) return slot.querySelector(".slot-preview");
+    if (input.classList.contains("product-slot-input")) {
+        return document.querySelector(`[data-product-preview-type="${input.dataset.imageType}"]`);
+    }
+
     const card =
         input.closest(
             ".variant-card"
@@ -1944,9 +1929,7 @@ function getPreviewContainer(input) {
 
     if (card) {
 
-        return card.querySelector(
-            ".variant-image-preview"
-        );
+        return card.querySelector(".variant-image-preview");
 
     }
 
@@ -2119,10 +2102,11 @@ function refreshImagePreviews(
     container
 ) {
 
-    container.innerHTML = "";
-
-    const store =
-        getFileStore(input);
+    const store = getFileStore(input);
+    if (container.dataset.originalPreview === undefined) {
+        container.dataset.originalPreview = container.innerHTML;
+    }
+    container.innerHTML = store.files.length ? "" : container.dataset.originalPreview;
 
 
     Array.from(
@@ -2151,8 +2135,11 @@ function addFilesToInput(
     container
 ) {
 
-    const store =
-        getFileStore(input);
+    let store = getFileStore(input);
+    if (input.classList.contains("product-slot-input") || input.classList.contains("variant-slot-input")) {
+        store = new DataTransfer();
+        fileStores.set(input, store);
+    }
 
 
     const selectedFiles =
@@ -2264,52 +2251,8 @@ function removeSelectedFile(
     );
 
 
-    if (
-        input.classList.contains(
-            "variant-image-input"
-        )
-    ) {
-
-        input.required =
-            newStore.files.length === 0;
-
-    }
-
 }
 
-
-/* =========================================================
-   PRODUCT IMAGE INPUT
-   ========================================================= */
-
-const productImagesInput =
-    document.getElementById(
-        "productImages"
-    );
-
-
-if (productImagesInput) {
-
-    productImagesInput.addEventListener(
-        "change",
-        function () {
-
-            addFilesToInput(
-                this,
-                document.getElementById(
-                    "productImagePreview"
-                )
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   VARIANT IMAGE INPUT
-   ========================================================= */
 
 document.addEventListener(
     "change",
@@ -2319,11 +2262,7 @@ document.addEventListener(
             event.target;
 
 
-        if (
-            !input.classList.contains(
-                "variant-image-input"
-            )
-        ) {
+        if (!input.classList.contains("variant-slot-input") && !input.classList.contains("product-slot-input")) {
             return;
         }
 
@@ -2720,6 +2659,33 @@ saveCropButton.addEventListener(
     saveCrop
 );
 
+document.addEventListener("click", async function (event) {
+    const button = event.target.closest(".crop-existing-image");
+    if (!button) return;
+    const slot = button.closest(".image-slot");
+    const productPreview = button.closest("[data-product-preview-type]");
+    const type = slot?.dataset.imageType || productPreview?.dataset.productPreviewType;
+    const input = slot?.querySelector("input[type='file']") ||
+        document.querySelector(`.product-slot-input[data-image-type="${type}"]`);
+    if (!input) return;
+    try {
+        const response = await fetch(button.dataset.imageUrl, { credentials: "same-origin" });
+        if (!response.ok) throw new Error("Could not load the current image.");
+        const blob = await response.blob();
+        const file = new File([blob], button.dataset.fileName || "image.jpg", {
+            type: blob.type || "image/jpeg",
+            lastModified: Date.now()
+        });
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        input.files = transfer.files;
+        fileStores.set(input, transfer);
+        openCropModal(input, file);
+    } catch (error) {
+        alert(error.message || "Unable to open this image for cropping.");
+    }
+});
+
 
 cropModal.addEventListener(
     "click",
@@ -3072,17 +3038,8 @@ if (productForm) {
         "reset",
         function () {
 
-            if (productImagesInput) {
-
-                fileStores.delete(
-                    productImagesInput
-                );
-
-            }
-
-
             document.querySelectorAll(
-                ".variant-image-input"
+                ".variant-slot-input, .product-slot-input"
             ).forEach(
                 function (input) {
 

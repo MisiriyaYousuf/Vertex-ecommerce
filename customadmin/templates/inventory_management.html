@@ -19,7 +19,7 @@
         </h2>
 
         <p>
-            Manage base products, variants, pricing and stock levels.
+            Manage variant pricing and stock levels by product.
         </p>
     </div>
 
@@ -310,237 +310,7 @@
 
         {% for product in products %}
 
-            <!-- =================================================
-                 BASE PRODUCT
-            ================================================== -->
 
-            <div class="inventory-row base-product-row">
-
-                <!-- PRODUCT -->
-
-                <div class="inventory-product">
-
-                    <div class="product-image-wrapper">
-
-                        {% if product.main_image %}
-
-                            <img
-                                src="{{ product.main_image.image.url }}"
-                                class="product-image"
-                                alt="{{ product.name }}"
-                            >
-
-                        {% else %}
-
-                            {% with first_image=product.images.first %}
-
-                                {% if first_image %}
-
-                                    <img
-                                        src="{{ first_image.image.url }}"
-                                        class="product-image"
-                                        alt="{{ product.name }}"
-                                    >
-
-                                {% else %}
-
-                                    <div class="product-placeholder">
-                                        <i class="fas fa-image"></i>
-                                    </div>
-
-                                {% endif %}
-
-                            {% endwith %}
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <div class="product-details">
-
-                        <div class="product-name">
-                            {{ product.name }}
-                        </div>
-
-                        <div class="product-meta">
-
-                            Product {{ product.id }}
-
-                            <span class="base-product-label">
-                                BASE PRODUCT
-                            </span>
-
-                        </div>
-
-
-                        <div class="variant-code">
-
-                            <span class="inventory-label">
-                                Code
-                            </span>
-
-                            {% if product.product_code %}
-
-                                <span class="product-code">
-                                    {{ product.product_code }}
-                                </span>
-
-                            {% else %}
-
-                                <span class="muted-text">
-                                    —
-                                </span>
-
-                            {% endif %}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- PRICE -->
-
-                <div class="inventory-section price-section">
-
-                    <div class="inventory-label">
-                        Price
-                    </div>
-
-                    {% if product.discount_price %}
-
-                        <div class="discount-price">
-                            ₹{{ product.discount_price }}
-                        </div>
-
-                        <div class="original-price">
-                            ₹{{ product.sale_price }}
-                        </div>
-
-                    {% else %}
-
-                        <div class="discount-price">
-                            ₹{{ product.sale_price }}
-                        </div>
-
-                    {% endif %}
-
-                </div>
-
-
-                <!-- VARIANT -->
-
-                <div class="inventory-section variant-section">
-
-                    <div class="inventory-label">
-                        Variant
-                    </div>
-
-                    <div class="variant-info">
-
-                        {% if product.color %}
-
-                            <span class="variant-badge">
-
-                                <i class="fas fa-palette"></i>
-
-                                {{ product.color }}
-
-                            </span>
-
-                        {% endif %}
-
-
-                        {% if product.size %}
-
-                            <span class="variant-badge">
-
-                                <i class="fas fa-ruler"></i>
-
-                                {{ product.size }}
-
-                            </span>
-
-                        {% endif %}
-
-
-                        {% if not product.color and not product.size %}
-
-                            <span class="muted-text">
-                                Default
-                            </span>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-                <!-- STOCK -->
-
-                <div class="inventory-section stock-section">
-
-                    <div class="inventory-label">
-                        Stock
-                    </div>
-
-                    <div class="stock-value">
-                        {{ product.quantity }}
-                    </div>
-
-                </div>
-
-
-                <!-- STATUS -->
-
-                <div class="inventory-section status-section">
-
-                    <div class="inventory-label">
-                        Status
-                    </div>
-
-                    <div class="status-group">
-
-                        {% if product.quantity == 0 %}
-
-                            <span class="stock-badge stock-out">
-
-                                <span class="stock-dot"></span>
-
-                                Out of Stock
-
-                            </span>
-
-                        {% elif product.quantity <= 5 %}
-
-                            <span class="stock-badge stock-low">
-
-                                <span class="stock-dot"></span>
-
-                                Low Stock
-
-                            </span>
-
-                        {% else %}
-
-                            <span class="stock-badge stock-available">
-
-                                <span class="stock-dot"></span>
-
-                                Available
-
-                            </span>
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-            </div>
 
 
             <!-- =================================================
@@ -577,10 +347,10 @@
                                         a fallback.
                                     -->
 
-                                    {% if product.main_image %}
+                                    {% if product.primary_image %}
 
                                         <img
-                                            src="{{ product.main_image.image.url }}"
+                                            src="{{ product.primary_image.image.url }}"
                                             class="product-image variant-fallback-image"
                                             alt="{{ product.name }}"
                                         >

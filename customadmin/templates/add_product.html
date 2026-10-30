@@ -118,6 +118,30 @@
     font-size: 13px;
 }
 
+.product-list-link {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    flex-shrink: 0;
+    padding: 8px 13px;
+    border: 1px solid #315170;
+    border-radius: 8px;
+    background: #315170;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .2s ease;
+}
+
+.product-list-link:hover {
+    border-color: #263f58;
+    background: #263f58;
+    color: #ffffff;
+}
+
 
 /* =========================================================
    FORM BODY
@@ -771,6 +795,65 @@
 }
 
 
+/* FIX: Each preview column mirrors the matching upload-input card. */
+.variant-image-preview {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    margin-top: 12px !important;
+    padding: 0;
+    box-sizing: border-box;
+    align-items: start;
+}
+
+.variant-image-preview .image-preview-item {
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    padding: 11px;
+    border: 1px solid #e5eaf0;
+    border-radius: 9px;
+    background: #fafbfd;
+    box-sizing: border-box;
+}
+
+/* This label spacer matches the label above each file input, so the
+   preview image starts directly below its corresponding input row. */
+.variant-image-preview .image-preview-item::before {
+    content: attr(data-image-label);
+    display: block;
+    min-height: 12px;
+    margin: 0 0 7px;
+    color: #4b5967;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 12px;
+    white-space: nowrap;
+}
+
+.variant-image-preview .image-preview-image-box,
+.variant-image-preview .image-preview-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 110px;
+    min-height: 110px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.variant-image-preview .image-preview-image-box img {
+    object-fit: contain;
+}
+
+.variant-image-preview .image-preview-empty {
+    padding: 8px;
+    font-size: 9px;
+}
+
+
 /* =========================================================
    FORM ERRORS
 ========================================================= */
@@ -1065,12 +1148,21 @@
 
     .image-upload-grid,
     .image-preview-container,
-    .variant-image-grid {
+    .variant-image-grid,
+    .variant-image-preview {
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
 }
 
+
+/* Keep the variant upload and preview grids on the same breakpoints. */
+@media (max-width: 1100px) and (min-width: 993px) {
+    .variant-image-grid,
+    .variant-image-preview {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
 
 @media (max-width: 992px) {
 
@@ -1096,9 +1188,11 @@
 
     .product-header {
         padding: 20px;
-
+        flex-direction: column;
         align-items: flex-start;
     }
+
+    .product-list-link { width:100%; }
 
     .header-icon {
         width: 42px;
@@ -1193,7 +1287,8 @@
 
     .image-upload-grid,
     .image-preview-container,
-    .variant-image-grid {
+    .variant-image-grid,
+    .variant-image-preview {
         grid-template-columns: 1fr;
     }
 
@@ -1243,7 +1338,7 @@
                 <div class="header-left">
 
                     <div class="header-icon">
-                        <i class="fas fa-clock"></i>
+                        <i class="fas fa-box-open"></i>
                     </div>
 
                     <div>
@@ -1253,7 +1348,7 @@
                         </span>
 
                         <h3>
-                            Add New Watch
+                            Add New Product
                         </h3>
 
                         <p>
@@ -1264,6 +1359,8 @@
                     </div>
 
                 </div>
+
+                <a href="{% url 'customadmin:list_product' %}" class="product-list-link"><i class="fas fa-list"></i> List Products</a>
 
             </div>
 
@@ -1313,7 +1410,7 @@
                         <div>
 
                             <h5>
-                                Watch Information
+                                Product Information
                             </h5>
 
                             <p>
@@ -1328,6 +1425,16 @@
 
                     <div class="row g-3">
 
+
+                        <!-- BRAND -->
+
+                        <div class="col-md-6">
+                            <label class="form-label">Brand</label>
+                            {{ form.brand }}
+                            {% if form.brand.errors %}
+                                <div class="text-danger small mt-1">{% for error in form.brand.errors %}<div>{{ error }}</div>{% endfor %}</div>
+                            {% endif %}
+                        </div>
 
                         <!-- CATEGORY -->
 
@@ -1407,157 +1514,9 @@
                         </div>
 
 
-                        <!-- SALE PRICE -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Sale Price
-                                <span>*</span>
-                            </label>
-
-                            {{ form.sale_price }}
-
-                            {% if form.sale_price.errors %}
-
-                                <div class="text-danger small mt-1">
-
-                                    {% for error in form.sale_price.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-
-                                </div>
-
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- DISCOUNT PRICE -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Discount Price
-                            </label>
-
-                            {{ form.discount_price }}
-
-                            {% if form.discount_price.errors %}
-
-                                <div class="text-danger small mt-1">
-
-                                    {% for error in form.discount_price.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-
-                                </div>
-
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- COLOR -->
-
-                        <div class="col-md-4">
-
-                            <label class="form-label">
-                                Color
-                            </label>
-
-                            {{ form.color }}
-
-                            {% if form.color.errors %}
-
-                                <div class="text-danger small mt-1">
-
-                                    {% for error in form.color.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-
-                                </div>
-
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- SIZE -->
-
-                        <div class="col-md-4">
-
-                            <label class="form-label">
-                                Watch Size
-                            </label>
-
-                            {{ form.size }}
-
-                            {% if form.size.errors %}
-
-                                <div class="text-danger small mt-1">
-
-                                    {% for error in form.size.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-
-                                </div>
-
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- PRODUCT CODE -->
-
-                        <div class="col-md-4">
-
-                            <label class="form-label">
-                                Product Code
-                                <span>*</span>
-                            </label>
-
-                            {{ form.product_code }}
-
-                            {% if form.product_code.errors %}
-
-                                <div class="text-danger small mt-1">
-
-                                    {% for error in form.product_code.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-
-                                </div>
-
-                            {% endif %}
-
-                        </div>
-
-
-                        <!-- QUANTITY -->
-
-                        <div class="col-md-6">
-
-                            <label class="form-label">
-                                Stock Quantity
-                                <span>*</span>
-                            </label>
-
-                            {{ form.quantity }}
-
-                            {% if form.quantity.errors %}
-
-                                <div class="text-danger small mt-1">
-
-                                    {% for error in form.quantity.errors %}
-                                        <div>{{ error }}</div>
-                                    {% endfor %}
-
-                                </div>
-
-                            {% endif %}
-
-                        </div>
+                        <!-- UPDATED: VARIANT-ONLY FIELDS REMOVED FROM PRODUCT FORM.
+                             Sale price, discount price, color, size, product code and
+                             quantity are entered separately in Product Variants below. -->
 
                     </div>
 
@@ -1582,7 +1541,7 @@
                             {{ form.featured }}
 
                             <label class="form-check-label">
-                                Featured Watch
+                                Featured Product
                             </label>
 
                         </div>
@@ -1689,11 +1648,10 @@
                                 name="product_image_front"
                                 class="image-upload-input product-image-input"
                                 accept="image/jpeg,image/png,image/webp"
-                                required
                             >
 
                             <p class="image-upload-help">
-                                Front view of the watch.
+                                Front view of the product.
                             </p>
 
                         </div>
@@ -1721,11 +1679,10 @@
                                 name="product_image_side"
                                 class="image-upload-input product-image-input"
                                 accept="image/jpeg,image/png,image/webp"
-                                required
                             >
 
                             <p class="image-upload-help">
-                                Side view of the watch.
+                                Side view of the product.
                             </p>
 
                         </div>
@@ -1753,11 +1710,10 @@
                                 name="product_image_back"
                                 class="image-upload-input product-image-input"
                                 accept="image/jpeg,image/png,image/webp"
-                                required
                             >
 
                             <p class="image-upload-help">
-                                Back view of the watch.
+                                Back view of the product.
                             </p>
 
                         </div>
@@ -1789,13 +1745,13 @@
                         <div>
 
                            <h5>
-                                Watch Variants
-                                <small>(Optional)</small>
+                                Product Variants
+                                <small>(Minimum 2 required)</small>
                             </h5>
 
                             <p>
-                                Variants are optional. Add them only when the watch
-                                has different colors, sizes, prices or stock levels.
+                                Add at least two variants for every product. Each variant
+                                can have its own color, size, price, stock and images.
                             </p>
                         </div>
 
@@ -1840,7 +1796,7 @@
 
                             <i class="fas fa-check me-1"></i>
 
-                            Save Watch
+                            Save Product
 
                         </button>
 
@@ -1876,7 +1832,7 @@
                 </span>
 
                 <h6 class="variant-title">
-                    Watch Variant
+                    Product Variant
                 </h6>
 
             </div>
@@ -1992,7 +1948,7 @@
                         type="text"
                         name="variant_size"
                         class="form-control variant-size"
-                        placeholder="Example: 42 mm"
+                        placeholder="Example: Medium"
                         maxlength="100"
                         required
                     >
@@ -2078,7 +2034,7 @@
 
             <div class="variant-image-heading">
 
-                Variant Images
+                Variant Images (upload at least one)
 
                 <span>*</span>
 
@@ -2102,7 +2058,6 @@
                         class="variant-image-input"
                         data-image-type="main"
                         accept="image/jpeg,image/png,image/webp"
-                        required
                     >
 
                 </div>
@@ -2122,7 +2077,6 @@
                         class="variant-image-input"
                         data-image-type="front"
                         accept="image/jpeg,image/png,image/webp"
-                        required
                     >
 
                 </div>
@@ -2142,7 +2096,6 @@
                         class="variant-image-input"
                         data-image-type="side"
                         accept="image/jpeg,image/png,image/webp"
-                        required
                     >
 
                 </div>
@@ -2162,7 +2115,6 @@
                         class="variant-image-input"
                         data-image-type="back"
                         accept="image/jpeg,image/png,image/webp"
-                        required
                     >
 
                 </div>
@@ -2827,205 +2779,156 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =========================================================
-       RENDER PRODUCT IMAGES
-    ========================================================= */
+   RENDER PRODUCT IMAGES - FIXED ORDER
+========================================================= */
 
-    function renderProductImages() {
+function renderProductImages() {
 
-        productPreview.innerHTML = "";
+    // Clear existing previews
+    productPreview.innerHTML = "";
 
+    // Render previews in a fixed order:
+    // Main -> Front -> Side -> Back
+    productImageTypes.forEach(function (type) {
 
-        productImageTypes.forEach(
-            function (type) {
+        const file = productImageFiles[type];
 
-                const file =
-                    productImageFiles[type];
+        // Create the preview item immediately.
+        // This preserves its position even when FileReader
+        // finishes loading images in a different order.
+        const item = document.createElement("div");
 
+        item.className = "image-preview-item";
+        item.dataset.imageType = type;
 
-                const item =
-                    document.createElement(
-                        "div"
-                    );
+        // Add the item to the container BEFORE reading the file.
+        productPreview.appendChild(item);
 
-                item.className =
-                    "image-preview-item";
+        // If no image has been selected, show the placeholder.
+        if (!file) {
 
+            const empty = document.createElement("div");
 
-                if (!file) {
+            empty.className = "image-preview-empty";
 
-                    const empty =
-                        document.createElement(
-                            "div"
-                        );
+            empty.textContent = type.toUpperCase() + " IMAGE";
 
-                    empty.className =
-                        "image-preview-empty";
+            item.appendChild(empty);
 
-                    empty.textContent =
-                        type.toUpperCase() +
-                        " IMAGE";
+            return;
+        }
 
-                    item.appendChild(
-                        empty
-                    );
+        const reader = new FileReader();
 
-                    productPreview.appendChild(
-                        item
-                    );
+        reader.onload = function (event) {
 
-                    return;
-                }
-
-
-                const reader =
-                    new FileReader();
-
-
-                reader.onload =
-                    function (event) {
-
-                        const imageBox =
-                            document.createElement(
-                                "div"
-                            );
-
-                        imageBox.className =
-                            "image-preview-image-box";
-
-
-                        const image =
-                            document.createElement(
-                                "img"
-                            );
-
-                        image.src =
-                            event.target.result;
-
-                        image.alt =
-                            type +
-                            " product image";
-
-
-                        imageBox.appendChild(
-                            image
-                        );
-
-
-                        const badge =
-                            document.createElement(
-                                "div"
-                            );
-
-                        badge.className =
-                            "image-type-badge";
-
-                        badge.textContent =
-                            type.toUpperCase() +
-                            " IMAGE";
-
-
-                        imageBox.appendChild(
-                            badge
-                        );
-
-
-                        item.appendChild(
-                            imageBox
-                        );
-
-
-                        const actions =
-                            document.createElement(
-                                "div"
-                            );
-
-                        actions.className =
-                            "image-action-container";
-
-
-                        const cropButton =
-                            createCropButton();
-
-
-                        cropButton.addEventListener(
-                            "click",
-                            function () {
-
-                                openCropper(
-                                    file,
-                                    {
-                                        label:
-                                            type,
-
-                                        file:
-                                            file,
-
-                                        setFile:
-                                            function (
-                                                newFile
-                                            ) {
-
-                                                productImageFiles[
-                                                    type
-                                                ] = newFile;
-
-                                                renderProductImages();
-                                            }
-                                    }
-                                );
-                            }
-                        );
-
-
-                        actions.appendChild(
-                            cropButton
-                        );
-
-
-                        const deleteButton =
-                            createDeleteButton();
-
-
-                        deleteButton.addEventListener(
-                            "click",
-                            function () {
-
-                                productImageFiles[
-                                    type
-                                ] = null;
-
-                                productImageInputs[
-                                    type
-                                ].value = "";
-
-                                renderProductImages();
-                            }
-                        );
-
-
-                        actions.appendChild(
-                            deleteButton
-                        );
-
-
-                        item.appendChild(
-                            actions
-                        );
-
-
-                        productPreview.appendChild(
-                            item
-                        );
-                    };
-
-
-                reader.readAsDataURL(
-                    file
-                );
+            // Ignore stale callbacks if the preview was refreshed.
+            if (!item.isConnected) {
+                return;
             }
-        );
-    }
 
+            // Clear any previous contents of this preview item.
+            item.innerHTML = "";
+
+            // Image container
+            const imageBox = document.createElement("div");
+
+            imageBox.className = "image-preview-image-box";
+
+            // Preview image
+            const image = document.createElement("img");
+
+            image.src = event.target.result;
+
+            image.alt = type + " product image";
+
+            imageBox.appendChild(image);
+
+            // Image type badge
+            const badge = document.createElement("div");
+
+            badge.className = "image-type-badge";
+
+            badge.textContent = type.toUpperCase() + " IMAGE";
+
+            imageBox.appendChild(badge);
+
+            item.appendChild(imageBox);
+
+            // Action buttons
+            const actions = document.createElement("div");
+
+            actions.className = "image-action-container";
+
+            // Crop button
+            const cropButton = createCropButton();
+
+            cropButton.addEventListener("click", function () {
+
+                openCropper(file, {
+
+                    label: type,
+
+                    file: file,
+
+                    setFile: function (newFile) {
+
+                        // Update only the selected image type.
+                        productImageFiles[type] = newFile;
+
+                        // Keep the file input synchronized.
+                        const input = productImageInputs[type];
+
+                        const dataTransfer = new DataTransfer();
+
+                        dataTransfer.items.add(newFile);
+
+                        input.files = dataTransfer.files;
+
+                        // Refresh previews in the same fixed order.
+                        renderProductImages();
+                    }
+                });
+            });
+
+            actions.appendChild(cropButton);
+
+            // Delete button
+            const deleteButton = createDeleteButton();
+
+            deleteButton.addEventListener("click", function () {
+
+                // Remove only the selected image.
+                productImageFiles[type] = null;
+
+                productImageInputs[type].value = "";
+
+                // Refresh previews without changing their order.
+                renderProductImages();
+            });
+
+            actions.appendChild(deleteButton);
+
+            item.appendChild(actions);
+        };
+
+        reader.onerror = function () {
+            if (item.isConnected) {
+                item.innerHTML = "";
+
+                const errorMessage = document.createElement("div");
+
+                errorMessage.className = "image-preview-empty";
+
+                errorMessage.textContent = "Unable to load image";
+
+                item.appendChild(errorMessage);
+            }
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
 
     /* =========================================================
        PRODUCT IMAGE INPUT EVENTS
@@ -3183,7 +3086,7 @@ document.addEventListener("DOMContentLoaded", function () {
             card.querySelector(
                 ".variant-title"
             ).textContent =
-                "Watch Variant " +
+                "Product Variant " +
                 (index + 1);
 
 
@@ -3273,6 +3176,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 "click",
                 function () {
 
+                    const currentCards =
+                        variantContainer.querySelectorAll(
+                            ".variant-card"
+                        );
+
+                    if (currentCards.length <= 2) {
+                        alert("A product must contain at least 2 variants.");
+                        return;
+                    }
+
                     card.remove();
 
                 }
@@ -3319,6 +3232,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 item.className =
                     "image-preview-item";
+                item.dataset.imageType = type;
+
+                // Keep preview columns in the same order as the file inputs.
+                item.dataset.imageLabel =
+                    type.charAt(0).toUpperCase() + type.slice(1) + " Image";
+
+                // Reserve the slot before reading so completion timing cannot reorder previews.
+                preview.appendChild(item);
 
 
                 if (!file) {
@@ -3339,10 +3260,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         empty
                     );
 
-                    preview.appendChild(
-                        item
-                    );
-
                     return;
                 }
 
@@ -3353,6 +3270,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 reader.onload =
                     function (event) {
+
+                        if (!item.isConnected) return;
+                        item.innerHTML = "";
 
                         const imageBox =
                             document.createElement(
@@ -3506,9 +3426,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         );
 
 
-                        preview.appendChild(
-                            item
-                        );
                     };
 
 
@@ -3686,28 +3603,24 @@ document.addEventListener("DOMContentLoaded", function () {
                CHECK PRODUCT IMAGES
             ----------------------------------------- */
 
-            for (
-                const type
-                of productImageTypes
-            ) {
+            /* UPDATED: match add_product view validation:
+               main image is required and at least 3 product images are required. */
+            if (!productImageFiles.main) {
+                event.preventDefault();
+                alert("Please upload the main product image.");
+                return;
+            }
 
-                if (
-                    !productImageFiles[type]
-                ) {
-
-                    event.preventDefault();
-
-
-                    alert(
-                        "Please upload the " +
-                        type +
-                        " product image."
-                    );
-
-
-                    return;
+            const uploadedProductImageCount = productImageTypes.filter(
+                function (type) {
+                    return Boolean(productImageFiles[type]);
                 }
+            ).length;
 
+            if (uploadedProductImageCount < 3) {
+                event.preventDefault();
+                alert("Please upload at least 3 product images, including the main image.");
+                return;
             }
 
 
@@ -3751,10 +3664,16 @@ document.addEventListener("DOMContentLoaded", function () {
             ----------------------------------------- */
 
             const variantCards =
-                document.querySelectorAll(
+                variantContainer.querySelectorAll(
                     ".variant-card"
                 );
 
+            /* FIX: A product must have at least two variants. */
+            if (variantCards.length < 2) {
+                event.preventDefault();
+                alert("Please add at least 2 variants before saving the product.");
+                return;
+            }
 
             for (
                 const card
@@ -3770,53 +3689,34 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
 
-                for (
-                    const type
-                    of productImageTypes
-                ) {
+                /* UPDATED: the backend requires at least one image per variant,
+                   not all four image positions. */
+                const uploadedVariantImageCount = productImageTypes.filter(
+                    function (type) {
+                        return Boolean(variantImages[type]);
+                    }
+                ).length;
 
-                    if (
-                        !variantImages[type]
-                    ) {
+                if (uploadedVariantImageCount < 1) {
+                    event.preventDefault();
+                    alert("Please upload at least one image for every variant.");
+                    return;
+                }
 
-                        event.preventDefault();
-
-
-                        alert(
-                            "Please upload the " +
-                            type +
-                            " image for every variant."
-                        );
-
-
-                        return;
+                for (const type of productImageTypes) {
+                    if (!variantImages[type]) {
+                        continue;
                     }
 
-
-                    const input =
-                        card.querySelector(
-                            '.variant-image-input[data-image-type="' +
-                            type +
-                            '"]'
-                        );
-
+                    const input = card.querySelector(
+                        '.variant-image-input[data-image-type="' + type + '"]'
+                    );
 
                     if (input) {
-
-                        const dataTransfer =
-                            new DataTransfer();
-
-
-                        dataTransfer.items.add(
-                            variantImages[type]
-                        );
-
-
-                        input.files =
-                            dataTransfer.files;
-
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(variantImages[type]);
+                        input.files = dataTransfer.files;
                     }
-
                 }
 
             }
@@ -3848,6 +3748,10 @@ document.addEventListener("DOMContentLoaded", function () {
     /* =========================================================
        INITIAL PRODUCT PREVIEW
     ========================================================= */
+
+    /* FIX: Start with two variants because every product requires at least two. */
+    addVariant.click();
+    addVariant.click();
 
     renderProductImages();
 

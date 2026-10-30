@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseNotAllowed
+from django.http import Http404, HttpResponseForbidden, HttpResponseNotAllowed
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
@@ -19,14 +19,13 @@ from django.db.models.functions import Coalesce
 from orders.views import update_status
 from orders.models import Coupon
 from wallet.models import CancellationRequest, ReturnRequest, WalletTransaction
-from offers.views import delete_offer, edit_offer, offer_management, toggle_offer
+from offers.views import delete_offer, edit_offer, offer_list, offer_management, toggle_offer
+from offers.services import get_effective_price
 from wallet.services import (
-    approve_cancellation_request,
     approve_return_request,
     credit_item_refund,
     mark_fully_refunded,
     refund_amount_for_item,
-    reject_cancellation_request,
     reject_return_request,
 )
 import calendar
@@ -305,7 +304,7 @@ def user_management(request):
             user__is_superuser=False
         ).count()
 
-        paginator = Paginator(profiles, 2)
+        paginator = Paginator(profiles, 5)
         page_number = request.GET.get("page")
         profiles = paginator.get_page(page_number)
 
@@ -387,12 +386,19 @@ def unblock_user(request):
 @never_cache
 @login_required
 def category_management(request):
-    search = request.GET.get("search","").strip()
     categories = Category.objects.filter(is_trashed=False).order_by("name")
+    search = request.GET.get("search", "").strip()
     if search:
-        categories = categories.filter(
-            Q(name__icontains=search)
-        )
+        categories = categories.filter(name__icontains=search)
+    page_obj = Paginator(categories, 5).get_page(request.GET.get("page"))
+    return render(request, "category_list.html", {
+        "categories": page_obj,
+        "search": search,
+    })
+
+@never_cache
+@login_required
+def add_category(request):
     if request.method == "POST":
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -401,14 +407,12 @@ def category_management(request):
             return redirect("customadmin:category_management")
     else:
         form = CategoryForm()
-    return render(request,"category_manage.html",{ "categories": categories, "form": form, "search": search, })
+    return render(request, "category_add.html", {"form": form})
 
+@never_cache
+@login_required
 def edit_category(request):
-
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
-
-    category_id = request.POST.get("category_id")
+    category_id = request.POST.get("category_id") if request.method == "POST" else request.GET.get("category_id")
 
     category = Category.objects.filter(
         id=category_id,
@@ -421,42 +425,15 @@ def edit_category(request):
             "Category not found."
         )
 
-        return redirect(
-            "customadmin:category_management"
-        )
+        return redirect("customadmin:category_management")
 
-    form = CategoryForm(
-        request.POST,
-        instance=category
-    )
+    form = CategoryForm(request.POST or None, instance=category)
 
-    if form.is_valid():
-
+    if request.method == "POST" and form.is_valid():
         form.save()
-
-        messages.success(
-            request,
-            "Category updated successfully."
-        )
-
-        return redirect(
-            "customadmin:category_management"
-        )
-    categories = Category.objects.filter(
-        is_trashed=False
-    ).order_by("-id")
-
-
-    return render(
-        request,
-        "category_manage.html",
-        {
-            "categories": categories,
-            "form": form,
-            "category": category,
-            "edit_category_id": category.id,
-        }
-    )
+        messages.success(request, "Category updated successfully.")
+        return redirect("customadmin:category_management")
+    return render(request, "category_edit.html", {"category": category, "form": form})
 
 @never_cache
 @login_required
@@ -464,7 +441,10 @@ def delete_category(request):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
     category_id = request.POST.get("category_id")
-    category = Category.objects.filter(id=category_id,is_trashed=False,).first()
+    category = Category.objects.filter(id=category_id,is_trashed=False).first()
+    if not category:
+        messages.error(request, "Category not found.")
+        return redirect("customadmin:category_management")
     if category.products.exists():
         messages.error(
             request,
@@ -547,6 +527,11 @@ def add_product(request):
             for index in variant_indexes
             if index.strip()
         ]
+
+        if len(variant_indexes) < 2:
+            custom_errors.append(
+                "A product must contain at least 2 variants."
+            )
 
         validated_variants = []
 
@@ -705,20 +690,6 @@ def add_product(request):
                     )
 
                     product_images_objects.append(product_image)
-                main_image = next(
-                    (
-                        image
-                        for image in product_images_objects
-                        if image.image_type == "main"
-                    ),
-                    None
-                )
-
-                if main_image:
-                    product.main_image = main_image
-                    product.save(update_fields=["main_image"])
-
-
                 for variant_data in validated_variants:
 
                     variant_form = variant_data["form"]
@@ -823,18 +794,28 @@ def list_product(request):
         )
         .select_related(
             "category",
-            "main_image"
         )
+        .prefetch_related("images")
         .order_by(
-            "id"
+            "-updated_at",
+            "-id"
         )
     )
 
     if search:
         product_list = product_list.filter(
             Q(name__icontains=search) |
-            Q(category__name__icontains=search)
+            Q(category__name__icontains=search) |
+            Q(brand__icontains=search)
         )
+
+    brands = list(
+        Product.objects.filter(is_deleted=False).exclude(brand="")
+        .values_list("brand", flat=True).distinct().order_by("brand")
+    )
+    selected_brand = request.GET.get("brand", "").strip()
+    if selected_brand:
+        product_list = product_list.filter(brand__iexact=selected_brand)
 
     paginator = Paginator(
         product_list,
@@ -849,50 +830,44 @@ def list_product(request):
         page_number
     )
 
+    for product in products:
+        variants = list(product.variants.filter(is_active=True).order_by("sale_price", "id"))
+        product.inventory_variants = variants
+        product.total_stock = sum(variant.quantity for variant in variants)
+        product.display_variant = variants[0] if variants else None
+        product.display_pricing = (
+            get_effective_price(product, product.display_variant)
+            if product.display_variant else None
+        )
+
     return render(
         request,
         "list_product.html",
         {
             "products": products,
             "search": search,
+            "brands": brands,
+            "selected_brand": selected_brand,
         }
     )
 
 @never_cache
 @login_required
-def view_product(request):
+def view_product(request, product_id):
 
     if not request.user.is_superuser:
-        return redirect("users:home")
+        return HttpResponseForbidden()
 
-    if request.method != "POST":
-
-        return HttpResponseNotAllowed(
-            ["POST"]
-        )
-
-    product_id = request.POST.get(
-        "product_id"
-    )
-
-    if not product_id:
-
-        return render(
-            request,
-            "view_product.html",
-            {
-                "product": None,
-                "error_message": "Product ID is missing."
-            }
-        )
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
 
     product = (
         Product.objects
         .filter(id=product_id)
         .select_related(
             "category",
-            "main_image"
         )
+        .prefetch_related("images")
         .prefetch_related(
             "images",
             "variants__images"
@@ -901,28 +876,22 @@ def view_product(request):
     )
 
     if product is None:
+        raise Http404("Product not found.")
 
-        return render(
-            request,
-            "view_product.html",
-            {
-                "product": None,
-                "error_message": "Product not found."
-            }
-        )
-
-    variants = product.variants.all()
+    variants = list(product.variants.all())
 
     total_variant_stock = sum(
         variant.quantity or 0
         for variant in variants
     )
+    display_variant = min(variants, key=lambda variant: variant.sale_price) if variants else None
 
     context = {
         "product": product,
         "product_images": product.images.all(),
         "variants": variants,
         "total_variant_stock": total_variant_stock,
+        "display_variant": display_variant,
     }
 
     return render(
@@ -938,6 +907,27 @@ def edit_product(request):
     
     if not request.user.is_superuser:
         return redirect("users:home")
+
+    image_types = [("main", "Main"), ("front", "Front"), ("side", "Side"), ("back", "Back")]
+
+    def edit_context(form):
+        variants = list(product.variants.prefetch_related("images").all())
+        for variant in variants:
+            images_by_type = {image.image_type: image for image in variant.images.all()}
+            variant.image_slots = [
+                {"type": image_type, "label": label, "image": images_by_type.get(image_type)}
+                for image_type, label in image_types
+            ]
+        product_images = {image.image_type: image for image in product.images.all()}
+        return {
+            "form": form,
+            "product": product,
+            "variants": variants,
+            "product_image_slots": [
+                {"type": image_type, "label": label, "image": product_images.get(image_type)}
+                for image_type, label in image_types
+            ],
+        }
 
     product_id = request.POST.get("product_id")
 
@@ -959,7 +949,6 @@ def edit_product(request):
         )
         .select_related(
             "category",
-            "main_image"
         )
         .prefetch_related(
             "images",
@@ -990,12 +979,7 @@ def edit_product(request):
         return render(
             request,
             "edit_product.html",
-            {
-                "form": form,
-                "product": product,
-                "variants": product.variants.all(),
-                "product_images": product.images.all(),
-            }
+            edit_context(form)
         )
 
     if action != "update":
@@ -1023,44 +1007,18 @@ def edit_product(request):
         "image/webp",
     }
 
-    image_types = [
-        "main",
-        "front",
-        "side",
-        "back",
-    ]
+    image_type_names = [image_type for image_type, _label in image_types]
 
     
 
-    new_product_images = request.FILES.getlist(
-        "product_images"
-    )
-
-    existing_product_image_types = set(
-        product.images.values_list(
-            "image_type",
-            flat=True
-        )
-    )
-
-    available_product_image_types = [
-        image_type
-        for image_type in image_types
-        if image_type not in existing_product_image_types
+    new_product_images = [
+        {"image_type": image_type, "image": request.FILES.get(f"product_image_{image_type}")}
+        for image_type in image_type_names
+        if request.FILES.get(f"product_image_{image_type}")
     ]
 
-    if len(new_product_images) > len(
-        available_product_image_types
-    ):
-
-        custom_errors.append(
-            "Only "
-            f"{len(available_product_image_types)} "
-            "additional product image(s) can be added. "
-            "A product can have only Main, Front, Side and Back images."
-        )
-
-    for image in new_product_images:
+    for image_data in new_product_images:
+        image = image_data["image"]
 
         if image.size > 5 * 1024 * 1024:
 
@@ -1197,23 +1155,21 @@ def edit_product(request):
         # VARIANT IMAGES
         # -----------------------------------------------------
 
-        variant_images = request.FILES.getlist(
-            f"variant_images_{index}"
-        )
-
-        # Existing variant backward-compatible field
-        if (
-            not variant_images
-            and index.startswith("existing_")
-        ):
-
-            existing_id = index[
-                len("existing_"):
-            ]
-
-            variant_images = request.FILES.getlist(
-                f"variant_images_existing_{existing_id}"
+        existing_id = index[len("existing_"):] if index.startswith("existing_") else None
+        variant_images = [
+            {
+                "image_type": image_type,
+                "image": request.FILES.get(
+                    f"variant_image_existing_{existing_id}_{image_type}"
+                    if existing_id else f"variant_image_{index}_{image_type}"
+                ),
+            }
+            for image_type in image_type_names
+            if request.FILES.get(
+                f"variant_image_existing_{existing_id}_{image_type}"
+                if existing_id else f"variant_image_{index}_{image_type}"
             )
+        ]
 
         # -----------------------------------------------------
         # VARIANT FORM DATA
@@ -1321,32 +1277,15 @@ def edit_product(request):
 
             existing_variant_image_types = set()
 
-        available_variant_image_types = [
-            image_type
-            for image_type in image_types
-            if image_type not in existing_variant_image_types
-        ]
-
-        # -----------------------------------------------------
-        # IMAGE COUNT
-        # -----------------------------------------------------
-
-        if len(variant_images) > len(
-            available_variant_image_types
-        ):
-
-            custom_errors.append(
-                f"Variant {position}: "
-                f"Only {len(available_variant_image_types)} "
-                "additional image(s) can be added. "
-                "Maximum is Main, Front, Side and Back."
-            )
+        if not (existing_variant_image_types | {image["image_type"] for image in variant_images}):
+            custom_errors.append(f"Variant {position} must have at least one image.")
 
         # -----------------------------------------------------
         # IMAGE VALIDATION
         # -----------------------------------------------------
 
-        for image in variant_images:
+        for image_data in variant_images:
+            image = image_data["image"]
 
             if image.size > 5 * 1024 * 1024:
 
@@ -1453,56 +1392,6 @@ def edit_product(request):
                 "by another variant."
             )
 
-        # -----------------------------------------------------
-        # BASE PRODUCT
-        # -----------------------------------------------------
-
-        product_query = Product.objects.filter(
-            product_code__iexact=code
-        )
-
-        if product_query.exists():
-
-            custom_errors.append(
-                f"Variant {item['index']}: "
-                "This product code is already used "
-                "by a base product."
-            )
-
-    # =========================================================
-    # CHECK BASE PRODUCT CODE AGAINST VARIANTS
-    # =========================================================
-
-    if product_valid:
-
-        base_product_code = (
-            form.cleaned_data.get(
-                "product_code"
-            )
-        )
-
-        if base_product_code:
-
-            base_product_code = (
-                base_product_code
-                .strip()
-                .upper()
-            )
-
-            variant_query = (
-                ProductVariant.objects
-                .filter(
-                    product_code__iexact=base_product_code
-                )
-            )
-
-            if variant_query.exists():
-
-                custom_errors.append(
-                    "Product code is already used "
-                    "by a product variant."
-                )
-
     # =========================================================
     # VALIDATION FAILED
     # =========================================================
@@ -1526,12 +1415,7 @@ def edit_product(request):
         return render(
             request,
             "edit_product.html",
-            {
-                "form": form,
-                "product": product,
-                "variants": product.variants.all(),
-                "product_images": product.images.all(),
-            }
+            edit_context(form)
         )
 
     
@@ -1546,36 +1430,13 @@ def edit_product(request):
             # PRODUCT IMAGES
             # =================================================
 
-            current_product_types = set(
-                product.images.values_list(
-                    "image_type",
-                    flat=True
-                )
-            )
-
-            available_product_types = [
-                image_type
-                for image_type in image_types
-                if image_type not in current_product_types
-            ]
-
-            current_position = (
-                product.images.count()
-            )
-
-            for image_type, image in zip(
-                available_product_types,
-                new_product_images
-            ):
-
-                ProductImage.objects.create(
+            for image_data in new_product_images:
+                image_type = image_data["image_type"]
+                ProductImage.objects.update_or_create(
                     product=product,
                     image_type=image_type,
-                    image=image,
-                    position=current_position
+                    defaults={"image": image_data["image"], "position": image_type_names.index(image_type)},
                 )
-
-                current_position += 1
 
             # =================================================
             # SAVE VARIANTS
@@ -1698,40 +1559,13 @@ def edit_product(request):
                 # VARIANT IMAGES
                 # =============================================
 
-                variant_images = item["images"]
-
-                if variant_images:
-
-                    existing_types = set(
-                        variant.images.values_list(
-                            "image_type",
-                            flat=True
-                        )
+                for image_data in item["images"]:
+                    image_type = image_data["image_type"]
+                    ProductVariantImage.objects.update_or_create(
+                        variant=variant,
+                        image_type=image_type,
+                        defaults={"image": image_data["image"], "position": image_type_names.index(image_type)},
                     )
-
-                    available_types = [
-                        image_type
-                        for image_type in image_types
-                        if image_type not in existing_types
-                    ]
-
-                    position = (
-                        variant.images.count()
-                    )
-
-                    for image_type, image in zip(
-                        available_types,
-                        variant_images
-                    ):
-
-                        ProductVariantImage.objects.create(
-                            variant=variant,
-                            image_type=image_type,
-                            image=image,
-                            position=position
-                        )
-
-                        position += 1
 
             # =================================================
             # DELETE REMOVED VARIANTS
@@ -1740,60 +1574,6 @@ def edit_product(request):
             product.variants.exclude(
                 id__in=saved_variant_ids
             ).delete()
-
-            # =================================================
-            # SET MAIN IMAGE
-            # =================================================
-
-            main_image = (
-                product.images
-                .filter(
-                    image_type="main"
-                )
-                .first()
-            )
-
-            if main_image:
-
-                if product.main_image_id != main_image.id:
-
-                    product.main_image = main_image
-
-                    product.save(
-                        update_fields=[
-                            "main_image"
-                        ]
-                    )
-
-            elif product.images.exists():
-
-                first_image = (
-                    product.images
-                    .order_by(
-                        "position",
-                        "id"
-                    )
-                    .first()
-                )
-
-                product.main_image = first_image
-
-                product.save(
-                    update_fields=[
-                        "main_image"
-                    ]
-                )
-
-            else:
-
-                # No images remain
-                product.main_image = None
-
-                product.save(
-                    update_fields=[
-                        "main_image"
-                    ]
-                )
 
         # =====================================================
         # SUCCESS
@@ -1827,12 +1607,7 @@ def edit_product(request):
         return render(
             request,
             "edit_product.html",
-            {
-                "form": form,
-                "product": product,
-                "variants": product.variants.all(),
-                "product_images": product.images.all(),
-            }
+            edit_context(form)
         )
     
 @never_cache
@@ -1893,29 +1668,7 @@ def delete_product_image(request):
 
         product = image.product
 
-        was_main_image = (
-            product.main_image_id == image.id
-        )
-
         image.delete()
-
-
-        if was_main_image:
-
-            next_image = (
-                product.images
-                .order_by(
-                    "position",
-                    "id"
-                )
-                .first()
-            )
-
-            product.main_image = next_image
-
-            product.save(
-                update_fields=["main_image"]
-            )
 
         return JsonResponse(
             {
@@ -2238,17 +1991,7 @@ def refund_request_management(request):
         )
         .order_by("requested_at")
     )
-    cancellation_requests = list(
-        CancellationRequest.objects.filter(status=CancellationRequest.PENDING)
-        .select_related(
-            "order_item__order__user",
-            "order_item__product",
-            "order_item__variant",
-        )
-        .order_by("requested_at")
-    )
-
-    for refund_request in return_requests + cancellation_requests:
+    for refund_request in return_requests:
         refund_request.refund_amount = refund_amount_for_item(
             refund_request.order_item
         )
@@ -2258,7 +2001,6 @@ def refund_request_management(request):
         "refund_request_management.html",
         {
             "return_requests": return_requests,
-            "cancellation_requests": cancellation_requests,
         },
     )
 
@@ -2276,7 +2018,7 @@ def review_refund_request(request):
     review_action = request.POST.get("review_action")
     review_note = request.POST.get("review_note", "").strip()
 
-    if request_type not in ["return", "cancellation"]:
+    if request_type != "return":
         messages.error(request, "Invalid refund request type.")
         return redirect("customadmin:refund_request_management")
     if review_action not in ["approve", "reject"]:
@@ -2284,24 +2026,15 @@ def review_refund_request(request):
         return redirect("customadmin:refund_request_management")
 
     try:
-        if request_type == "return":
-            if review_action == "approve":
-                success, message = approve_return_request(request_id, request.user)
-            else:
-                success, message = reject_return_request(
-                    request_id,
-                    request.user,
-                    review_note,
-                )
-        elif review_action == "approve":
-            success, message = approve_cancellation_request(request_id, request.user)
+        if review_action == "approve":
+            success, message = approve_return_request(request_id, request.user)
         else:
-            success, message = reject_cancellation_request(
+            success, message = reject_return_request(
                 request_id,
                 request.user,
                 review_note,
             )
-    except (ReturnRequest.DoesNotExist, CancellationRequest.DoesNotExist):
+    except ReturnRequest.DoesNotExist:
         success, message = False, "The refund request no longer exists."
 
     if success:
@@ -2405,10 +2138,10 @@ def admin_order_detail(request):
                     item.product.images.all()
                 )
 
-                if item.product.main_image:
+                if item.product.primary_image:
 
                     item.display_image = (
-                        item.product.main_image
+                        item.product.primary_image
                     )
 
                 elif product_images:
@@ -2431,10 +2164,10 @@ def admin_order_detail(request):
                 item.product.images.all()
             )
 
-            if item.product.main_image:
+            if item.product.primary_image:
 
                 item.display_image = (
-                    item.product.main_image
+                    item.product.primary_image
                 )
 
             elif product_images:
@@ -2481,7 +2214,6 @@ def update_order_status(request):
 
     valid_statuses = [
         "Pending",
-        "Processing",
         "Shipped",
         "Out for Delivery",
         "Delivered",
@@ -2598,12 +2330,6 @@ def update_order_status(request):
                 update_fields=["quantity"]
             )
 
-        else:
-            item.product.quantity += item.quantity
-
-            item.product.save(
-                update_fields=["quantity"]
-            )
 
         item.cancellation_reason = "Cancelled by admin."
         item.status = "Cancelled"
@@ -2643,12 +2369,6 @@ def update_order_status(request):
                 update_fields=["quantity"]
             )
 
-        else:
-            item.product.quantity += item.quantity
-
-            item.product.save(
-                update_fields=["quantity"]
-            )
 
         item.is_returned = True
         item.return_reason = "Returned by admin."
@@ -2717,23 +2437,9 @@ def inventory_management(request):
     # BASE PRODUCT STOCK
     # ==========================================================
 
-    base_stock_total = (
-        inventory_products.aggregate(
-            total=Coalesce(
-                Sum("quantity"),
-                Value(0)
-            )
-        )["total"]
-    )
-
-    base_low_stock = inventory_products.filter(
-        quantity__gt=0,
-        quantity__lte=5,
-    ).count()
-
-    base_out_of_stock = inventory_products.filter(
-        quantity=0,
-    ).count()
+    base_stock_total = 0
+    base_low_stock = 0
+    base_out_of_stock = 0
 
 
     # ==========================================================
@@ -2799,7 +2505,6 @@ def inventory_management(request):
         )
         .select_related(
             "category",
-            "main_image",
         )
     )
 
@@ -2817,9 +2522,6 @@ def inventory_management(request):
         base_search = (
             Q(name__icontains=search)
             | Q(category__name__icontains=search)
-            | Q(product_code__icontains=search)
-            | Q(color__icontains=search)
-            | Q(size__icontains=search)
         )
 
         variant_search = (
@@ -2831,7 +2533,7 @@ def inventory_management(request):
 
   
 
-    base_stock_condition = Q()
+    base_stock_condition = Q(pk__in=[])
 
     variant_stock_condition = Q(
         variants__is_active=True
@@ -2840,9 +2542,7 @@ def inventory_management(request):
 
     if stock_filter == "available":
 
-        base_stock_condition = Q(
-            quantity__gt=5
-        )
+        base_stock_condition = Q(pk__in=[])
 
         variant_stock_condition = Q(
             variants__is_active=True,
@@ -2852,10 +2552,7 @@ def inventory_management(request):
 
     elif stock_filter == "low":
 
-        base_stock_condition = Q(
-            quantity__gt=0,
-            quantity__lte=5,
-        )
+        base_stock_condition = Q(pk__in=[])
 
         variant_stock_condition = Q(
             variants__is_active=True,
@@ -2866,9 +2563,7 @@ def inventory_management(request):
 
     elif stock_filter == "out":
 
-        base_stock_condition = Q(
-            quantity=0
-        )
+        base_stock_condition = Q(pk__in=[])
 
         variant_stock_condition = Q(
             variants__is_active=True,
@@ -2934,7 +2629,7 @@ def inventory_management(request):
 
         products = products.annotate(
             show_base_inventory=Value(
-                True,
+                False,
                 output_field=BooleanField()
             )
         )
@@ -2979,10 +2674,7 @@ def inventory_management(request):
 
     if selected_sort == "stock_low":
 
-        products = products.order_by(
-            "quantity",
-            "name",
-        )
+        products = products.order_by("name")
 
         variant_queryset = variant_queryset.order_by(
             "quantity",
@@ -2992,10 +2684,7 @@ def inventory_management(request):
 
     elif selected_sort == "stock_high":
 
-        products = products.order_by(
-            "-quantity",
-            "name",
-        )
+        products = products.order_by("name")
 
         variant_queryset = variant_queryset.order_by(
             "-quantity",
@@ -3051,7 +2740,7 @@ def inventory_management(request):
 
     paginator = Paginator(
         products,
-        5
+        3
     )
 
     products_page = paginator.get_page(
@@ -3101,74 +2790,36 @@ def inventory_management(request):
 @never_cache
 @login_required
 def coupon_management(request):
-
     if not request.user.is_superuser:
         return redirect("users:home")
-
-    search = request.GET.get(
-        "search",
-        ""
-    ).strip()
-
-    edit_id = request.GET.get("edit")
-
-    coupons = Coupon.objects.all()
-
-    if search:
-        coupons = coupons.filter(
-            Q(code__icontains=search)
-        )
-
-    coupons = coupons.order_by(
-        "-created_at"
-    )
-
-    edit_coupon = None
-
-    if edit_id:
-        edit_coupon = Coupon.objects.filter(
-            id=edit_id
-        ).first()
-
     if request.method == "POST":
-
-        form = CouponForm(
-            request.POST
-        )
-
+        form = CouponForm(request.POST)
         if form.is_valid():
-
             coupon = form.save()
-
-            messages.success(
-                request,
-                f'Coupon "{coupon.code}" created successfully.'
-            )
-
-            return redirect(
-                "customadmin:coupon_management"
-            )
-
+            messages.success(request, f'Coupon "{coupon.code}" created successfully.')
+            return redirect("customadmin:coupon_list")
     else:
-
-        if edit_coupon:
-            form = CouponForm(
-                instance=edit_coupon
-            )
-        else:
-            form = CouponForm()
-
+        form = CouponForm()
     return render(
         request,
         "coupon_management.html",
         {
-            "coupons": coupons,
             "form": form,
-            "search": search,
-            "edit_coupon_id": edit_coupon.id if edit_coupon else None,
-            "coupon": edit_coupon,
         }
     )
+
+
+@never_cache
+@login_required
+def coupon_list(request):
+    if not request.user.is_superuser:
+        return redirect("users:home")
+    search = request.GET.get("search", "").strip()
+    coupons = Coupon.objects.all()
+    if search:
+        coupons = coupons.filter(Q(code__icontains=search))
+    page_obj = Paginator(coupons.order_by("-created_at"), 5).get_page(request.GET.get("page"))
+    return render(request, "coupon_list.html", {"coupons": page_obj, "search": search})
 
 @never_cache
 @login_required
@@ -3189,7 +2840,7 @@ def view_coupon(request):
         )
 
         return redirect(
-            "customadmin:coupon_management"
+            "customadmin:coupon_list"
         )
 
     coupon = Coupon.objects.filter(
@@ -3203,7 +2854,7 @@ def view_coupon(request):
         )
 
         return redirect(
-            "customadmin:coupon_management"
+            "customadmin:coupon_list"
         )
 
     return render(
@@ -3233,7 +2884,7 @@ def edit_coupon(request):
         )
 
         return redirect(
-            "customadmin:coupon_management"
+            "customadmin:coupon_list"
         )
 
     coupon = Coupon.objects.filter(
@@ -3247,26 +2898,16 @@ def edit_coupon(request):
         )
 
         return redirect(
-            "customadmin:coupon_management"
+            "customadmin:coupon_list"
         )
 
     if request.POST.get("action") == "load":
-
-        form = CouponForm(
-            instance=coupon
-        )
-
-        coupons = Coupon.objects.all().order_by(
-            "-created_at"
-        )
-
+        form = CouponForm(instance=coupon)
         return render(
             request,
             "coupon_management.html",
             {
-                "coupons": coupons,
                 "form": form,
-                "search": "",
                 "edit_coupon_id": coupon.id,
                 "coupon": coupon,
             }
@@ -3287,20 +2928,14 @@ def edit_coupon(request):
         )
 
         return redirect(
-            "customadmin:coupon_management"
+            "customadmin:coupon_list"
         )
-
-    coupons = Coupon.objects.all().order_by(
-        "-created_at"
-    )
 
     return render(
         request,
         "coupon_management.html",
         {
-            "coupons": coupons,
             "form": form,
-            "search": "",
             "edit_coupon_id": coupon.id,
             "coupon": coupon,
         }
@@ -3335,7 +2970,7 @@ def delete_coupon(request):
         )
 
         return redirect(
-            "customadmin:coupon_management"
+            "customadmin:coupon_list"
         )
 
     coupon = Coupon.objects.filter(
@@ -3350,7 +2985,7 @@ def delete_coupon(request):
         )
 
         return redirect(
-            "customadmin:coupon_management"
+            "customadmin:coupon_list"
         )
 
     code = coupon.code
@@ -3363,7 +2998,7 @@ def delete_coupon(request):
     )
 
     return redirect(
-        "customadmin:coupon_management"
+            "customadmin:coupon_list"
     )
 
 
@@ -3391,7 +3026,7 @@ def wallet_management(request):
 
         transactions = transactions.filter(search_filter)
 
-    paginator = Paginator(transactions, 10)
+    paginator = Paginator(transactions, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
 
     return render(

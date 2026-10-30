@@ -6,301 +6,110 @@
 
 {% block extra_css %}
 <style>
-    .wallet-page {
-        color: #e8edf5;
-    }
-
-    .wallet-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 16px;
-        margin-bottom: 22px;
-    }
-
-    .wallet-header h2 {
-        margin: 0 0 6px;
-        color: #fff;
-        font-size: 24px;
-    }
-
-    .wallet-header p {
-        margin: 0;
-        color: #aab7c9;
-    }
-
-    .wallet-search {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .wallet-search input {
-        min-width: 230px;
-        padding: 11px 13px;
-        border: 1px solid #394b64;
-        border-radius: 8px;
-        background: #111b2a;
-        color: #fff;
-        outline: none;
-    }
-
-    .wallet-search input:focus {
-        border-color: #668bb9;
-    }
-
-    .wallet-btn {
-        display: inline-block;
-        padding: 10px 15px;
-        border: 0;
-        border-radius: 8px;
-        background: #315170;
-        color: #fff;
-        text-decoration: none;
-        cursor: pointer;
-        font-size: 14px;
-        white-space: nowrap;
-    }
-
-    .wallet-btn:hover {
-        background: #426b94;
-        color: #fff;
-    }
-
-    .wallet-table-wrap {
-        overflow-x: auto;
-        border: 1px solid #2d3c50;
-        border-radius: 12px;
-        background: #111b2a;
-    }
-
-    .wallet-table {
-        width: 100%;
-        min-width: 800px;
-        border-collapse: collapse;
-    }
-
-    .wallet-table th {
-        padding: 15px;
-        background: #1a293d;
-        color: #b9c9dc;
-        text-align: left;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: .5px;
-        white-space: nowrap;
-    }
-
-    .wallet-table td {
-        padding: 15px;
-        border-top: 1px solid #27364a;
-        color: #e8edf5;
-        vertical-align: middle;
-    }
-
-    .wallet-table tbody tr:hover {
-        background: #19283b;
-    }
-
-    .transaction-id {
-        color: #a9c9f2;
-        font-weight: 600;
-    }
-
-    .transaction-type {
-        display: inline-block;
-        padding: 5px 9px;
-        border-radius: 20px;
-        background: #243b55;
-        color: #c7ddfa;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-
-    .amount {
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .wallet-email {
-        color: #aab7c9;
-        font-size: 12px;
-    }
-
-    .empty-state {
-        padding: 35px 15px !important;
-        text-align: center;
-        color: #aab7c9 !important;
-    }
-
-    .wallet-pagination {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 20px;
-        color: #aab7c9;
-    }
-
-    .pagination-links {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .pagination-links a,
-    .pagination-links span {
-        padding: 8px 12px;
-        border: 1px solid #394b64;
-        border-radius: 7px;
-        color: #dce7f5;
-        text-decoration: none;
-    }
-
-    .pagination-links .current {
-        background: #315170;
-        border-color: #315170;
-        color: #fff;
-    }
-
-    @media (max-width: 600px) {
-        .wallet-search,
-        .wallet-search input {
-            width: 100%;
-        }
-    }
+.wallet-page { padding: 18px 24px 40px; color: #263442; }
+.wallet-header { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:24px; }
+.wallet-eyebrow { display:inline-flex; align-items:center; gap:7px; margin-bottom:6px; color:#315170; font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; }
+.wallet-header h2 { margin:0 0 6px; color:#1f2937; font-size:25px; font-weight:750; }
+.wallet-header p { margin:0; color:#7b8794; font-size:13px; }
+.wallet-count { display:inline-flex; align-items:center; gap:9px; flex-shrink:0; padding:9px 14px; border:1px solid #dce5ec; border-radius:9px; background:#fff; color:#315170; font-size:12px; font-weight:700; box-shadow:0 4px 14px rgba(31,41,55,.045); }
+.wallet-filter { margin-bottom:22px; padding:18px; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.wallet-filter-heading { display:flex; align-items:center; gap:10px; margin-bottom:15px; }
+.wallet-filter-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:#eef3f7; color:#315170; font-size:12px; }
+.wallet-filter-heading h6 { margin:0; color:#344454; font-size:13px; font-weight:750; }
+.wallet-filter-heading span { display:block; margin-top:2px; color:#9aa4ad; font-size:10px; }
+.wallet-search { position:relative; }
+.wallet-search i { position:absolute; top:50%; left:13px; z-index:2; color:#9aa5af; font-size:12px; transform:translateY(-50%); pointer-events:none; }
+.wallet-search input { min-height:42px; padding-left:36px; border:1px solid #dce2e8; border-radius:8px; color:#344454; font-size:12px; box-shadow:none; }
+.wallet-search input:focus { border-color:#315170; box-shadow:0 0 0 3px rgba(49,81,112,.09); }
+.wallet-filter-btn,.wallet-clear-btn { width:100%; min-height:42px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; }
+.wallet-filter-btn { border:0; background:#315170; color:#fff; }
+.wallet-filter-btn:hover { background:#263f58; color:#fff; }
+.wallet-clear-btn { border:1px solid #dce2e8; background:#fff; color:#66727d; }
+.wallet-clear-btn:hover { border-color:#315170; background:#f7f9fb; color:#315170; }
+.wallet-card { overflow:hidden; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.wallet-table { width:100%; margin:0; vertical-align:middle; }
+.wallet-table thead { background:#f7f9fb; }
+.wallet-table th { padding:13px 16px; border:0; border-bottom:1px solid #e7ebef; color:#7b8794; font-size:9px; font-weight:800; letter-spacing:.75px; text-transform:uppercase; white-space:nowrap; }
+.wallet-table td { padding:14px 16px; border-bottom:1px solid #edf0f3; color:#4d5a67; font-size:12px; vertical-align:middle; }
+.wallet-table tbody tr:hover { background:#fbfcfd; }
+.wallet-table tbody tr:last-child td { border-bottom:0; }
+.transaction-id { color:#315170; font-weight:750; white-space:nowrap; }
+.transaction-date { color:#344454; font-weight:600; white-space:nowrap; }
+.transaction-time { display:block; margin-top:2px; color:#9aa4ad; font-size:10px; }
+.wallet-user { color:#344454; font-weight:700; }
+.wallet-email { display:block; max-width:190px; overflow:hidden; color:#7e8993; font-size:11px; text-overflow:ellipsis; white-space:nowrap; }
+.transaction-type { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border:1px solid #e1e6ea; border-radius:6px; background:#f8fafb; color:#596674; font-size:10px; font-weight:700; }
+.transaction-amount { color:#263442; font-size:12px; font-weight:800; white-space:nowrap; }
+.wallet-view-btn { min-height:31px; display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:5px 10px; border:1px solid #d8e1e8; border-radius:7px; background:#fff; color:#315170; font-size:10px; font-weight:700; text-decoration:none; white-space:nowrap; }
+.wallet-view-btn:hover { border-color:#315170; background:#315170; color:#fff; }
+.wallet-empty { padding:55px 20px !important; text-align:center; }
+.wallet-empty-icon { width:52px; height:52px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; border-radius:12px; background:#f1f4f6; color:#8c99a5; font-size:19px; }
+.wallet-empty h5 { margin-bottom:5px; color:#465462; font-size:14px; font-weight:750; }
+.wallet-empty p { margin:0; color:#9aa4ad; font-size:11px; }
+.wallet-pagination { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:15px 18px; border-top:1px solid #edf0f3; background:#fff; }
+.wallet-pagination-summary { color:#89949e; font-size:11px; white-space:nowrap; }
+.wallet-pagination-summary strong { color:#4b5966; font-weight:750; }
+.wallet-pagination-nav { display:flex; align-items:center; gap:5px; }
+.wallet-page-link { width:31px; height:31px; display:inline-flex; align-items:center; justify-content:center; border:1px solid #dfe5ea; border-radius:8px; background:#fff; color:#5d6a76; font-size:11px; font-weight:700; text-decoration:none; }
+.wallet-page-link:hover,.wallet-page-link.active { border-color:#315170; background:#315170; color:#fff; }
+.wallet-page-link.disabled { color:#b6bec5; background:#f8f9fa; }
+@media(max-width:991.98px) { .wallet-page { padding:16px 15px 30px; } .wallet-header { align-items:flex-start; flex-direction:column; } .wallet-count { align-self:flex-start; } }
+@media(max-width:767.98px) { .wallet-page { padding:14px 10px 25px; } .wallet-header h2 { font-size:21px; } .wallet-header p { font-size:12px; } .wallet-table { min-width:760px; } .wallet-card { overflow-x:auto; } .wallet-pagination { flex-direction:column; justify-content:center; } }
+@media(max-width:480px) { .wallet-page { padding:12px 10px 25px; } .wallet-header h2 { font-size:19px; } .wallet-count { width:100%; justify-content:center; } .wallet-filter { padding:14px; border-radius:11px; } .wallet-card { border-radius:11px; } }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="wallet-page">
-
+<div class="container-fluid wallet-page">
     <div class="wallet-header">
         <div>
-            <h2>Wallet Transactions</h2>
-            <p>View wallet credits, debits, purchases and refunds.</p>
+            <div class="wallet-eyebrow"><i class="fas fa-wallet"></i> WALLET MANAGEMENT</div>
+            <h2>Wallet transactions</h2>
+            <p>Review customer wallet credits, debits, purchases and refunds.</p>
         </div>
-
-        <form method="get" class="wallet-search">
-            <input
-                type="text"
-                name="q"
-                value="{{ search_query }}"
-                placeholder="Search ID, user or transaction..."
-                aria-label="Search wallet transactions"
-            >
-
-            <button type="submit" class="wallet-btn">
-                Search
-            </button>
-
-            {% if search_query %}
-                <a
-                    href="{% url 'customadmin:wallet_management' %}"
-                    class="wallet-btn"
-                >
-                    Clear
-                </a>
-            {% endif %}
-        </form>
+        <div class="wallet-count"><i class="fas fa-receipt"></i>{{ page_obj.paginator.count }} Transactions</div>
     </div>
 
-    <div class="wallet-table-wrap">
-        <table class="wallet-table">
-            <thead>
-                <tr>
-                    <th>Transaction ID</th>
-                    <th>Transaction Date</th>
-                    <th>User</th>
-                    <th>Transaction Type</th>
-                    <th>Amount</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+    <div class="wallet-filter">
+        <div class="wallet-filter-heading">
+            <div class="wallet-filter-icon"><i class="fas fa-sliders-h"></i></div>
+            <div><h6>Search transactions</h6><span>Search by transaction ID, customer or transaction details</span></div>
+        </div>
+        <form method="get"><div class="row g-3 align-items-end">
+            <div class="col-lg-8 col-md-8"><label class="form-label small fw-semibold text-secondary">Search</label><div class="wallet-search"><i class="fas fa-search"></i><input class="form-control" type="text" name="q" value="{{ search_query }}" placeholder="ID, username, email or transaction type" autocomplete="off"></div></div>
+            <div class="col-lg-2 col-md-2"><button class="wallet-filter-btn" type="submit"><i class="fas fa-search"></i> Search</button></div>
+            <div class="col-lg-2 col-md-2"><a class="wallet-clear-btn" href="{% url 'customadmin:wallet_management' %}"><i class="fas fa-times"></i> Clear</a></div>
+        </div></form>
+    </div>
 
+    <div class="wallet-card"><div class="table-responsive">
+        <table class="table wallet-table"><thead><tr><th>Transaction</th><th>Date &amp; Time</th><th>Customer</th><th>Type</th><th>Amount</th><th>Action</th></tr></thead>
             <tbody>
-                {% for transaction in transactions %}
-                    <tr>
-                        <td class="transaction-id">
-                            #{{ transaction.id }}
-                        </td>
-
-                        <td>
-                            {{ transaction.created_at|date:"d M Y, h:i A" }}
-                        </td>
-
-                        <td>
-                            {{ transaction.wallet.user.get_username }}
-                            <br>
-                            <span class="wallet-email">
-                                {{ transaction.wallet.user.email }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="transaction-type">
-                                {{ transaction.get_transaction_type_display }}
-                            </span>
-                        </td>
-
-                        <td class="amount">
-                            ₹{{ transaction.amount|floatformat:2 }}
-                        </td>
-
-                        <td>
-                            <a
-                                href="{% url 'customadmin:wallet_transaction_detail' transaction.id %}"
-                                class="wallet-btn"
-                            >
-                                View Details
-                            </a>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="6" class="empty-state">
-                            No wallet transactions found.
-                        </td>
-                    </tr>
-                {% endfor %}
+            {% for transaction in transactions %}
+                <tr>
+                    <td><span class="transaction-id">#{{ transaction.id }}</span></td>
+                    <td><span class="transaction-date">{{ transaction.created_at|date:"d M Y" }}</span><span class="transaction-time">{{ transaction.created_at|time:"h:i A" }}</span></td>
+                    <td><span class="wallet-user">{{ transaction.wallet.user.get_username }}</span><span class="wallet-email">{{ transaction.wallet.user.email }}</span></td>
+                    <td><span class="transaction-type"><i class="fas fa-exchange-alt"></i>{{ transaction.get_transaction_type_display }}</span></td>
+                    <td><span class="transaction-amount">₹{{ transaction.amount|floatformat:2 }}</span></td>
+                    <td><a href="{% url 'customadmin:wallet_transaction_detail' transaction.id %}" class="wallet-view-btn"><i class="fas fa-eye"></i> View</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6"><div class="wallet-empty"><div class="wallet-empty-icon"><i class="fas fa-wallet"></i></div><h5>No transactions found</h5><p>No wallet transactions match your search.</p></div></td></tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>
-
     {% if page_obj.paginator.num_pages > 1 %}
         <div class="wallet-pagination">
-            <span>
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-
-            <div class="pagination-links">
-                {% if page_obj.has_previous %}
-                    <a href="?q={{ search_query|urlencode }}&page=1">
-                        First
-                    </a>
-
-                    <a href="?q={{ search_query|urlencode }}&page={{ page_obj.previous_page_number }}">
-                        Previous
-                    </a>
-                {% endif %}
-
-                <span class="current">{{ page_obj.number }}</span>
-
-                {% if page_obj.has_next %}
-                    <a href="?q={{ search_query|urlencode }}&page={{ page_obj.next_page_number }}">
-                        Next
-                    </a>
-
-                    <a href="?q={{ search_query|urlencode }}&page={{ page_obj.paginator.num_pages }}">
-                        Last
-                    </a>
-                {% endif %}
-            </div>
+            <div class="wallet-pagination-summary">Showing <strong>{{ page_obj.start_index }}</strong>–<strong>{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> transactions</div>
+            <nav class="wallet-pagination-nav" aria-label="Wallet transaction pagination">
+                {% if page_obj.has_previous %}<a class="wallet-page-link" href="?q={{ search_query|urlencode }}&amp;page={{ page_obj.previous_page_number }}" aria-label="Previous page"><i class="fas fa-chevron-left"></i></a>{% else %}<span class="wallet-page-link disabled"><i class="fas fa-chevron-left"></i></span>{% endif %}
+                {% for page_number in page_obj.paginator.page_range %}<a class="wallet-page-link {% if page_obj.number == page_number %}active{% endif %}" href="?q={{ search_query|urlencode }}&amp;page={{ page_number }}">{{ page_number }}</a>{% endfor %}
+                {% if page_obj.has_next %}<a class="wallet-page-link" href="?q={{ search_query|urlencode }}&amp;page={{ page_obj.next_page_number }}" aria-label="Next page"><i class="fas fa-chevron-right"></i></a>{% else %}<span class="wallet-page-link disabled"><i class="fas fa-chevron-right"></i></span>{% endif %}
+            </nav>
         </div>
     {% endif %}
-
+    </div>
 </div>
 {% endblock %}
