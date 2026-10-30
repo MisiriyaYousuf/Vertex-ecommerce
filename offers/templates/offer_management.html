@@ -1,72 +1,78 @@
 {% extends "admin_base.html" %}
-
-{% block title %}Offer Management{% endblock %}
-{% block navbar_title %}Offer Management{% endblock %}
+{% block title %}Add Offers - Admin Panel{% endblock %}
+{% block navbar_title %}Add Offers{% endblock %}
 {% block navbar_icon %}tags{% endblock %}
 
 {% block content %}
 <style>
-    .offer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-    .offer-card { border: 1px solid #dde3ea; border-radius: 10px; padding: 20px; background: #fff; }
-    .offer-card h3 { font-size: 1.1rem; margin-bottom: 16px; }
-    .offer-table { background: #fff; border-radius: 10px; overflow: hidden; }
-    .status-active { color: #198754; font-weight: 600; }
-    .status-inactive { color: #6c757d; font-weight: 600; }
+.offers-page { padding:18px 24px 40px; color:#263442; }
+.offers-header { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:22px; }
+.offers-eyebrow { display:inline-flex; align-items:center; gap:7px; margin-bottom:6px; color:#315170; font-size:10px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; }
+.offers-header h2 { margin:0 0 6px; color:#1f2937; font-size:25px; font-weight:750; }
+.offers-header p { max-width:760px; margin:0; color:#7b8794; font-size:13px; }
+.offers-list-link { min-height:38px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:8px 13px; border:1px solid #315170; border-radius:8px; background:#315170; color:#fff; font-size:11px; font-weight:700; text-decoration:none; white-space:nowrap; }
+.offers-list-link:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.offer-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:start; gap:16px; }
+.offer-form-card { min-width:0; overflow:hidden; border:1px solid #e5eaee; border-radius:13px; background:#fff; box-shadow:0 5px 20px rgba(31,41,55,.05); }
+.offer-form-heading { display:flex; align-items:center; gap:10px; padding:15px 17px; border-bottom:1px solid #edf0f3; }
+.offer-form-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border-radius:8px; background:#eef3f7; color:#315170; font-size:12px; }
+.offer-form-heading h3 { margin:0; color:#344454; font-size:13px; font-weight:750; }
+.offer-form-body { padding:17px; }
+.offer-form-body .form-label { display:block; margin-bottom:6px; color:#596674; font-size:11px; font-weight:700; }
+.offer-field { margin-bottom:13px; }
+.offer-field:last-of-type { margin-bottom:16px; }
+.offer-field .form-control,.offer-field .form-select { min-height:38px; font-size:11px; }
+.offer-check-field { display:flex; align-items:center; gap:8px; margin:8px 0 15px; }
+.offer-check-field .form-check-input { float:none; margin:0; }
+.offer-check-field .form-check-label { color:#596674; font-size:11px; font-weight:650; }
+.offer-save-btn { min-height:36px; padding:7px 13px; border:1px solid #315170; border-radius:7px; background:#315170; color:#fff; font-size:11px; font-weight:700; }
+.offer-save-btn:hover { border-color:#263f58; background:#263f58; color:#fff; }
+.offer-error { margin-top:4px; color:#c0392b; font-size:10px; }
+@media(max-width:1199.98px) { .offer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:991.98px) { .offers-page { padding:16px 15px 30px; } .offers-header { align-items:flex-start; flex-direction:column; } }
+@media(max-width:767.98px) { .offers-page { padding:14px 10px 25px; } .offers-header h2 { font-size:21px; } .offers-header p { font-size:12px; } .offers-list-link { width:100%; } .offer-grid { grid-template-columns:1fr; gap:12px; } }
+@media(max-width:480px) { .offers-page { padding:12px 10px 25px; } .offers-header h2 { font-size:19px; } .offer-form-body { padding:14px; } }
 </style>
 
-<p class="text-muted">For each item, customers receive the larger of its product offer and category offer. Offers never stack.</p>
+<div class="container-fluid offers-page">
+    <div class="offers-header">
+        <div><div class="offers-eyebrow"><i class="fas fa-tags"></i> OFFER MANAGEMENT</div><h2>Add Offers</h2><p>Set product, category, and referral offers. Customers receive the larger product or category offer; discounts do not stack.</p></div>
+        <a href="{% url 'customadmin:offer_list' %}" class="offers-list-link"><i class="fas fa-list"></i> List Offers</a>
+    </div>
 
-<div class="offer-grid mb-4">
-    <section class="offer-card">
-        <h3><i class="fas fa-box me-2"></i>Add product offer</h3>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="offer_type" value="product">
-            {% for field in product_offer_form %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                </div>
-            {% endfor %}
-            <button class="btn btn-primary" type="submit">Save product offer</button>
-        </form>
-    </section>
+    <div class="offer-grid">
+        <section class="offer-form-card">
+            <div class="offer-form-heading"><div class="offer-form-icon"><i class="fas fa-box"></i></div><h3>Add Product Offer</h3></div>
+            <div class="offer-form-body"><form method="post">{% csrf_token %}<input type="hidden" name="offer_type" value="product">
+                {% for field in product_offer_form %}
+                    {% if field.name == "is_active" %}<div class="offer-check-field">{{ field }}<label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
+                    {% else %}<div class="offer-field"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="offer-error">{{ error }}</div>{% endfor %}</div>{% endif %}
+                {% endfor %}
+                <button class="offer-save-btn" type="submit"><i class="fas fa-plus me-1"></i> Save Product Offer</button>
+            </form></div>
+        </section>
 
-    <section class="offer-card">
-        <h3><i class="fas fa-layer-group me-2"></i>Add category offer</h3>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="offer_type" value="category">
-            {% for field in category_offer_form %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                </div>
-            {% endfor %}
-            <button class="btn btn-primary" type="submit">Save category offer</button>
-        </form>
-    </section>
+        <section class="offer-form-card">
+            <div class="offer-form-heading"><div class="offer-form-icon"><i class="fas fa-layer-group"></i></div><h3>Add Category Offer</h3></div>
+            <div class="offer-form-body"><form method="post">{% csrf_token %}<input type="hidden" name="offer_type" value="category">
+                {% for field in category_offer_form %}
+                    {% if field.name == "is_active" %}<div class="offer-check-field">{{ field }}<label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
+                    {% else %}<div class="offer-field"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="offer-error">{{ error }}</div>{% endfor %}</div>{% endif %}
+                {% endfor %}
+                <button class="offer-save-btn" type="submit"><i class="fas fa-plus me-1"></i> Save Category Offer</button>
+            </form></div>
+        </section>
 
-    <section class="offer-card">
-        <h3><i class="fas fa-gift me-2"></i>Add referral reward</h3>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="offer_type" value="referral">
-            {% for field in referral_offer_form %}
-                <div class="mb-3">
-                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
-                </div>
-            {% endfor %}
-            <button class="btn btn-primary" type="submit">Save referral reward</button>
-        </form>
-    </section>
+        <section class="offer-form-card">
+            <div class="offer-form-heading"><div class="offer-form-icon"><i class="fas fa-gift"></i></div><h3>Add Referral Reward</h3></div>
+            <div class="offer-form-body"><form method="post">{% csrf_token %}<input type="hidden" name="offer_type" value="referral">
+                {% for field in referral_offer_form %}
+                    {% if field.name == "is_active" %}<div class="offer-check-field">{{ field }}<label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
+                    {% else %}<div class="offer-field"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="offer-error">{{ error }}</div>{% endfor %}</div>{% endif %}
+                {% endfor %}
+                <button class="offer-save-btn" type="submit"><i class="fas fa-plus me-1"></i> Save Referral Reward</button>
+            </form></div>
+        </section>
+    </div>
 </div>
-
-{% include "offer_table.html" with title="Product offers" offers=product_offers offer_type="product" target="product" %}
-{% include "offer_table.html" with title="Category offers" offers=category_offers offer_type="category" target="category" %}
-{% include "offer_table.html" with title="Referral rewards" offers=referral_offers offer_type="referral" target="" %}
 {% endblock %}

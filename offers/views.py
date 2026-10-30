@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -46,10 +47,50 @@ def offer_management(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Offer created successfully.")
-            return redirect("customadmin:offer_management")
+            return redirect("customadmin:offer_list")
         messages.error(request, "Please correct the errors below.")
         return render(request, "offer_management.html", _offer_configuration_context(**{context_key: form}))
     return render(request, "offer_management.html", _offer_configuration_context())
+
+
+@login_required
+@user_passes_test(_is_admin)
+@never_cache
+def offer_list(request):
+    combined_offers = []
+    offer_groups = (
+        ("product", ProductOffer.objects.select_related("product").all()),
+        ("category", CategoryOffer.objects.select_related("category").all()),
+        ("referral", ReferralOffer.objects.all()),
+    )
+    for offer_type, queryset in offer_groups:
+        for offer in queryset:
+            if offer_type == "product":
+                target_name = offer.product.name
+                discount_label = f"{offer.discount_percentage}%"
+            elif offer_type == "category":
+                target_name = offer.category.name
+                discount_label = f"{offer.discount_percentage}%"
+            else:
+                target_name = (
+                    f"{offer.discount_value}% coupon"
+                    if offer.discount_type == ReferralOffer.PERCENTAGE
+                    else f"₹{offer.discount_value} coupon"
+                )
+                discount_label = (
+                    f"{offer.discount_value}%"
+                    if offer.discount_type == ReferralOffer.PERCENTAGE
+                    else f"₹{offer.discount_value}"
+                )
+            combined_offers.append({
+                "offer": offer,
+                "offer_type": offer_type,
+                "target_name": target_name,
+                "discount_label": discount_label,
+            })
+    combined_offers.sort(key=lambda item: item["offer"].created_at, reverse=True)
+    page_obj = Paginator(combined_offers, 5).get_page(request.GET.get("page"))
+    return render(request, "offer_list.html", {"offers": page_obj})
 
 
 def _offer_class_and_form(offer_type):
@@ -75,7 +116,7 @@ def edit_offer(request, offer_type, offer_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Offer updated successfully.")
-            return redirect("customadmin:offer_management")
+            return redirect("customadmin:offer_list")
     else:
         form = form_class(instance=offer)
     return render(request, "offer_form.html", {"form": form, "offer": offer, "offer_label": label})
@@ -90,7 +131,7 @@ def toggle_offer(request, offer_type, offer_id):
     offer.is_active = not offer.is_active
     offer.save(update_fields=["is_active", "updated_at"])
     messages.success(request, "Offer status updated.")
-    return redirect("customadmin:offer_management")
+    return redirect("customadmin:offer_list")
 
 
 @login_required
@@ -100,7 +141,7 @@ def delete_offer(request, offer_type, offer_id):
     model_class, _, _ = _offer_class_and_form(offer_type)
     get_object_or_404(model_class, id=offer_id).delete()
     messages.success(request, "Offer deleted.")
-    return redirect("customadmin:offer_management")
+    return redirect("customadmin:offer_list")
 
 
 @login_required
