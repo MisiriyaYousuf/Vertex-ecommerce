@@ -1774,10 +1774,10 @@ Home - Vertex
                     class="product-image"
                 >
 
-                    {% if product.main_image %}
+                    {% if product.primary_image %}
 
                         <img
-                            src="{{ product.main_image.image.url }}"
+                            src="{{ product.primary_image.image.url }}"
                             alt="{{ product.name }}"
                         >
 
@@ -1815,7 +1815,7 @@ Home - Vertex
                         ₹{{ product.pricing.unit_price|floatformat:2 }}
                     </span>
 
-                    {% if product.pricing.has_discount %}
+                    {% if product.pricing and product.pricing.has_discount %}
                         <del class="old-price">
                             ₹{{ product.pricing.original_price|floatformat:2 }}
                         </del>
