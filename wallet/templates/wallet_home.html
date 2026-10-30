@@ -3,40 +3,177 @@
 {% block title %}My Wallet{% endblock %}
 
 {% block content %}
-<main style="max-width: 960px; margin: 40px auto; padding: 24px; color: #fff;">
-    <h1>My Wallet</h1>
-    <section style="padding: 24px; margin: 20px 0; border-radius: 14px; background: #291c38;">
-        <p>Available balance</p>
-        <strong style="font-size: 2rem;">₹{{ wallet.balance|floatformat:2 }}</strong>
-    </section>
+<style>
+    .wallet-page {
+        width: 92%;
+        max-width: 1100px;
+        margin: 42px auto 60px;
+        color: #fff;
+    }
 
-    <h2>Wallet activity</h2>
-    {% if transactions.object_list %}
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead><tr><th>Date</th><th>Activity</th><th>Order</th><th>Amount</th><th>Balance</th></tr></thead>
-                <tbody>
-                {% for entry in transactions %}
-                    <tr>
-                        <td>{{ entry.created_at|date:"d M Y, H:i" }}</td>
-                        <td>{{ entry.get_transaction_type_display }}{% if entry.description %}<br><small>{{ entry.description }}</small>{% endif %}</td>
-                        <td>{% if entry.order_id %}#{{ entry.order_id }}{% else %}—{% endif %}</td>
-                        <td>{% if entry.transaction_type == "PURCHASE" %}−{% else %}+{% endif %}₹{{ entry.amount|floatformat:2 }}</td>
-                        <td>₹{{ entry.balance_after|floatformat:2 }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    .wallet-card {
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, .15);
+        border-radius: 16px;
+        background: linear-gradient(145deg, rgba(73, 46, 91, .78), rgba(45, 27, 61, .76));
+        box-shadow: 0 8px 30px rgba(20, 12, 30, .3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .wallet-heading {
+        margin: 0 0 22px;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 750;
+        letter-spacing: -.4px;
+    }
+
+    .wallet-balance {
+        margin-bottom: 30px;
+        padding: 22px 24px;
+        border: 1px solid rgba(255, 255, 255, .14);
+        border-radius: 13px;
+        background: rgba(30, 16, 42, .34);
+    }
+
+    .wallet-balance-label {
+        margin: 0 0 6px;
+        color: rgba(255, 255, 255, .78);
+        font-size: 13px;
+    }
+
+    .wallet-balance-value {
+        color: #fff;
+        font-size: 32px;
+        font-weight: 750;
+    }
+
+    .wallet-section-heading {
+        margin: 0 0 14px;
+        color: #fff;
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+    .wallet-table-wrap {
+        overflow-x: auto;
+        border: 1px solid rgba(255, 255, 255, .13);
+        border-radius: 11px;
+    }
+
+    .wallet-table {
+        width: 100%;
+        min-width: 650px;
+        border-collapse: collapse;
+        color: rgba(255, 255, 255, .9);
+    }
+
+    .wallet-table th,
+    .wallet-table td {
+        padding: 13px 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, .1);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .wallet-table th {
+        background: rgba(30, 16, 42, .3);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .wallet-table td {
+        font-size: 13px;
+    }
+
+    .wallet-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .wallet-table small,
+    .wallet-empty {
+        color: rgba(255, 255, 255, .72);
+    }
+
+    .wallet-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 18px;
+        color: rgba(255, 255, 255, .8);
+        font-size: 13px;
+    }
+
+    .wallet-pagination a {
+        color: #fff;
+        font-weight: 650;
+        text-decoration: none;
+    }
+
+    .wallet-pagination a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+        .wallet-page {
+            width: 94%;
+            margin: 24px auto 40px;
+        }
+
+        .wallet-card {
+            padding: 20px 16px;
+        }
+
+        .wallet-heading {
+            font-size: 25px;
+        }
+    }
+</style>
+
+<main class="wallet-page">
+    <section class="wallet-card">
+        <h1 class="wallet-heading">My Wallet</h1>
+
+        <div class="wallet-balance">
+            <p class="wallet-balance-label">Available balance</p>
+            <strong class="wallet-balance-value">₹{{ wallet.balance|floatformat:2 }}</strong>
         </div>
-        {% if transactions.has_other_pages %}
-            <nav>
-                {% if transactions.has_previous %}<a href="?page={{ transactions.previous_page_number }}">Previous</a>{% endif %}
-                <span>Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
-                {% if transactions.has_next %}<a href="?page={{ transactions.next_page_number }}">Next</a>{% endif %}
-            </nav>
+
+        <h2 class="wallet-section-heading">Wallet activity</h2>
+        {% if transactions.object_list %}
+            <div class="wallet-table-wrap">
+                <table class="wallet-table">
+                    <thead>
+                        <tr><th>Date</th><th>Activity</th><th>Order</th><th>Amount</th><th>Balance</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for entry in transactions %}
+                        <tr>
+                            <td>{{ entry.created_at|date:"d M Y, H:i" }}</td>
+                            <td>{{ entry.get_transaction_type_display }}{% if entry.description %}<br><small>{{ entry.description }}</small>{% endif %}</td>
+                            <td>{% if entry.order_id %}#{{ entry.order_id }}{% else %}—{% endif %}</td>
+                            <td>{% if entry.transaction_type == "PURCHASE" %}−{% else %}+{% endif %}₹{{ entry.amount|floatformat:2 }}</td>
+                            <td>₹{{ entry.balance_after|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if transactions.has_other_pages %}
+                <nav class="wallet-pagination" aria-label="Wallet activity pages">
+                    {% if transactions.has_previous %}<a href="?page={{ transactions.previous_page_number }}">Previous</a>{% endif %}
+                    <span>Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span>
+                    {% if transactions.has_next %}<a href="?page={{ transactions.next_page_number }}">Next</a>{% endif %}
+                </nav>
+            {% endif %}
+        {% else %}
+            <p class="wallet-empty">No wallet activity yet.</p>
         {% endif %}
-    {% else %}
-        <p>No wallet activity yet.</p>
-    {% endif %}
+    </section>
 </main>
 {% endblock %}
