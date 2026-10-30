@@ -568,19 +568,19 @@
                                          BASE PRODUCT
                                     ====================== -->
 
-                                    {% if item.product.color %}
+                                    {% if item.variant.color %}
 
                                         <span>
-                                            Color: {{ item.product.color }}
+                                            Color: {{ item.variant.color }}
                                         </span>
 
                                     {% endif %}
 
 
-                                    {% if item.product.size %}
+                                    {% if item.variant.size %}
 
                                         <span>
-                                            Size: {{ item.product.size }}
+                                            Size: {{ item.variant.size }}
                                         </span>
 
                                     {% endif %}
@@ -677,35 +677,7 @@
 
             <div class="form-actions">
 
-                <!-- =============================================
-                     BACK TO ORDER
-
-                     view_order() accepts POST, so don't use
-                     a normal <a href>.
-                ============================================== -->
-
-                <form
-                    method="POST"
-                    action="{% url 'orders:view_order' %}"
-                    style="display: inline;"
-                >
-
-                    {% csrf_token %}
-
-                    <input
-                        type="hidden"
-                        name="order_id"
-                        value="{{ order.id }}"
-                    >
-
-                    <button
-                        type="submit"
-                        class="back-btn"
-                    >
-                        Back to Order
-                    </button>
-
-                </form>
+                <a href="{% url 'orders:view_order_detail' order.id %}" class="back-btn">Back to Order</a>
 
 
                 <!-- =============================================
@@ -729,28 +701,7 @@
 <script>
 
 function goBackToOrder() {
-
-    const form = document.createElement("form");
-
-    form.method = "POST";
-    form.action = "{% url 'orders:view_order' %}";
-
-    const csrf = document.createElement("input");
-    csrf.type = "hidden";
-    csrf.name = "csrfmiddlewaretoken";
-    csrf.value = "{{ csrf_token }}";
-
-    const orderId = document.createElement("input");
-    orderId.type = "hidden";
-    orderId.name = "order_id";
-    orderId.value = "{{ order.id }}";
-
-    form.appendChild(csrf);
-    form.appendChild(orderId);
-
-    document.body.appendChild(form);
-
-    form.submit();
+    window.location.href = "{% url 'orders:view_order_detail' order.id %}";
 }
 
 </script>

@@ -1365,25 +1365,7 @@
 
     <!-- BACK TO ORDERS -->
 
-   <form
-    method="POST"
-    action="{% url 'orders:view_order' %}"
->
-    {% csrf_token %}
-
-    <input
-        type="hidden"
-        name="order_id"
-        value="{{ order.id }}"
-    >
-
-    <button
-        type="submit"
-        class="back-btn"
-    >
-        Back to Order
-    </button>
-</form>
+   <a href="{% url 'orders:view_order_detail' order.id %}" class="back-btn">Back to Order</a>
 
 
     <div style="

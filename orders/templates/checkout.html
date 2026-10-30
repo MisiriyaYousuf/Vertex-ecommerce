@@ -1749,10 +1749,10 @@ Checkout
 
                                             {% else %}
 
-                                                {% if item.product.main_image %}
+                                                {% if item.product.primary_image %}
 
                                                     <img
-                                                        src="{{ item.product.main_image.image.url }}"
+                                                        src="{{ item.product.primary_image.image.url }}"
                                                         alt="{{ item.product.name }}"
                                                     >
 

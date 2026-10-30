@@ -1,53 +1,21 @@
-{% load static %}
+{% extends "user_base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Secure Payment | Vertex{% endblock %}
 
-<head>
+{% block extra_css %}
+<style>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Secure Payment | Vertex
-    </title>
-
-    <style>
-
-        * {
+        .payment-page,
+        .payment-page * {
             box-sizing: border-box;
         }
 
-        body {
-
-            margin: 0;
-
-            min-height: 100vh;
-
+        .payment-page {
+            min-height: 62vh;
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #160d2d,
-                    #241044,
-                    #10091f
-                );
-
-            color: #ffffff;
+            padding: 35px 0;
         }
 
 
@@ -76,13 +44,14 @@
         }
 
 
-        h1 {
+        .payment-container h1 {
 
             margin-bottom: 12px;
+            color: #ffffff;
         }
 
 
-        p {
+        .payment-container p {
 
             color: #d6d0e5;
 
@@ -202,7 +171,7 @@
         }
 
 
-        .small {
+        .payment-container .small {
 
             font-size: 13px;
 
@@ -210,11 +179,11 @@
         }
 
     </style>
+{% endblock %}
 
-</head>
+{% block content %}
 
-
-<body>
+<div class="payment-page">
 
 
 <div class="payment-container">
@@ -257,6 +226,8 @@
     <p class="secure-text">
         🔒 Secured by Razorpay
     </p>
+
+</div>
 
 </div>
 
@@ -1015,6 +986,4 @@ retryButton.addEventListener(
 </script>
 
 
-</body>
-
-</html>
+{% endblock %}
