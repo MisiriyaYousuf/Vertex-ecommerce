@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
@@ -39,6 +39,7 @@ from django.urls import reverse
 from orders.models import Coupon,CouponUsage
 from wallet.models import CancellationRequest, ReturnRequest, Wallet
 from wallet.forms import ReturnRequestForm
+from wallet.services import approve_cancellation_request, approve_return_request
 from wallet.services import debit_wallet_for_order, get_wallet
 from offers.services import get_effective_price
 from offers.models import ReferralReward
@@ -292,7 +293,6 @@ def checkout(request):
         .select_related(
             "product",
             "product__category",
-            "product__main_image",
             "variant",
         )
         .prefetch_related(
@@ -393,7 +393,7 @@ def checkout(request):
 
         else:
 
-            available_quantity = product.quantity
+            available_quantity = 0
 
         if available_quantity <= 0:
 
@@ -724,6 +724,9 @@ def order_detail(request, order_id=None):
 
     if order_id:
 
+        if request.method != "GET":
+            return HttpResponseNotAllowed(["GET"])
+
         order = (
             Order.objects
             .filter(
@@ -732,7 +735,6 @@ def order_detail(request, order_id=None):
             )
             .prefetch_related(
                 "items__product__images",
-                "items__product__main_image",
                 "items__variant__images",
             )
             .select_related(
@@ -742,15 +744,7 @@ def order_detail(request, order_id=None):
         )
 
         if not order:
-
-            messages.error(
-                request,
-                "Order not found."
-            )
-
-            return redirect(
-                "orders:order_list"
-            )
+            raise Http404("Order not found.")
 
         for item in order.items.all():
 
@@ -806,10 +800,10 @@ def order_detail(request, order_id=None):
 
                 item.display_images = product_images
 
-            elif product and product.main_image:
+            elif product and product.primary_image:
 
                 item.display_images = [
-                    product.main_image
+                    product.primary_image
                 ]
 
             else:
@@ -874,7 +868,6 @@ def order_detail(request, order_id=None):
                 .select_related(
                     "product",
                     "product__category",
-                    "product__main_image",
                     "variant",
                 )
                 .first()
@@ -1004,7 +997,7 @@ def order_detail(request, order_id=None):
 
             else:
 
-                available_quantity = product.quantity
+                available_quantity = 0
 
             if action == "increase":
 
@@ -1094,7 +1087,6 @@ def order_detail(request, order_id=None):
         .select_related(
             "product",
             "product__category",
-            "product__main_image",
             "variant",
         )
         .prefetch_related(
@@ -1215,7 +1207,7 @@ def order_detail(request, order_id=None):
 
         else:
 
-            available_quantity = product.quantity
+            available_quantity = 0
 
         if available_quantity <= 0:
 
@@ -1406,10 +1398,10 @@ def order_detail(request, order_id=None):
 
             thumbnails = product_images
 
-        elif product.main_image:
+        elif product.primary_image:
 
             thumbnails = [
-                product.main_image
+                product.primary_image
             ]
 
         else:
@@ -1425,13 +1417,13 @@ def order_detail(request, order_id=None):
         original_price = (
             variant.sale_price
             if variant
-            else product.sale_price
+            else 0
         )
 
         available_quantity = (
             variant.quantity
             if variant
-            else product.quantity
+            else 0
         )
 
         variant_label = get_purchase_label(
@@ -1899,9 +1891,7 @@ def place_cod_order(request):
                     "cart:cart"
                 )
 
-            available_quantity = (
-                product.quantity
-            )
+            available_quantity = 0
 
         if available_quantity <= 0:
 
@@ -2142,27 +2132,7 @@ def place_cod_order(request):
             )
 
         else:
-
-            if (
-                product.quantity
-                < cart_item.quantity
-            ):
-
-                raise ValueError(
-                    f"Insufficient stock for "
-                    f"{product.name}"
-                )
-
-            product.quantity -= (
-                cart_item.quantity
-            )
-
-            product.save(
-                update_fields=[
-                    "quantity",
-                    "updated_at",
-                ]
-            )
+            raise ValueError(f"{product.name} has no selected variant.")
 
     if coupon:
         CouponUsage.objects.create(
@@ -2415,8 +2385,10 @@ def razorpay_create(request):
             available_quantity = variant.quantity
 
         else:
-
-            available_quantity = product.quantity
+            return JsonResponse(
+                {"success": False, "message": "Choose a product variant first."},
+                status=400,
+            )
 
         if available_quantity < quantity:
 
@@ -3147,42 +3119,7 @@ def finalize_paid_order(
             )
 
         else:
-
-            locked_product = (
-                Product.objects
-                .select_for_update()
-                .get(id=product.id)
-            )
-
-            if (
-                not locked_product.is_active
-                or locked_product.is_deleted
-            ):
-
-                raise ValueError(
-                    f"{product.name} "
-                    "is no longer available."
-                )
-
-            if locked_product.quantity < (
-                item.quantity
-            ):
-
-                raise ValueError(
-                    f"Insufficient stock for "
-                    f"{product.name}."
-                )
-
-            locked_product.quantity -= (
-                item.quantity
-            )
-
-            locked_product.save(
-                update_fields=[
-                    "quantity",
-                    "updated_at",
-                ]
-            )
+            raise ValueError(f"{product.name} has no selected variant.")
 
         item.status = "Processing"
 
@@ -3822,10 +3759,10 @@ def order_list(request):
 
             if not display_image:
 
-                if item.product.main_image:
+                if item.product.primary_image:
 
                     display_image = (
-                        item.product.main_image
+                        item.product.primary_image
                     )
 
                 else:
@@ -3870,28 +3807,14 @@ def order_list(request):
 # ============================================================
 @login_required
 @never_cache
-def view_order(request):
+def view_order(request, order_id=None):
 
-    if request.method != "POST":
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
 
-        return redirect(
-            "orders:order_list"
-        )
-
-    order_id = request.POST.get(
-        "order_id"
-    )
-
+    order_id = order_id or request.session.get("last_order_id")
     if not order_id:
-
-        messages.error(
-            request,
-            "Order not found."
-        )
-
-        return redirect(
-            "orders:order_list"
-        )
+        raise Http404("Order not found.")
 
     order = (
         Order.objects
@@ -3910,15 +3833,7 @@ def view_order(request):
     )
 
     if not order:
-
-        messages.error(
-            request,
-            "Order not found."
-        )
-
-        return redirect(
-            "orders:order_list"
-        )
+        raise Http404("Order not found.")
 
     for item in order.items.all():
 
@@ -3964,10 +3879,10 @@ def view_order(request):
                     variant_images[0]
                 )
 
-            elif item.product.main_image:
+            elif item.product.primary_image:
 
                 item.main_display_image = (
-                    item.product.main_image
+                    item.product.primary_image
                 )
 
             else:
@@ -4016,10 +3931,10 @@ def view_order(request):
                 product_images
             )
 
-            if item.product.main_image:
+            if item.product.primary_image:
 
                 item.main_display_image = (
-                    item.product.main_image
+                    item.product.primary_image
                 )
 
             elif product_images:
@@ -4032,13 +3947,8 @@ def view_order(request):
 
                 item.main_display_image = None
 
-            item.display_size = (
-                item.product.size
-            )
-
-            item.display_color = (
-                item.product.color
-            )
+            item.display_size = item.variant.size if item.variant else ""
+            item.display_color = item.variant.color if item.variant else ""
 
         item.original_price = (
             item.price + item.discount
@@ -4047,7 +3957,6 @@ def view_order(request):
     cancellable_items = order.items.filter(
         status__in=[
             "Pending",
-            "Processing",
             "Shipped",
             "Out for Delivery",
         ]
@@ -4117,7 +4026,7 @@ def cancel_order(request):
         return redirect("orders:order_list")
 
     cancellable_items = order.items.filter(
-        status__in=["Pending", "Processing", "Shipped", "Out for Delivery"]
+        status__in=["Pending", "Shipped", "Out for Delivery"]
     ).exclude(cancellation_request__status=CancellationRequest.PENDING)
 
     cancel_complete_order = request.POST.get("cancel_complete_order") == "yes"
@@ -4167,7 +4076,7 @@ def cancel_order(request):
             .filter(
                 order=locked_order,
                 id__in=selected_items,
-                status__in=["Pending", "Processing", "Shipped", "Out for Delivery"],
+                status__in=["Pending", "Shipped", "Out for Delivery"],
             )
             .exclude(cancellation_request__status=CancellationRequest.PENDING)
         )
@@ -4195,20 +4104,21 @@ def cancel_order(request):
                 )
             elif not created:
                 continue
-            requested_any = True
+            approved, _message = approve_cancellation_request(
+                cancellation_request.pk,
+                admin_user=None,
+            )
+            requested_any = requested_any or approved
 
     if not requested_any:
         messages.error(
             request,
-            "No eligible items were selected. Delivered items cannot be cancelled.",
+            "No eligible items were selected. Only pending, shipped, or out-for-delivery items can be cancelled.",
         )
         return redirect("orders:order_list")
 
     request.session["last_cancelled_order_id"] = order.id
-    messages.success(
-        request,
-        "Cancellation request submitted. Your wallet refund will be processed after admin approval.",
-    )
+    messages.success(request, "The selected items were cancelled. Any eligible refund was credited to your wallet.")
     return redirect("orders:cancellation_success")
 
 @login_required
@@ -4344,7 +4254,6 @@ def return_order(request):
             .exclude(return_request__status=ReturnRequest.PENDING)
           .select_related(
              "product",
-             "product__main_image",
              "variant", ) 
              .prefetch_related(
                  "product__images",
@@ -4402,10 +4311,10 @@ def return_order(request):
                     item.product.images.all()
                 )
 
-                if item.product.main_image:
+                if item.product.primary_image:
 
                     item.main_display_image = (
-                        item.product.main_image
+                        item.product.primary_image
                     )
 
                 elif product_images:
@@ -4424,10 +4333,10 @@ def return_order(request):
 
             item.display_images = product_images
 
-            if item.product.main_image:
+            if item.product.primary_image:
 
                 item.main_display_image = (
-                    item.product.main_image
+                    item.product.primary_image
                 )
 
             elif product_images:
@@ -4498,7 +4407,11 @@ def return_order(request):
             ])
         elif not created:
             continue
-        requested_any = True
+        approved, _message = approve_return_request(
+            return_request.pk,
+            admin_user=None,
+        )
+        requested_any = requested_any or approved
 
     if not requested_any:
 
@@ -4522,7 +4435,7 @@ def return_order(request):
 
     messages.success(
         request,
-        "Return request submitted. The refund will be added to your wallet after admin approval."
+        "The selected return was processed. Any eligible refund was credited to your wallet."
     )
 
     return redirect(

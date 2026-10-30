@@ -785,14 +785,9 @@
 
                     <div class="order-actions">
 
-                       <form method="POST" action="{% url 'orders:view_order' %}" style="margin:0;">
-                            {% csrf_token %}
-                            <input type="hidden" name="order_id" value="{{ order.id }}">
-
-                            <button type="submit" class="order-btn">
-                                View Order
-                            </button>
-                        </form>
+                       <a href="{% url 'orders:view_order_detail' order.id %}" class="order-btn">
+                            View Order
+                        </a>
                         <a
                             href="{% url 'products:products' %}"
                             class="order-btn"
