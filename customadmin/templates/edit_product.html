@@ -228,6 +228,16 @@ input:focus {
 .image-slot .delete-image-btn { opacity: 1; width: 26px; height: 26px; font-size: 11px; }
 .image-slot input[type="file"] { width: 100%; font-size: 10px; }
 .image-slot .slot-preview { margin-top: 8px; }
+.variant-image-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.variant-image-card { min-width: 0; padding: 11px; border: 1px solid #e5eaf0; border-radius: 9px; background: #fafbfd; }
+.variant-image-card .image-slot-label { display: block; margin-bottom: 7px; color: #4b5967; font-size: 10px; font-weight: 700; }
+.variant-image-card .variant-slot-input { width: 100%; padding: 6px; border: 1px solid #dce2e8; border-radius: 7px; background: #fff; font-size: 9px; }
+.variant-image-card .image-card { width: 100%; height: 125px; margin-bottom: 9px; }
+.variant-image-card .image-card img,
+.variant-image-card .preview-image img { width: 100%; height: 100%; object-fit: contain !important; object-position: center; padding: 7px; box-sizing: border-box; }
+.variant-image-card .preview-image { width: 100%; height: 125px; box-sizing: border-box; background: #fff; }
+.variant-image-card .delete-image-btn { opacity: 1; width: 26px; height: 26px; font-size: 11px; }
+.variant-image-card .slot-preview { margin-top: 8px; }
 .product-image-upload-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; }
 .product-image-preview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-top: 18px; }
 .product-image-preview-slot { position: relative; min-width: 0; min-height: 145px; }
@@ -239,7 +249,7 @@ input:focus {
 .product-image-preview-slot .image-preview-empty { height: 145px; display: flex; align-items: center; justify-content: center; border: 1px dashed #d3dbe3; border-radius: 10px; background: #fafbfd; color: #9aa5b0; font-size: 10px; text-align: center; }
 .product-image-preview-slot .delete-image-btn { opacity: 1; width: 26px; height: 26px; font-size: 11px; }
 @media (max-width: 768px) { .product-image-upload-grid, .product-image-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 768px) { .image-slot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 768px) { .image-slot-grid, .variant-image-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 .image-card {
     position: relative;
@@ -1043,7 +1053,7 @@ body.crop-modal-open {
                     </div>
 
 
-                    <div class="image-info-box"><strong>Image structure:</strong> Each image stays in its labeled position. Choose a new image to replace the current one; crop or delete existing images below.</div>
+                    <div class="image-info-box"><strong>Image structure:</strong> The base product uses only its Main image. Variant images are managed in each variant below.</div>
                     <div class="product-image-upload-grid">
                         {% for slot in product_image_slots %}
                             <div class="image-upload-card">
@@ -1320,9 +1330,9 @@ body.crop-modal-open {
                                     </div>
 
 
-                                    <div class="image-slot-grid variant-image-slots">
+                                    <div class="image-slot-grid variant-image-grid variant-image-slots">
                                         {% for slot in variant.image_slots %}
-                                            <div class="image-slot" data-image-type="{{ slot.type }}">
+                                            <div class="image-slot variant-image-card" data-image-type="{{ slot.type }}">
                                                 <label class="image-slot-label">{{ slot.label }} image</label>
                                                 {% if slot.image %}
                                                     <div class="image-card existing-variant-image" data-image-id="{{ slot.image.id }}">
@@ -1571,14 +1581,14 @@ body.crop-modal-open {
         <div class="variant-upload-area">
 
             <label class="modern-label">
-                Variant Images <span>*</span>
+                Variant Images: Front, Main, Side and Back are required <span>*</span>
             </label>
 
-            <div class="image-slot-grid variant-image-slots">
-                <div class="image-slot"><label class="image-slot-label">Main image</label><input type="file" class="form-control variant-slot-input" data-image-type="main" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
-                <div class="image-slot"><label class="image-slot-label">Front image</label><input type="file" class="form-control variant-slot-input" data-image-type="front" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
-                <div class="image-slot"><label class="image-slot-label">Side image</label><input type="file" class="form-control variant-slot-input" data-image-type="side" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
-                <div class="image-slot"><label class="image-slot-label">Back image</label><input type="file" class="form-control variant-slot-input" data-image-type="back" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+            <div class="image-slot-grid variant-image-grid variant-image-slots">
+                <div class="image-slot variant-image-card"><label class="image-slot-label">Front image *</label><input type="file" class="form-control variant-slot-input" data-image-type="front" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+                <div class="image-slot variant-image-card"><label class="image-slot-label">Main image *</label><input type="file" class="form-control variant-slot-input" data-image-type="main" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+                <div class="image-slot variant-image-card"><label class="image-slot-label">Side image *</label><input type="file" class="form-control variant-slot-input" data-image-type="side" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
+                <div class="image-slot variant-image-card"><label class="image-slot-label">Back image *</label><input type="file" class="form-control variant-slot-input" data-image-type="back" accept="image/jpeg,image/png,image/webp"><div class="slot-preview"></div></div>
             </div>
 
         </div>

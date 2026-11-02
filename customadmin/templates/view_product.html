@@ -1233,27 +1233,14 @@
                             <div class="stock-box">
 
                                 <div class="stock-box-label">
-                                    Stock across variants
-                                </div>
-
-                                <div class="stock-box-value">
-                                    {{ total_variant_stock|default:"0" }}
-                                </div>
-
-                            </div>
-
-
-                            <div class="stock-box">
-
-                                <div class="stock-box-label">
-                                    Variant Stock
+                                     Variant Stock
                                 </div>
 
                                 <div
                                     class="stock-box-value"
-                                    id="totalVariantStock"
+                                    id="selectedVariantStock"
                                 >
-                                    {{ total_variant_stock|default:"0" }}
+                                    Select a variant
                                 </div>
 
                             </div>
@@ -1361,19 +1348,6 @@
 
                                     Managed on each variant
 
-                                </div>
-
-                            </div>
-
-
-                            <div class="meta-item">
-
-                                <div class="meta-label">
-                                    Product Stock
-                                </div>
-
-                                <div class="meta-value">
-                                    {{ total_variant_stock|default:"0" }}
                                 </div>
 
                             </div>
@@ -1673,22 +1647,6 @@
                         <div class="selected-variant-item">
 
                             <div class="selected-variant-label">
-                                Stock
-                            </div>
-
-                            <div
-                                class="selected-variant-value"
-                                id="selectedVariantStock"
-                            >
-                                —
-                            </div>
-
-                        </div>
-
-
-                        <div class="selected-variant-item">
-
-                            <div class="selected-variant-label">
                                 Status
                             </div>
 
@@ -1845,9 +1803,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const zoomLevel =
         document.getElementById("zoomLevel");
-
-    const totalVariantStock =
-        document.getElementById("totalVariantStock");
 
     const selectedVariantPanel =
         document.getElementById("selectedVariantPanel");
@@ -2425,11 +2380,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (selectedVariantDiscountPrice) {
 
+            const hasVariantDiscount =
+                Number(item.discountPrice) > 0 &&
+                Number(item.discountPrice) < Number(item.salePrice);
+
             selectedVariantDiscountPrice.textContent =
-                item.discountPrice
-                    ? formatPrice(
-                        item.discountPrice
-                    )
+                hasVariantDiscount
+                    ? formatPrice(item.discountPrice)
                     : "—";
 
         }
@@ -2554,33 +2511,6 @@ document.addEventListener("DOMContentLoaded", function () {
             variant.name ||
             `Variant ${index + 1}`
         );
-
-    }
-
-
-    /* =====================================================
-       TOTAL VARIANT STOCK
-       ===================================================== */
-
-    let totalStock = 0;
-
-
-    variants.forEach(
-        function (variant) {
-
-            totalStock +=
-                Number(
-                    variant.stock || 0
-                );
-
-        }
-    );
-
-
-    if (totalVariantStock) {
-
-        totalVariantStock.textContent =
-            totalStock;
 
     }
 

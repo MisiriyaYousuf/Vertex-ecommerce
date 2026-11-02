@@ -948,8 +948,11 @@
                             <h3 class="product-name">{{ product.name }}</h3>
                             <div class="product-price-row">
                                 {% if product.display_variant %}
-                                    {% if product.display_variant.discount_price %}<span class="product-price">₹{{ product.display_variant.discount_price }}</span><span class="product-original-price">₹{{ product.display_variant.sale_price }}</span>
-                                    {% else %}<span class="product-price">₹{{ product.display_variant.sale_price }}</span>{% endif %}
+                                    {% if product.display_pricing and product.display_pricing.has_discount %}
+                                        <span class="product-price">₹{{ product.display_pricing.unit_price }}</span><span class="product-original-price">₹{{ product.display_pricing.original_price }}</span>
+                                    {% else %}
+                                        <span class="product-price">₹{{ product.display_pricing.unit_price|default:product.display_variant.sale_price }}</span>
+                                    {% endif %}
                                     {% if product.display_pricing and product.display_pricing.has_offer %}<span class="discount-label">OFFER</span>{% endif %}
                                 {% else %}<span class="product-price text-muted">Price unavailable</span>{% endif %}
                             </div>

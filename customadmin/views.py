@@ -481,9 +481,6 @@ def add_product(request):
 
         product_image_fields = {
             "main": "product_image_main",
-            "front": "product_image_front",
-            "side": "product_image_side",
-            "back": "product_image_back",
         }
 
         product_images = []
@@ -512,11 +509,6 @@ def add_product(request):
         if not request.FILES.get("product_image_main"):
             custom_errors.append(
                 "Main product image is required."
-            )
-
-        if len(product_images) < 3:
-            custom_errors.append(
-                "Please upload at least 3 product images."
             )
 
         variant_indexes = request.POST.getlist(
@@ -578,8 +570,8 @@ def add_product(request):
             )
 
             variant_image_fields = {
-                "main": f"variant_image_main_{index}",
                 "front": f"variant_image_front_{index}",
+                "main": f"variant_image_main_{index}",
                 "side": f"variant_image_side_{index}",
                 "back": f"variant_image_back_{index}",
             }
@@ -609,9 +601,9 @@ def add_product(request):
                             f"{image.name} must be JPG, PNG or WEBP."
                         )
 
-            if len(variant_images) < 1:
+            if len(variant_images) < 4:
                 custom_errors.append(
-                    f"Variant {position} must have at least one image."
+                    f"Variant {position} must include Front, Main, Side and Back images."
                 )
 
             variant_data = {
@@ -889,7 +881,7 @@ def view_product(request, product_id):
 
     context = {
         "product": product,
-        "product_images": product.images.all(),
+        "product_images": product.images.filter(image_type="main"),
         "variants": variants,
         "total_variant_stock": total_variant_stock,
         "display_variant": display_variant,
@@ -909,7 +901,8 @@ def edit_product(request):
     if not request.user.is_superuser:
         return redirect("users:home")
 
-    image_types = [("main", "Main"), ("front", "Front"), ("side", "Side"), ("back", "Back")]
+    image_types = [("main", "Main")]
+    variant_image_types = [("front", "Front"), ("main", "Main"), ("side", "Side"), ("back", "Back")]
 
     def edit_context(form):
         variants = list(product.variants.prefetch_related("images").all())
@@ -917,7 +910,7 @@ def edit_product(request):
             images_by_type = {image.image_type: image for image in variant.images.all()}
             variant.image_slots = [
                 {"type": image_type, "label": label, "image": images_by_type.get(image_type)}
-                for image_type, label in image_types
+                for image_type, label in variant_image_types
             ]
         product_images = {image.image_type: image for image in product.images.all()}
         return {
@@ -1009,6 +1002,7 @@ def edit_product(request):
     }
 
     image_type_names = [image_type for image_type, _label in image_types]
+    variant_image_type_names = [image_type for image_type, _label in variant_image_types]
 
     
 
@@ -1165,7 +1159,7 @@ def edit_product(request):
                     if existing_id else f"variant_image_{index}_{image_type}"
                 ),
             }
-            for image_type in image_type_names
+            for image_type in variant_image_type_names
             if request.FILES.get(
                 f"variant_image_existing_{existing_id}_{image_type}"
                 if existing_id else f"variant_image_{index}_{image_type}"
@@ -1278,8 +1272,14 @@ def edit_product(request):
 
             existing_variant_image_types = set()
 
-        if not (existing_variant_image_types | {image["image_type"] for image in variant_images}):
-            custom_errors.append(f"Variant {position} must have at least one image.")
+        available_variant_image_types = existing_variant_image_types | {
+            image["image_type"] for image in variant_images
+        }
+        missing_variant_image_types = set(variant_image_type_names) - available_variant_image_types
+        if missing_variant_image_types:
+            custom_errors.append(
+                f"Variant {position} must include Front, Main, Side and Back images."
+            )
 
         # -----------------------------------------------------
         # IMAGE VALIDATION
@@ -1565,7 +1565,7 @@ def edit_product(request):
                     ProductVariantImage.objects.update_or_create(
                         variant=variant,
                         image_type=image_type,
-                        defaults={"image": image_data["image"], "position": image_type_names.index(image_type)},
+                        defaults={"image": image_data["image"], "position": variant_image_type_names.index(image_type)},
                     )
 
             # =================================================

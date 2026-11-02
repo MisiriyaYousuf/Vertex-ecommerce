@@ -1568,10 +1568,7 @@
                                 Product Images
                             </h5>
 
-                            <p>
-                                Upload one image for each required
-                                product image position.
-                            </p>
+                            <p>Upload the main image used in the product list.</p>
 
                         </div>
 
@@ -1582,9 +1579,7 @@
 
                         <strong>Image structure:</strong>
 
-                        Main image is used as the primary product
-                        image. Front, Side and Back images are
-                        additional product gallery images.
+                        Only the Main image is needed for the base product. Upload Front, Main, Side and Back images for each variant below.
 
                         Each image can be cropped before saving.
 
@@ -1621,99 +1616,6 @@
 
                             <p class="image-upload-help">
                                 Primary product image.
-                            </p>
-
-                        </div>
-
-
-                        <!-- FRONT -->
-
-                        <div class="image-upload-card">
-
-                            <div class="image-type-label">
-
-                                <strong>
-                                    Front Image
-                                </strong>
-
-                                <span>
-                                    *
-                                </span>
-
-                            </div>
-
-                            <input
-                                type="file"
-                                id="productImageFront"
-                                name="product_image_front"
-                                class="image-upload-input product-image-input"
-                                accept="image/jpeg,image/png,image/webp"
-                            >
-
-                            <p class="image-upload-help">
-                                Front view of the product.
-                            </p>
-
-                        </div>
-
-
-                        <!-- SIDE -->
-
-                        <div class="image-upload-card">
-
-                            <div class="image-type-label">
-
-                                <strong>
-                                    Side Image
-                                </strong>
-
-                                <span>
-                                    *
-                                </span>
-
-                            </div>
-
-                            <input
-                                type="file"
-                                id="productImageSide"
-                                name="product_image_side"
-                                class="image-upload-input product-image-input"
-                                accept="image/jpeg,image/png,image/webp"
-                            >
-
-                            <p class="image-upload-help">
-                                Side view of the product.
-                            </p>
-
-                        </div>
-
-
-                        <!-- BACK -->
-
-                        <div class="image-upload-card">
-
-                            <div class="image-type-label">
-
-                                <strong>
-                                    Back Image
-                                </strong>
-
-                                <span>
-                                    *
-                                </span>
-
-                            </div>
-
-                            <input
-                                type="file"
-                                id="productImageBack"
-                                name="product_image_back"
-                                class="image-upload-input product-image-input"
-                                accept="image/jpeg,image/png,image/webp"
-                            >
-
-                            <p class="image-upload-help">
-                                Back view of the product.
                             </p>
 
                         </div>
@@ -1948,7 +1850,7 @@
                         type="text"
                         name="variant_size"
                         class="form-control variant-size"
-                        placeholder="Example: Medium"
+                        placeholder="Example: 42 mm"
                         maxlength="100"
                         required
                     >
@@ -2034,7 +1936,7 @@
 
             <div class="variant-image-heading">
 
-                Variant Images (upload at least one)
+                Variant Images (Front, Main, Side and Back required)
 
                 <span>*</span>
 
@@ -2273,12 +2175,8 @@ document.addEventListener("DOMContentLoaded", function () {
        PRODUCT IMAGE TYPES
     ========================================================= */
 
-    const productImageTypes = [
-        "main",
-        "front",
-        "side",
-        "back"
-    ];
+    const productImageTypes = ["main"];
+    const variantImageTypes = ["front", "main", "side", "back"];
 
 
     /* =========================================================
@@ -2292,21 +2190,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 "productImageMain"
             ),
 
-        front:
-            document.getElementById(
-                "productImageFront"
-            ),
-
-        side:
-            document.getElementById(
-                "productImageSide"
-            ),
-
-        back:
-            document.getElementById(
-                "productImageBack"
-            )
-
     };
 
 
@@ -2318,10 +2201,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const productImageFiles = {
 
-        main: null,
-        front: null,
-        side: null,
-        back: null
+        main: null
 
     };
 
@@ -2996,6 +2876,14 @@ function renderProductImages() {
                     ".variant-card"
                 );
 
+            const variantImageGrid = card.querySelector(".variant-image-grid");
+            ["front", "main", "side", "back"].forEach(type => {
+                const imageInput = variantImageGrid.querySelector(
+                    '.variant-image-input[data-image-type="' + type + '"]'
+                );
+                if (imageInput) variantImageGrid.appendChild(imageInput.closest(".variant-image-card"));
+            });
+
 
             const index =
                 variantCounter;
@@ -3218,7 +3106,7 @@ function renderProductImages() {
             card._variantImages;
 
 
-        productImageTypes.forEach(
+        variantImageTypes.forEach(
             function (type) {
 
                 const file =
@@ -3603,26 +3491,12 @@ function renderProductImages() {
                CHECK PRODUCT IMAGES
             ----------------------------------------- */
 
-            /* UPDATED: match add_product view validation:
-               main image is required and at least 3 product images are required. */
+            /* The main product image is required. */
             if (!productImageFiles.main) {
                 event.preventDefault();
                 alert("Please upload the main product image.");
                 return;
             }
-
-            const uploadedProductImageCount = productImageTypes.filter(
-                function (type) {
-                    return Boolean(productImageFiles[type]);
-                }
-            ).length;
-
-            if (uploadedProductImageCount < 3) {
-                event.preventDefault();
-                alert("Please upload at least 3 product images, including the main image.");
-                return;
-            }
-
 
             /* -----------------------------------------
                COPY CROPPED PRODUCT FILES
@@ -3689,21 +3563,19 @@ function renderProductImages() {
                 }
 
 
-                /* UPDATED: the backend requires at least one image per variant,
-                   not all four image positions. */
-                const uploadedVariantImageCount = productImageTypes.filter(
+                const uploadedVariantImageCount = variantImageTypes.filter(
                     function (type) {
                         return Boolean(variantImages[type]);
                     }
                 ).length;
 
-                if (uploadedVariantImageCount < 1) {
+                if (uploadedVariantImageCount < 4) {
                     event.preventDefault();
-                    alert("Please upload at least one image for every variant.");
+                    alert("Please upload Front, Main, Side and Back images for every variant.");
                     return;
                 }
 
-                for (const type of productImageTypes) {
+                for (const type of variantImageTypes) {
                     if (!variantImages[type]) {
                         continue;
                     }

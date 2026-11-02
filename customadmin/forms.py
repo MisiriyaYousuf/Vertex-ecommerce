@@ -432,11 +432,11 @@ class ProductVariantForm(forms.ModelForm):
         if (
             sale_price is not None
             and discount_price is not None
-            and discount_price >= sale_price
+            and discount_price > sale_price
         ):
             self.add_error(
                 "discount_price",
-                "Discount price must be less than the sale price."
+                "Discount price cannot be greater than the sale price."
             )
 
         return cleaned_data
