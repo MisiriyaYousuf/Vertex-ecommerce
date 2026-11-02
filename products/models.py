@@ -50,7 +50,7 @@ class Product(models.Model):
             images = list(self.images.all())
             self._primary_image_cache = next(
                 (image for image in images if image.image_type == "main"),
-                images[0] if images else None,
+                None,
             )
         return self._primary_image_cache
 
