@@ -1469,30 +1469,13 @@
 >
 
 {% if product.primary_image %}
-
 <img
     src="{{ product.primary_image.image.url }}"
     alt="{{ product.name }}"
     class="product-thumb active"
     onclick="changeProductImage(this)"
 >
-
 {% endif %}
-
-{% for image in product.images.all %}
-
-    {% if not product.primary_image or image.id != product.primary_image.id %}
-
-        <img
-            src="{{ image.image.url }}"
-            alt="{{ product.name }}"
-            class="product-thumb"
-            onclick="changeProductImage(this)"
-        >
-
-    {% endif %}
-
-{% endfor %}
 
 </div>
 
@@ -2440,27 +2423,11 @@ function getBaseGallery() {
     const images = [];
 
     {% if product.primary_image %}
-
     images.push({
         src: "{{ product.primary_image.image.url }}",
         alt: "{{ product.name|escapejs }}"
     });
-
     {% endif %}
-
-
-    {% for image in product.images.all %}
-
-    {% if not product.primary_image or image.id != product.primary_image.id %}
-
-    images.push({
-        src: "{{ image.image.url }}",
-        alt: "{{ product.name|escapejs }}"
-    });
-
-    {% endif %}
-
-    {% endfor %}
 
     return images;
 }
