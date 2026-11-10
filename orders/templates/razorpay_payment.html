@@ -868,61 +868,22 @@ async function openRazorpayCheckout() {
                 PAYMENT FAILED
                 ==================================================== */
 
-                razorpay.on(
-                    "payment.failed",
-                    function(response) {
+                
+                    
+                razorpay.on("payment.failed", function (response) {
 
-                        console.error(
-                            "========== RAZORPAY PAYMENT FAILED =========="
-                        );
+                    console.log("FULL RAZORPAY ERROR:");
+                    console.log(JSON.stringify(response, null, 2));
 
-                        console.error(
-                            "Full response:",
-                            response
-                        );
+                    console.log("Error Code:", response.error.code);
+                    console.log("Description:", response.error.description);
+                    console.log("Reason:", response.error.reason);
+                    console.log("Source:", response.error.source);
+                    console.log("Step:", response.error.step);
+                    console.log("Order ID:", response.error.metadata?.order_id);
+                    console.log("Payment ID:", response.error.metadata?.payment_id);
 
-                        console.error(
-                            "Error object:",
-                            response?.error
-                        );
-
-                        console.error(
-                            "Error code:",
-                            response?.error?.code
-                        );
-
-                        console.error(
-                            "Description:",
-                            response?.error?.description
-                        );
-
-                        console.error(
-                            "Source:",
-                            response?.error?.source
-                        );
-
-                        console.error(
-                            "Step:",
-                            response?.error?.step
-                        );
-
-                        console.error(
-                            "Reason:",
-                            response?.error?.reason
-                        );
-
-                        console.error(
-                            "Metadata:",
-                            response?.error?.metadata
-                        );
-
-                        console.error(
-                            "=============================================="
-                        );
-                        window.location.href =
-                            "{% url 'orders:order_failure' %}";
-                    }
-                );
+                });
 
         /* ====================================================
            OPEN CHECKOUT

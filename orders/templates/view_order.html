@@ -3,6 +3,211 @@
 {% block content %}
 
 <style>
+    
+    /* =====================================
+    VERTEX GLASSMORPHIC ORDER BUTTONS
+    ===================================== */
+
+    /* Common Glass Button Style */
+    .back-btn,
+    .order-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        padding: 12px 22px;
+
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+
+        color: #ffffff;
+        text-decoration: none;
+
+        background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.30),
+            rgba(109, 40, 217, 0.18)
+        );
+
+        border: 1px solid rgba(196, 181, 253, 0.35);
+        border-radius: 12px;
+
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+
+        box-shadow:
+            0 8px 25px rgba(109, 40, 217, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+        cursor: pointer;
+
+        transition: all 0.3s ease;
+    }
+
+    /* Common Hover */
+    .back-btn:hover,
+    .order-btn:hover {
+        transform: translateY(-3px);
+
+        border-color: rgba(216, 180, 254, 0.65);
+
+        box-shadow:
+            0 10px 30px rgba(139, 92, 246, 0.30),
+            0 0 15px rgba(168, 85, 247, 0.12);
+    }
+
+    /* Back to Order */
+    .back-btn:hover {
+        background: linear-gradient(
+            135deg,
+            rgba(168, 85, 247, 0.50),
+            rgba(124, 58, 237, 0.35)
+        );
+    }
+
+    /* Return Order */
+    .return-btn {
+        background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.35),
+            rgba(124, 58, 237, 0.20)
+        );
+    }
+
+    .return-btn:hover {
+        background: linear-gradient(
+            135deg,
+            rgba(168, 85, 247, 0.60),
+            rgba(124, 58, 237, 0.45)
+        );
+    }
+
+    /* Cancel Order */
+    .cancel-btn {
+        background: linear-gradient(
+            135deg,
+            rgba(239, 68, 68, 0.20),
+            rgba(185, 28, 28, 0.12)
+        );
+
+        border-color: rgba(248, 113, 113, 0.30);
+    }
+
+    .cancel-btn:hover {
+        background: linear-gradient(
+            135deg,
+            rgba(239, 68, 68, 0.40),
+            rgba(185, 28, 28, 0.30)
+        );
+
+        border-color: rgba(248, 113, 113, 0.60);
+
+        box-shadow:
+            0 10px 30px rgba(239, 68, 68, 0.20),
+            0 0 15px rgba(239, 68, 68, 0.10);
+    }
+
+    /* Click Effect */
+    .back-btn:active,
+    .order-btn:active {
+        transform: translateY(-1px) scale(0.98);
+    }
+
+    /* Focus Accessibility */
+    .back-btn:focus-visible,
+    .order-btn:focus-visible {
+        outline: 2px solid #c084fc;
+        outline-offset: 4px;
+    }
+
+    
+    /* ================================
+    VERTEX GLASSMORPHIC INVOICE BUTTON
+    ================================ */
+
+    .invoice-form {
+        display: inline-block;
+        margin-top: 15px;
+    }
+
+    .invoice-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+
+        padding: 13px 24px;
+
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+
+        background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.35),
+            rgba(109, 40, 217, 0.20)
+        );
+
+        border: 1px solid rgba(196, 181, 253, 0.35);
+        border-radius: 12px;
+
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+
+        box-shadow:
+            0 8px 25px rgba(109, 40, 217, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+        cursor: pointer;
+
+        transition: all 0.3s ease;
+    }
+
+    /* PDF Icon */
+    .invoice-btn i {
+        font-size: 17px;
+        color: #d8b4fe;
+        transition: all 0.3s ease;
+    }
+
+    /* Hover Effect */
+    .invoice-btn:hover {
+        background: linear-gradient(
+            135deg,
+            rgba(168, 85, 247, 0.55),
+            rgba(124, 58, 237, 0.4)
+        );
+
+        border-color: rgba(216, 180, 254, 0.65);
+
+        box-shadow:
+            0 10px 30px rgba(139, 92, 246, 0.35),
+            0 0 15px rgba(168, 85, 247, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+        transform: translateY(-3px);
+    }
+
+    /* Icon Hover */
+    .invoice-btn:hover i {
+        color: #ffffff;
+        transform: scale(1.15);
+    }
+
+    /* Click Effect */
+    .invoice-btn:active {
+        transform: translateY(-1px) scale(0.98);
+    }
+
+    /* Focus Accessibility */
+    .invoice-btn:focus-visible {
+        outline: 2px solid #c084fc;
+        outline-offset: 4px;
+    }
+
     .order-detail-page {
         max-width: 1150px;
         margin: 40px auto;
@@ -673,7 +878,30 @@
 
         <div>
             <h1>Order Details</h1>
-            <p>Order #{{ order.id }}</p>
+            
+        </div>
+        <div>
+            <form
+                method="POST"
+                action="{% url 'orders:download_invoice' %}"
+                class="invoice-form"
+            >
+                {% csrf_token %}
+
+                <input
+                    type="hidden"
+                    name="order_id"
+                    value="{{ order.id }}"
+                >
+
+                <button
+                    type="submit"
+                    class="view-orders-btn invoice-btn"
+                >
+                    <i class="fas fa-file-pdf"></i>
+                    Download Invoice
+                </button>
+            </form>
         </div>
 
     
@@ -696,7 +924,7 @@
                 </span>
 
                 <span class="summary-value">
-                    #{{ order.id }}
+                   {{ order.id }}
                 </span>
             </div>
 

@@ -21,6 +21,10 @@ from reportlab.platypus import (
     Table,
     TableStyle,
 )
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from django.conf import settings
+import os
 import uuid
 from cart.models import Cart
 from products.models import Product, ProductVariant
@@ -3219,48 +3223,42 @@ def order_success(request):
 @never_cache
 def order_failure(request):
 
-    order_id = request.session.get(
-        "razorpay_django_order_id"
+    order_id = (
+        request.GET.get("order_id")
+        or request.session.get("razorpay_django_order_id")
     )
+    try:
+        order_id = int(order_id) if order_id else None
+    except (TypeError, ValueError):
+        order_id = None
 
-    if not order_id:
-        return redirect(
-            "orders:order_list"
+    order = None
+    if order_id:
+        order = (
+            Order.objects
+            .filter(
+                id=order_id,
+                user=request.user,
+                payment_method="RAZORPAY",
+            )
+            .select_related("address")
+            .prefetch_related(
+                "items__product__images",
+                "items__variant__images",
+            )
+            .first()
         )
 
-    order = (
-        Order.objects
-        .filter(
-            id=order_id,
-            user=request.user,
-        )
-        .select_related("address")
-        .prefetch_related(
-            "items__product__images",
-            "items__variant__images",
-        )
-        .first()
-    )
+    if order:
+        request.session["razorpay_django_order_id"] = order.id
+        for item in order.items.all():
 
-    if not order:
+            item.purchase_label = get_purchase_label(
+                item.product,
+                item.variant,
+            )
 
-        messages.error(
-            request,
-            "Order not found."
-        )
-
-        return redirect(
-            "orders:order_list"
-        )
-
-    for item in order.items.all():
-
-        item.purchase_label = get_purchase_label(
-            item.product,
-            item.variant,
-        )
-
-        item.variant_label = item.purchase_label
+            item.variant_label = item.purchase_label
 
     return render(
         request,
@@ -3270,12 +3268,15 @@ def order_failure(request):
         },
     )
 
-# ============================================================
-# DOWNLOAD INVOICE
-# ============================================================
-
 @login_required
-def download_invoice(request, order_id):
+@require_POST
+def download_invoice(request):
+
+    order_id = request.POST.get("order_id")
+
+    if not order_id:
+        messages.error(request, "Invalid order.")
+        return redirect("orders:order_list")
 
     order = (
         Order.objects
@@ -3283,10 +3284,7 @@ def download_invoice(request, order_id):
             id=order_id,
             user=request.user,
         )
-        .select_related(
-            "address",
-            "user",
-        )
+        .select_related("address", "user")
         .prefetch_related(
             "items__product",
             "items__variant",
@@ -3295,18 +3293,32 @@ def download_invoice(request, order_id):
     )
 
     if not order:
-
-        messages.error(
-            request,
-            "Order not found."
-        )
-
-        return redirect(
-            "orders:order_list"
-        )
+        messages.error(request, "Order not found.")
+        return redirect("orders:order_list")
 
     buffer = BytesIO()
 
+    font_path = os.path.join(
+        settings.BASE_DIR,
+        "static",
+        "fonts",
+        "NotoSans-Regular.ttf",
+    )
+
+    bold_font_path = os.path.join(
+        settings.BASE_DIR,
+        "static",
+        "fonts",
+        "NotoSans-Bold.ttf",
+    )
+
+    pdfmetrics.registerFont(
+        TTFont("NotoSans", font_path)
+    )
+
+    pdfmetrics.registerFont(
+        TTFont("NotoSans-Bold", bold_font_path)
+    )
     document = SimpleDocTemplate(
         buffer,
         pagesize=A4,
@@ -3314,6 +3326,9 @@ def download_invoice(request, order_id):
         leftMargin=15 * mm,
         topMargin=15 * mm,
         bottomMargin=15 * mm,
+        title=f"Invoice ",
+        author="Vertex",
+        subject=f"Customer Invoice for Order #{order.id}",
     )
 
     styles = getSampleStyleSheet()
@@ -3321,6 +3336,7 @@ def download_invoice(request, order_id):
     title_style = ParagraphStyle(
         "InvoiceTitle",
         parent=styles["Title"],
+        fontName="NotoSans-Bold",
         fontSize=20,
         spaceAfter=10,
     )
@@ -3328,15 +3344,15 @@ def download_invoice(request, order_id):
     normal_style = ParagraphStyle(
         "InvoiceNormal",
         parent=styles["Normal"],
+        fontName="NotoSans",
         fontSize=9,
         leading=12,
     )
 
     elements = []
-
     elements.append(
         Paragraph(
-            f"Invoice - Order #{order.id}",
+            f"Invoice",
             title_style,
         )
     )
@@ -3430,7 +3446,7 @@ def download_invoice(request, order_id):
 
     for item in order.items.all():
 
-        if item.is_cancelled or item.is_returned:
+        if item.status in ["Cancelled", "Returned"]:
             continue
 
         product_name = item.product_name
@@ -3495,7 +3511,13 @@ def download_invoice(request, order_id):
                     "FONTNAME",
                     (0, 0),
                     (-1, 0),
-                    "Helvetica-Bold",
+                    "NotoSans-Bold",
+                ),
+                (
+                    "FONTNAME",
+                    (0, 1),
+                    (-1, -1),
+                    "NotoSans",
                 ),
                 (
                     "FONTSIZE",
@@ -3554,16 +3576,22 @@ def download_invoice(request, order_id):
         TableStyle(
             [
                 (
-                    "ALIGN",
-                    (1, 0),
-                    (1, -1),
-                    "RIGHT",
+                    "FONTNAME",
+                    (0, 0),
+                    (-1, -2),
+                    "NotoSans",
                 ),
                 (
                     "FONTNAME",
                     (0, -1),
                     (-1, -1),
-                    "Helvetica-Bold",
+                    "NotoSans-Bold",
+                ),
+                (
+                    "ALIGN",
+                    (1, 0),
+                    (1, -1),
+                    "RIGHT",
                 ),
                 (
                     "LINEABOVE",
@@ -3591,18 +3619,11 @@ def download_invoice(request, order_id):
         content_type="application/pdf",
     )
 
-    response[
-        "Content-Disposition"
-    ] = (
-        f'attachment; filename="order_{order.id}_invoice.pdf"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="Invoice.pdf"'
     )
 
     return response
-
-
-# ============================================================
-# ORDER LIST
-# ============================================================
 
 @login_required
 @never_cache
@@ -3802,9 +3823,6 @@ def order_list(request):
         context,
     )
 
-# ============================================================
-# VIEW ORDER
-# ============================================================
 @login_required
 @never_cache
 def view_order(request, order_id=None):

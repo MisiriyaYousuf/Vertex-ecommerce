@@ -723,43 +723,57 @@
 
 
                         <!-- STATUS / PRICE -->
+                        
+                            <div class="item-right">
 
-                        <div class="item-right">
+                                {% if item.display_status == "Pending" %}
+                                    <span class="status status-pending">
+                                        Pending
+                                    </span>
 
-                            {% if item.display_status == "Pending" %}
-                                <span class="status status-pending">
-                                    Pending
-                                </span>
+                                {% elif item.display_status == "Processing" %}
+                                    <span class="status status-processing">
+                                        Processing
+                                    </span>
 
-                            {% elif item.display_status == "Shipped" %}
-                                <span class="status status-shipped">
-                                    Shipped
-                                </span>
+                                {% elif item.display_status == "Confirmed" %}
+                                    <span class="status status-processing">
+                                        Confirmed
+                                    </span>
 
-                            {% elif item.display_status == "Out for Delivery" %}
-                                <span class="status status-out">
-                                    Out for Delivery
-                                </span>
+                                {% elif item.display_status == "Shipped" %}
+                                    <span class="status status-shipped">
+                                        Shipped
+                                    </span>
 
-                            {% elif item.display_status == "Delivered" %}
-                                <span class="status status-delivered">
-                                    Delivered
-                                </span>
+                                {% elif item.display_status == "Out for Delivery" %}
+                                    <span class="status status-out">
+                                        Out for Delivery
+                                    </span>
 
-                            {% elif item.display_status == "Cancelled" %}
-                                <span class="status status-cancelled">
-                                    Cancelled
-                                </span>
+                                {% elif item.display_status == "Delivered" %}
+                                    <span class="status status-delivered">
+                                        Delivered
+                                    </span>
 
-                            {% elif item.display_status == "Returned" %}
-                                <span class="status status-returned">
-                                    Returned
-                                </span>
-                            {% endif %}
+                                {% elif item.display_status == "Cancelled" %}
+                                    <span class="status status-cancelled">
+                                        Cancelled
+                                    </span>
 
-                           
+                                {% elif item.display_status == "Returned" %}
+                                    <span class="status status-returned">
+                                        Returned
+                                    </span>
 
-                        </div>
+                                {% else %}
+                                    <span class="status">
+                                        {{ item.display_status|default:"Unknown" }}
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
 
                     </div>
 
