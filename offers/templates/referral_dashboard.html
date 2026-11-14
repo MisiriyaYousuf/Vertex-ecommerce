@@ -1,4 +1,5 @@
 {% extends "user_base.html" %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -23,6 +24,20 @@
     .referrals-page h2 { color: #fff; }
 
     .referrals-page p { color: rgba(255,255,255,.62); }
+
+    .referrals-page .referral-page-header {
+        margin: 0 0 18px;
+        padding: 0 2px;
+    }
+    .referrals-page .referral-page-header h1 {
+        margin-bottom: 6px;
+        color: #263f58 !important;
+    }
+    .referrals-page .referral-page-header p {
+        margin: 0;
+        color: #315170 !important;
+    }
+
 
     .referrals-page .form-control {
         background: rgba(20,12,30,.55);
@@ -58,12 +73,56 @@
     @media (max-width: 520px) {
         .referral-card { padding: 16px; }
     }
+    body:has(.referrals-page) {
+        background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+        background-color: #315170 !important;
+    }
+    body:has(.referrals-page) .main-content { background: transparent !important; }
+    body:has(.referrals-page) .main-content .referrals-page {
+        padding: 24px !important;
+        border: 1px solid #9bbbd3 !important;
+        border-radius: 16px !important;
+        background: #dce8f1 !important;
+        color: #263f58 !important;
+        box-shadow: 0 8px 24px rgba(38,63,88,.12) !important;
+        box-sizing: border-box;
+    }
+    body:has(.referrals-page) .main-content .referral-card {
+        border: 1px solid #c5d4e0 !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+        color: #263f58 !important;
+        box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+    body:has(.referrals-page) .main-content .referral-card :is(h1,h2,p,label,th,td,strong,.text-muted) { color: #263f58 !important; }
+    body:has(.referrals-page) .main-content .referral-card .form-control {
+        border: 1px solid #789dbb !important;
+        background: #fff !important;
+        color: #263f58 !important;
+        -webkit-text-fill-color: #263f58 !important;
+    }
+    body:has(.referrals-page) .main-content .referral-card .form-label { color: #315170 !important; }
+    body:has(.referrals-page) .main-content .referral-card .btn {
+        border: 1px solid #315170 !important;
+        background: #315170 !important;
+        color: #fff !important;
+    }
+    body:has(.referrals-page) .main-content .referral-card .referral-table th {
+        border-bottom: 1px solid #9bbbd3 !important;
+        background: #eaf1f6 !important;
+        color: #315170 !important;
+    }
+    body:has(.referrals-page) .main-content .referral-card .referral-table td { border-color: #c5d4e0 !important; }
 </style>
 
 <div class="referrals-page">
+    <header class="referral-page-header">
+        <h1 class="h3">Invite friends and earn rewards</h1>
+        <p>Share your link or referral code. When a friend verifies a new account with it, you receive a single-use coupon.</p>
+    </header>
     <div class="referral-card">
-        <h1 class="h3 mb-3">Invite friends and earn rewards</h1>
-        <p class="mb-3">Share your link or referral code. When a friend verifies a new account with it, you receive a single-use coupon.</p>
         <label class="form-label" for="referral-code">Your referral code</label>
         <div class="input-group mb-3">
             <input id="referral-code" class="form-control" value="{{ referral_profile.code }}" readonly>

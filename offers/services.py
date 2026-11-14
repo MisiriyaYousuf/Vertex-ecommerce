@@ -40,8 +40,7 @@ def _valid_offer(queryset, today):
 
 def get_effective_price(product, variant=None, on_date=None):
     if variant is None:
-        # A product is a catalog parent. Its display price comes from one of its
-        # active variants; checkout must always pass the selected variant.
+
         variant = product.variants.filter(is_active=True).order_by("sale_price", "id").first()
         if variant is None:
             return None
@@ -132,7 +131,6 @@ def _current_referral_offer(today):
 
 @transaction.atomic
 def award_referral_coupon(referred_user, referral_code):
-    """Create one reward coupon for the referrer, if the code is valid."""
     referral_code = (referral_code or "").strip().upper()
     if not referral_code:
         return None
