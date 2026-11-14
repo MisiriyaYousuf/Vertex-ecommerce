@@ -565,6 +565,71 @@
     box-shadow: 0 4px 14px rgba(170, 120, 255, 0.15);
 }
 
+/* Improve contrast for order metadata and product quantity/price columns. */
+body:has(.orders-page) .main-content .order-card {
+    border: 1px solid #9bbbd3 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    color: #263f58 !important;
+    box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+body:has(.orders-page) .main-content .order-top {
+    border-bottom: 1px solid #9bbbd3 !important;
+}
+body:has(.orders-page) .main-content .meta-item {
+    min-width: 120px;
+    padding: 8px 12px;
+    border: 1px solid #c5d4e0;
+    border-radius: 8px;
+    background: #eaf1f6;
+}
+body:has(.orders-page) .main-content :is(.meta-label,.meta-value,.product-name,.product-description,.item-price,.order-total,.order-meta,.product-info,.product-details) {
+    color: #263f58 !important;
+}
+body:has(.orders-page) .main-content .order-item {
+    border-bottom: 1px solid #c5d4e0 !important;
+}
+body:has(.orders-page) .main-content .product-thumb {
+    border: 1px solid #c5d4e0 !important;
+    background: #fff !important;
+}
+body:has(.orders-page) .main-content .order-item .product-details {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body:has(.orders-page) .main-content .product-details span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent !important;
+    color: #315170 !important;
+}
+body:has(.orders-page) .main-content .product-details strong { color: #244766 !important; }
+body:has(.orders-page) .main-content .item-right .status {
+    border: 1px solid #9bbbd3 !important;
+    background: #dce8f1 !important;
+    color: #315170 !important;
+}
+body:has(.orders-page) .main-content :is(.search-btn,.order-btn,.pagination-btn,.pagination-page) {
+    border: 1px solid #315170 !important;
+    background: #315170 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
+body:has(.orders-page) .main-content :is(.search-btn,.order-btn,.pagination-btn,.pagination-page):hover,
+body:has(.orders-page) .main-content .pagination-page.active {
+    border-color: #263f58 !important;
+    background: #263f58 !important;
+    color: #fff !important;
+}
+
 
 </style>
 
