@@ -196,7 +196,7 @@
 /* SELECT OPTIONS */
 
 .form-group select option {
-    background: #2d1b3d;
+    background: #263f58;
     color: #ffffff;
 }
 
@@ -505,6 +505,75 @@
         width: 100%;
     }
 
+}
+
+body:has(.add-address-section) {
+    background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+    background-color: #315170 !important;
+}
+body:has(.add-address-section) .main-content { background: transparent !important; }
+body:has(.add-address-section) .main-content .add-address-wrapper {
+    padding: 24px !important;
+    border: 1px solid #9bbbd3 !important;
+    border-radius: 16px !important;
+    background: #dce8f1 !important;
+    box-shadow: 0 8px 24px rgba(38,63,88,.12) !important;
+    box-sizing: border-box;
+}
+body:has(.add-address-section) .main-content .address-page-header :is(h2,p) { color: #315170 !important; }
+body:has(.add-address-section) .main-content .address-form-card {
+    border: 1px solid #9bbbd3 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    color: #263f58 !important;
+    box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+body:has(.add-address-section) .main-content .form-card-header {
+    border-bottom: 1px solid #9bbbd3 !important;
+}
+body:has(.add-address-section) .main-content .form-card-header :is(h4,p),
+body:has(.add-address-section) .main-content .address-form-card form .form-group label { color: #315170 !important; }
+body:has(.add-address-section) .main-content .address-form-card form :is(input,select,textarea) {
+    border: 1px solid #789dbb !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #263f58 !important;
+    box-shadow: none !important;
+}
+body:has(.add-address-section) .main-content .address-form-card form .form-group input::placeholder,
+body:has(.add-address-section) .main-content .address-form-card form .form-group textarea::placeholder,
+body:has(.add-address-section) .main-content .address-form-card form .form-group input:focus::placeholder,
+body:has(.add-address-section) .main-content .address-form-card form .form-group textarea:focus::placeholder {
+    color: #526579 !important;
+    -webkit-text-fill-color: #526579 !important;
+    opacity: 1 !important;
+}
+body:has(.add-address-section) .main-content .address-form-card form :is(input,select,textarea):focus {
+    border-color: #315170 !important;
+    box-shadow: 0 0 0 3px rgba(49,81,112,.14) !important;
+}
+body:has(.add-address-section) .main-content .address-type-options label,
+body:has(.add-address-section) .main-content .default-address {
+    border-color: #9bbbd3 !important;
+    border-radius: 8px !important;
+    background: #eaf1f6 !important;
+    color: #263f58 !important;
+}
+body:has(.add-address-section) .main-content .address-form-card form :is(input[type="checkbox"],input[type="radio"]) { accent-color: #315170 !important; }
+body:has(.add-address-section) .main-content :is(.add-address-btn,.cancel-btn) {
+    border: 1px solid #315170 !important;
+    border-radius: 8px !important;
+    background: #315170 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
+body:has(.add-address-section) .main-content :is(.add-address-btn,.cancel-btn):hover {
+    border-color: #263f58 !important;
+    background: #263f58 !important;
+    color: #fff !important;
 }
 
 </style>

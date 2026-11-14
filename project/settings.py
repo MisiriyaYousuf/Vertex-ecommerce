@@ -67,19 +67,16 @@ SOCIALACCOUNT_PROVIDERS = {
 
         'AUTH_PARAMS': {
             'access_type': 'online',
+            'prompt': 'select_account',
         },
 
         'VERIFIED_EMAIL': True,
 
         'EMAIL_AUTHENTICATION': True,
     },
+    
 
-    'github': {
-        'APP': {
-            'client_id': '',
-            'secret': '',
-        }
-    }
+   
 }
 
 MIDDLEWARE = [
