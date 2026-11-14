@@ -18,10 +18,13 @@ Checkout
 .cod-warning {
     margin-top: 12px;
     padding: 13px 15px;
-    border: 1px solid rgba(255, 100, 100, 0.35);
-    border-radius: 10px;
-    background: rgba(255, 80, 80, 0.09);
-    color: #ffffff;
+    border: 1px solid rgba(155, 187, 211, .75);
+    border-radius: 8px;
+    background: rgba(220, 232, 241, .84);
+    color: #244766;
+    box-shadow: 0 6px 18px rgba(38, 63, 88, .12);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     font-size: 13px;
     line-height: 1.6;
 }
@@ -29,11 +32,32 @@ Checkout
 .cod-warning strong {
     display: block;
     margin-bottom: 4px;
-    color: #ffb3b3;
+    color: #315170;
 }
 
 .cod-warning p {
     margin: 0;
+}
+
+body:has(.checkout-page) .error-messages h6,
+body:has(.checkout-page) .error-messages .alert-success,
+body:has(.checkout-page) .error-messages .alert-error,
+body:has(.checkout-page) .error-messages .alert-danger,
+body:has(.checkout-page) .error-messages .alert-warning,
+body:has(.checkout-page) .error-messages .alert-info {
+    border: 1px solid rgba(155, 187, 211, .75) !important;
+    border-radius: 8px !important;
+    background: rgba(220, 232, 241, .84) !important;
+    color: #244766 !important;
+    box-shadow: 0 6px 18px rgba(38, 63, 88, .12) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+body:has(.checkout-page) .error-messages .alert {
+    --bs-alert-bg: rgba(220, 232, 241, .84) !important;
+    --bs-alert-border-color: rgba(155, 187, 211, .75) !important;
+    --bs-alert-color: #244766 !important;
 }
 
 

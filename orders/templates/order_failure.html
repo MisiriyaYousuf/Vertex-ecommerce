@@ -1,8 +1,15 @@
 {% extends "user_base.html" %}
+{% load static %}
 
 {% block content %}
 
 <style>
+
+body:has(.order-failure-page) {
+    background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+    background-color: #315170 !important;
+}
+body:has(.order-failure-page) .main-content { background: transparent !important; }
 
     .order-failure-card {
         width: 100%;

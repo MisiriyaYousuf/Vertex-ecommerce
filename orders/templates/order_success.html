@@ -9,6 +9,12 @@
 
 <style>
 
+body:has(.order-success-page) {
+    background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+    background-color: #315170 !important;
+}
+body:has(.order-success-page) .main-content { background: transparent !important; }
+
 /* =========================================================
    ORDER SUCCESS PAGE
    Same Glassmorphism Language as Products Page

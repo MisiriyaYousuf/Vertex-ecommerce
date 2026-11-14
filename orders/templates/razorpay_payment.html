@@ -1,9 +1,16 @@
 {% extends "user_base.html" %}
+{% load static %}
 
 {% block title %}Secure Payment | Vertex{% endblock %}
 
 {% block extra_css %}
 <style>
+
+        body:has(.payment-page) {
+            background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+            background-color: #315170 !important;
+        }
+        body:has(.payment-page) .main-content { background: transparent !important; }
 
         .payment-page,
         .payment-page * {
@@ -43,11 +50,25 @@
             text-align: center;
         }
 
+        body:has(.payment-page) .payment-container {
+            border: 1px solid #c5d4e0 !important;
+            border-radius: 12px !important;
+            background: #fff !important;
+            color: #263f58 !important;
+            box-shadow: 0 5px 16px rgba(38, 63, 88, .12) !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+        }
+
 
         .payment-container h1 {
 
             margin-bottom: 12px;
             color: #ffffff;
+        }
+
+        body:has(.payment-page) .payment-container :is(h1,p,.small,#paymentStatus,.secure-text) {
+            color: #263f58 !important;
         }
 
 
@@ -88,6 +109,17 @@
             font-weight: bold;
 
             cursor: pointer;
+        }
+
+        body:has(.payment-page) .payment-container #payButton,
+        body:has(.payment-page) .payment-container #retryButton {
+            border: 1px solid #315170 !important;
+            border-radius: 8px !important;
+            background: #315170 !important;
+            color: #fff !important;
+            box-shadow: none !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
         }
 
 
@@ -137,6 +169,12 @@
             text-align: left;
 
             line-height: 1.5;
+        }
+
+        body:has(.payment-page) .payment-container #paymentError {
+            border: 1px solid #9bbbd3 !important;
+            background: #dce8f1 !important;
+            color: #244766 !important;
         }
 
 
@@ -692,7 +730,7 @@ async function openRazorpayCheckout() {
             theme: {
 
                 color:
-                    "#6f42c1"
+                    "#315170"
             },
 
 

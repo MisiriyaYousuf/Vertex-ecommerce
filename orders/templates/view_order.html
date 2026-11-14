@@ -118,7 +118,7 @@
     /* Focus Accessibility */
     .back-btn:focus-visible,
     .order-btn:focus-visible {
-        outline: 2px solid #c084fc;
+        outline: 2px solid #7890a5;
         outline-offset: 4px;
     }
 
@@ -169,7 +169,7 @@
     /* PDF Icon */
     .invoice-btn i {
         font-size: 17px;
-        color: #d8b4fe;
+        color: #9db1c3;
         transition: all 0.3s ease;
     }
 
@@ -204,7 +204,7 @@
 
     /* Focus Accessibility */
     .invoice-btn:focus-visible {
-        outline: 2px solid #c084fc;
+        outline: 2px solid #7890a5;
         outline-offset: 4px;
     }
 
@@ -331,7 +331,7 @@
     }
 
     .status-out {
-        color: #c5a4ff;
+        color: #9db1c3;
         background: rgba(160,110,255,0.10);
     }
 
@@ -747,7 +747,7 @@
     .tracking-step.current .tracking-dot {
         border-color: rgba(197,164,255,0.95);
         background: rgba(197,164,255,0.18);
-        color: #c5a4ff;
+        color: #9db1c3;
         box-shadow:
             0 0 18px rgba(197,164,255,0.30),
             0 0 30px rgba(197,164,255,0.10);
@@ -778,7 +778,7 @@
 
     /* Current label */
     .tracking-step.current .tracking-label {
-        color: #a784e3;
+        color: #587795;
         font-weight: 700;
     }
 
@@ -867,6 +867,121 @@
         .tracking-line {
             display: none;
         }
+    }
+    /* Match checkout's solid blue and white palette without glass effects. */
+    body:has(.order-detail-page) .main-content .order-detail-page {
+        color: #263f58 !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .glass-card {
+        border: 1px solid #c5d4e0 !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+        color: #263f58 !important;
+        box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .order-header h1 { color: #fff !important; }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.section-title,.summary-label,.summary-value,.product-name,.product-id,.product-description,.detail-label,.detail-value,.tracking-label,.address-text,.total-row,.total-row strong) {
+        color: #263f58 !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.summary-box,.detail-box,.product-card,.cancelled-track,.returned-track) {
+        border: 1px solid #c5d4e0 !important;
+        border-radius: 9px !important;
+        background: #eaf1f6 !important;
+        color: #263f58 !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.summary-label,.summary-value) {
+        border: 0 !important;
+        background: transparent !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        color: #263f58 !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .products-card {
+        padding: 1rem !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .products-card .product-card {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 1rem !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .products-card .product-card,
+    body:has(.order-detail-page) .main-content .order-detail-page .products-card .product-card:hover,
+    body:has(.order-detail-page) .main-content .order-detail-page .products-card .product-card:focus-within {
+        transform: none !important;
+        transition: none !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.product-layout,.product-images,.product-info,.tracking-wrapper,.tracking-steps,.tracking-step,.address-card,.total-card,.order-cancel-section) {
+        border-color: #c5d4e0 !important;
+        border-radius: 9px !important;
+        background: #eaf1f6 !important;
+        color: #263f58 !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .tracking-line {
+        background: #9bbbd3 !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .tracking-wrapper {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .tracking-dot {
+        border: 2px solid #9bbbd3 !important;
+        background: #fff !important;
+        color: #315170 !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .tracking-step.completed .tracking-dot,
+    body:has(.order-detail-page) .main-content .order-detail-page .tracking-step.current .tracking-dot {
+        border-color: #315170 !important;
+        background: #315170 !important;
+        color: #fff !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .tracking-label,
+    body:has(.order-detail-page) .main-content .order-detail-page .tracking-step :is(.tracking-label,.tracking-label *) {
+        color: #315170 !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.main-image-box,.sub-image) {
+        border-color: #c5d4e0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page .status-badge {
+        border: 1px solid #b9cbd9 !important;
+        background: #dce8f1 !important;
+        color: #315170 !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.back-btn,.view-orders-btn,.invoice-btn,.order-btn) {
+        border: 1px solid #315170 !important;
+        border-radius: 8px !important;
+        background: #dce8f1 !important;
+        color: #315170 !important;
+        -webkit-text-fill-color: #315170 !important;
+        text-decoration: none !important;
+        box-shadow: none !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.back-btn,.view-orders-btn,.invoice-btn,.order-btn):hover {
+        border-color: #789dbb !important;
+        background: #c9dceb !important;
+        color: #244766 !important;
+        -webkit-text-fill-color: #244766 !important;
+    }
+    body:has(.order-detail-page) .main-content .order-detail-page :is(.back-btn,.view-orders-btn,.invoice-btn,.order-btn) :is(i,svg) { color: inherit !important; fill: currentColor !important; }
+    body:has(.order-detail-page) .main-content .order-detail-page * {
+        background-image: none !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
     }
 </style>
 

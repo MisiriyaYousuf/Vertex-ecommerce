@@ -1112,6 +1112,93 @@ Order Review
 
 
 
+    /* Match checkout's solid blue and white palette without glass effects. */
+    body:has(.order-review-page) {
+        background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+        background-color: #315170 !important;
+    }
+    body:has(.order-review-page) .main-content { background: transparent !important; }
+    body:has(.order-review-page) .main-content .order-review-page,
+    body:has(.order-review-page) .main-content .order-review-wrapper {
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-title { color: #fff !important; }
+    body:has(.order-review-page) .main-content .order-review-subtitle { color: #dce8f1 !important; }
+    body:has(.order-review-page) .main-content .review-card {
+        border: 1px solid #c5d4e0 !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+        color: #263f58 !important;
+        box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page :is(.review-section-title,.address-review-type,.address-review-name,.address-review-text,.address-review-phone,.delivery-label,.delivery-value,.review-product-name,.review-product-id,.review-product-description,.review-product-price,.quantity-label,.quantity-value,.item-total,.summary-title,.summary-row,.summary-total,.max-note) {
+        color: #263f58 !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page :is(.review-section-number,.address-review,.delivery-box,.review-product,.quantity-control) {
+        border: 1px solid #c5d4e0 !important;
+        border-radius: 9px !important;
+        background: #eaf1f6 !important;
+        color: #263f58 !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page :is(.summary-title,.summary-row,.summary-total) {
+        background: transparent !important;
+        background-image: none !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page :is(.address-review,.delivery-info,.delivery-box,.product-image-area,.quantity-control,.summary-card,.review-product-info) {
+        background: #eaf1f6 !important;
+        border-color: #c5d4e0 !important;
+        color: #263f58 !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page :is(.product-image-area,.product-thumbnail) {
+        border-color: #c5d4e0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page :is(.add-more-products-btn,.quantity-btn,.delete-product-btn,.place-order-btn,.back-checkout-btn) {
+        border: 1px solid #315170 !important;
+        border-radius: 8px !important;
+        background: #315170 !important;
+        color: #fff !important;
+        text-decoration: none !important;
+        box-shadow: none !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page :is(.add-more-products-btn,.quantity-btn,.delete-product-btn,.place-order-btn,.back-checkout-btn):hover {
+        border-color: #263f58 !important;
+        background: #263f58 !important;
+        color: #fff !important;
+    }
+    body:has(.order-review-page) .main-content .order-review-page * {
+        background-image: none !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+    body:has(.order-review-page) .error-messages h6,
+    body:has(.order-review-page) .error-messages .alert-success,
+    body:has(.order-review-page) .error-messages .alert-error,
+    body:has(.order-review-page) .error-messages .alert-danger,
+    body:has(.order-review-page) .error-messages .alert-warning,
+    body:has(.order-review-page) .error-messages .alert-info {
+        border: 1px solid rgba(155,187,211,.75) !important;
+        border-radius: 8px !important;
+        background: rgba(220,232,241,.84) !important;
+        color: #244766 !important;
+        box-shadow: 0 6px 18px rgba(38,63,88,.12) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        backdrop-filter: blur(8px) !important;
+    }
+    body:has(.order-review-page) .error-messages .alert {
+        --bs-alert-bg: rgba(220,232,241,.84) !important;
+        --bs-alert-border-color: rgba(155,187,211,.75) !important;
+        --bs-alert-color: #244766 !important;
+    }
 </style>
 
 

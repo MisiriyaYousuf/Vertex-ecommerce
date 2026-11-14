@@ -1668,9 +1668,7 @@ def place_cod_order(request):
             + timedelta(days=4)
         )
         
-    # =========================================================
-    # Get cart and lock rows
-    # =========================================================
+
 
     cart_items = list(
         Cart.objects
@@ -1696,9 +1694,6 @@ def place_cod_order(request):
             "cart:cart"
         )
 
-    # =========================================================
-    # Validate cart
-    # =========================================================
 
     validated_items = []
 
@@ -1712,9 +1707,6 @@ def place_cod_order(request):
 
         variant = cart_item.variant
 
-        # -----------------------------------------------------
-        # Product exists
-        # -----------------------------------------------------
 
         if not product:
 
