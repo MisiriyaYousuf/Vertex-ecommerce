@@ -1,4 +1,5 @@
 {% extends "user_base.html" %}
+{% load static %}
 
 {% block title %}My Wallet{% endblock %}
 
@@ -27,6 +28,12 @@
         font-size: 30px;
         font-weight: 750;
         letter-spacing: -.4px;
+    }
+
+    .wallet-subheading {
+        margin: -14px 0 20px;
+        color: #526579;
+        font-size: 14px;
     }
 
     .wallet-balance {
@@ -132,12 +139,58 @@
             font-size: 25px;
         }
     }
+    body:has(.wallet-page) {
+        background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+        background-color: #315170 !important;
+    }
+    body:has(.wallet-page) .main-content { background: transparent !important; }
+    body:has(.wallet-page) .main-content .wallet-page {
+        padding: 24px !important;
+        border: 1px solid #9bbbd3 !important;
+        border-radius: 16px !important;
+        background: #dce8f1 !important;
+        box-shadow: 0 8px 24px rgba(38,63,88,.12) !important;
+        box-sizing: border-box;
+    }
+    body:has(.wallet-page) .main-content .wallet-card {
+        border: 1px solid #c5d4e0 !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+        color: #263f58 !important;
+        box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+    }
+    body:has(.wallet-page) .main-content :is(.wallet-heading,.wallet-section-heading) { color: #315170 !important; }
+    body:has(.wallet-page) .main-content .wallet-balance {
+        border: 1px solid #315170 !important;
+        border-radius: 10px !important;
+        background: #315170 !important;
+        color: #fff !important;
+    }
+    body:has(.wallet-page) .main-content .wallet-balance :is(.wallet-balance-label,.wallet-balance-value) { color: #fff !important; }
+    body:has(.wallet-page) .main-content .wallet-table-wrap {
+        border: 1px solid #9bbbd3 !important;
+        border-radius: 9px !important;
+        background: #fff !important;
+    }
+    body:has(.wallet-page) .main-content .wallet-table :is(th,td) {
+        border-bottom: 1px solid #c5d4e0 !important;
+        color: #263f58 !important;
+    }
+    body:has(.wallet-page) .main-content .wallet-table th { background: #eaf1f6 !important; color: #315170 !important; }
+    body:has(.wallet-page) .main-content .wallet-table tbody tr:hover { background: #f3f7fa !important; }
+    body:has(.wallet-page) .main-content .wallet-table small,
+    body:has(.wallet-page) .main-content .wallet-empty,
+    body:has(.wallet-page) .main-content .wallet-pagination { color: #526579 !important; }
+    body:has(.wallet-page) .main-content .wallet-pagination a { color: #315170 !important; }
 </style>
 
 <main class="wallet-page">
-    <section class="wallet-card">
-        <h1 class="wallet-heading">My Wallet</h1>
+    <h1 class="wallet-heading">My Wallet</h1>
+    <p class="wallet-subheading">Manage your balance and review your wallet activity.</p>
 
+    <section class="wallet-card">
         <div class="wallet-balance">
             <p class="wallet-balance-label">Available balance</p>
             <strong class="wallet-balance-value">₹{{ wallet.balance|floatformat:2 }}</strong>
