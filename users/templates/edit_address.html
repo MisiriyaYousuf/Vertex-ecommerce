@@ -125,7 +125,7 @@
 /* SELECT OPTIONS */
 
 .form-group select option {
-    background: #3d1f54;
+    background: #263f58;
     color: #ffffff;
 }
 
@@ -378,6 +378,74 @@
         width: 100%;
         text-align: center;
     }
+}
+
+body:has(.address-container) {
+    background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+    background-color: #315170 !important;
+}
+body:has(.address-container) .main-content { background: transparent !important; }
+body:has(.address-container) .main-content .address-container {
+    border: 1px solid #c5d4e0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    color: #263f58 !important;
+    box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+body:has(.address-container) .main-content .address-header :is(h2,p) { color: #263f58 !important; }
+body:has(.address-container) .main-content .address-form .form-group label { color: #315170 !important; }
+body:has(.address-container) .main-content .address-form :is(input,select,textarea) {
+    border: 1px solid #9bbbd3 !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    color: #263f58 !important;
+    box-shadow: none !important;
+}
+body:has(.address-container) .main-content .address-form :is(input,textarea)::placeholder { color: #6f8193 !important; opacity: 1; }
+body:has(.address-container) .main-content .address-form :is(input,select,textarea):focus {
+    border-color: #315170 !important;
+    box-shadow: 0 0 0 3px rgba(49,81,112,.14) !important;
+}
+body:has(.address-container) .main-content .radio-option,
+body:has(.address-container) .main-content .default-address {
+    border: 1px solid #9bbbd3 !important;
+    border-radius: 8px !important;
+    background: #eaf1f6 !important;
+    color: #263f58 !important;
+    box-shadow: none !important;
+}
+body:has(.address-container) .main-content .radio-option:has(input:checked) {
+    border-color: #315170 !important;
+    background: #dce8f1 !important;
+    color: #244766 !important;
+}
+body:has(.address-container) .main-content .address-form :is(input[type="checkbox"],input[type="radio"]) { accent-color: #315170 !important; }
+body:has(.address-container) .main-content .form-buttons { border-top: 1px solid #9bbbd3 !important; }
+body:has(.address-container) .main-content .cancel-btn {
+    border: 1px solid #315170 !important;
+    border-radius: 8px !important;
+    background: #dce8f1 !important;
+    color: #315170 !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
+body:has(.address-container) .main-content .add-address-btn {
+    border: 1px solid #315170 !important;
+    border-radius: 8px !important;
+    background: #315170 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+body:has(.address-container) .main-content :is(.cancel-btn,.add-address-btn):hover {
+    border-color: #263f58 !important;
+    background: #263f58 !important;
+    color: #fff !important;
+}
+body:has(.address-container) .main-content .address-container * {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
 }
 
 </style>

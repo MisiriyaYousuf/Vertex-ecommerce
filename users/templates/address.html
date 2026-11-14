@@ -759,6 +759,110 @@
 
 }
 
+body:has(.address-section) {
+    background: url("{% static 'images/hero.png' %}") center center / cover fixed no-repeat !important;
+    background-color: #315170 !important;
+}
+body:has(.address-section) .main-content { background: transparent !important; }
+body:has(.address-section) .main-content .profile-page-header h2 { color: #315170 !important; }
+body:has(.address-section) .main-content .profile-page-header p { color: #526579 !important; }
+body:has(.address-section) .main-content .profile-wrapper {
+    padding: 24px !important;
+    border: 1px solid #9bbbd3 !important;
+    border-radius: 16px !important;
+    background: #dce8f1 !important;
+    box-shadow: 0 8px 24px rgba(38,63,88,.12) !important;
+    box-sizing: border-box;
+}
+body:has(.address-section) .main-content :is(.profile-layout,.profile-content,.address-grid) {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+body:has(.address-section) .main-content .profile-sidebar,
+body:has(.address-section) .main-content .address-section {
+    border: 1px solid #c5d4e0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    color: #263f58 !important;
+    box-shadow: 0 5px 16px rgba(38,63,88,.08) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+body:has(.address-section) .main-content .profile-sidebar :is(h3,.profile-email) { color: #263f58 !important; }
+body:has(.address-section) .main-content .profile-menu a {
+    border: 1px solid #c5d4e0 !important;
+    border-radius: 8px;
+    background: #fff !important;
+    color: #315170 !important;
+}
+body:has(.address-section) .main-content .profile-menu a:not(.active):hover {
+    background: #dce8f1 !important;
+    border-color: #9bbbd3 !important;
+    color: #244766 !important;
+}
+body:has(.address-section) .main-content .profile-menu a.active {
+    border-color: #315170 !important;
+    background: #315170 !important;
+    color: #fff !important;
+}
+body:has(.address-section) .main-content .profile-menu a.active :is(span,i,svg) {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    fill: currentColor !important;
+}
+body:has(.address-section) .main-content .address-section :is(.card-header h4,.card-header p) { color: #263f58 !important; }
+body:has(.address-section) .main-content .address-section .card-header { border-bottom: 1px solid #9bbbd3 !important; }
+body:has(.address-section) .main-content .address-card {
+    border: 1px solid #9bbbd3 !important;
+    border-radius: 10px !important;
+    background: #eaf1f6 !important;
+    color: #263f58 !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+}
+body:has(.address-section) .main-content .address-card-header {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body:has(.address-section) .main-content .address-card :is(.address-type,.default-badge,.address-details,.address-details p,.address-details span,.address-details strong) { color: #263f58 !important; }
+body:has(.address-section) .main-content .address-card :is(.address-type,.default-badge) {
+    border: 1px solid #9bbbd3 !important;
+    background: #dce8f1 !important;
+}
+body:has(.address-section) .main-content .address-card :is(.edit-address-btn,.delete-address-btn),
+body:has(.address-section) .main-content .add-address-card {
+    border: 1px solid #315170 !important;
+    border-radius: 8px !important;
+    background: #315170 !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
+body:has(.address-section) .main-content .address-card .address-actions {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body:has(.address-section) .main-content .address-card :is(.edit-address-btn,.delete-address-btn) {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+body:has(.address-section) .main-content .address-card :is(.edit-address-btn,.delete-address-btn) :is(i,svg),
+body:has(.address-section) .main-content .add-address-card :is(i,svg) { color: #fff !important; fill: currentColor !important; }
+body:has(.address-section) .main-content .add-address-card :is(h5,p,.add-address-icon) {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+}
+body:has(.address-section) .main-content .add-address-card .add-address-icon :is(i,svg) { color: #fff !important; fill: currentColor !important; }
+body:has(.address-section) .main-content .address-card :is(.edit-address-btn,.delete-address-btn):hover,
+body:has(.address-section) .main-content .add-address-card:hover { background: #263f58 !important; color: #fff !important; }
+
 </style>
 
 {% endblock %}

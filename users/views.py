@@ -600,7 +600,7 @@ def home(request):
 
         return redirect("users:signin")
 
-    # A catalog product is in stock when at least one active variant is available.
+
     products = (
         Product.objects
         .filter(
@@ -636,13 +636,13 @@ def home(request):
     for product in products:
         add_pricing(product)
 
-    # Keep only discounted products for the Top Sale Watches section.
+   
     products = [
         product for product in products
         if product.pricing and product.pricing.has_discount
     ][:6]
 
-    # Coupons valid today.
+    
     today = timezone.localdate()
 
     coupons = (
@@ -735,9 +735,7 @@ def edit_profile(request):
 
             profile.save()
 
-            # --------------------------------
-            # EMAIL CHANGE
-            # --------------------------------
+          
 
             if new_email != old_email:
 
@@ -770,7 +768,7 @@ def edit_profile(request):
                     "users:verify_profile_email"
                 )
 
-            # Email didn't change
+           
             messages.success(
                 request,
                 "Profile updated successfully."
@@ -781,11 +779,10 @@ def edit_profile(request):
             )
 
     else:
-        # GET request
+       
         form = EditProfileForm(user=user)
 
-    # IMPORTANT:
-    # This return handles GET requests and invalid POST requests
+   
     return render(
         request,
         "edit_profile.html",
@@ -1009,7 +1006,7 @@ def profile_resend_otp(request):
             'users:edit_profile'
         )
 
-    # Generate a NEW OTP.
+   
     otp_obj, otp_code = generate_otp(
         pending_email
     )
@@ -1042,7 +1039,6 @@ def profile_resend_otp(request):
         fail_silently=False,
     )
 
-    # Make absolutely sure session remains available.
     request.session['profile_email_change'] = pending_email
     request.session.modified = True
 
@@ -1076,7 +1072,7 @@ def change_password(request):
                 update_fields=["password"]
             )
 
-            # Keep user logged in after password change
+
             update_session_auth_hash(
                 request,
                 request.user
@@ -1321,7 +1317,7 @@ def edit_address(request):
 
                 elif updated_address.is_default:
 
-                    # Make sure no other address is default.
+    
                     Address.objects.filter(
                         user=request.user,
                         is_default=True
@@ -1333,13 +1329,13 @@ def edit_address(request):
 
                 updated_address.save()
 
-            # Remove edit session data
+    
             request.session.pop(
                 "edit_address_id",
                 None
             )
 
-            # Check where the edit was initiated from
+        
             return_to = request.session.pop(
                 "edit_address_return",
                 "address"
@@ -1350,15 +1346,14 @@ def edit_address(request):
                 "Address updated successfully."
             )
 
-            # If edited from checkout,
-            # return to checkout.
+           
             if return_to == "checkout":
 
                 return redirect(
                     "orders:checkout"
                 )
 
-            # Otherwise return to My Address
+    
             return redirect(
                 "users:address"
             )
