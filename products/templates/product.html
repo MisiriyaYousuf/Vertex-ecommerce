@@ -7,19 +7,10 @@
 
 <style>
 
-/* =========================================================
-   PRODUCTS PAGE
-   ========================================================= */
-
 .products-page {
     padding-top: 30px;
     padding-bottom: 55px;
 }
-
-
-/* =========================================================
-   PAGE HEADER
-   ========================================================= */
 
 .products-header {
     margin-bottom: 22px;
@@ -37,11 +28,6 @@
     color: rgba(255, 255, 255, 0.70);
     margin-bottom: 0;
 }
-
-
-/* =========================================================
-   SEARCH CARD
-   ========================================================= */
 
 .search-card {
     background:
@@ -198,11 +184,6 @@
         rgba(255, 255, 255, 0.28);
 }
 
-
-/* =========================================================
-   FILTER & SORT CARD
-   ========================================================= */
-
 .filter-card {
     background:
         linear-gradient(
@@ -281,11 +262,6 @@
     margin-bottom: 4px;
 }
 
-
-/* =========================================================
-   FILTER INPUTS
-   ========================================================= */
-
 .filter-card .form-control,
 .filter-card .form-select {
 
@@ -329,15 +305,13 @@
 }
 
 .filter-card .form-select option {
-    background: #2d1b3d;
+    background: #263f58;
 
     color: #ffffff;
 }
 
 
-/* =========================================================
-   FILTER BUTTONS
-   ========================================================= */
+
 
 .filter-actions {
     display: flex;
@@ -406,11 +380,6 @@
         rgba(255, 255, 255, 0.28);
 }
 
-
-/* =========================================================
-   PRODUCTS GRID
-   ========================================================= */
-
 .products-grid {
     margin-left: -10px;
 
@@ -446,10 +415,6 @@
     margin-bottom: 20px;
 }
 
-
-/* =========================================================
-   PRODUCT CARD
-   ========================================================= */
 
 .product-card {
 
@@ -500,11 +465,6 @@
         rgba(255, 255, 255, 0.22);
 }
 
-
-/* =========================================================
-   PRODUCT IMAGE
-   ========================================================= */
-
 .product-image-wrapper {
 
     width: 100%;
@@ -539,13 +499,6 @@
 
     text-decoration: none;
 }
-
-
-/*
-   Important:
-   max-width / max-height prevent the image
-   from looking too zoomed.
-*/
 
 .product-image {
 
@@ -591,11 +544,6 @@
 
     font-size: 12px;
 }
-
-
-/* =========================================================
-   WISHLIST
-   ========================================================= */
 
 .wishlist-form {
 
@@ -665,16 +613,11 @@
 
 .wishlist-btn.is-wishlisted,
 .wishlist-btn.is-wishlisted:hover {
-    color: #a855f7 !important;
+    color: #587795 !important;
     background: rgba(45, 27, 61, 0.82);
     border-color: rgba(168, 85, 247, 0.75);
     box-shadow: 0 0 14px rgba(168, 85, 247, 0.42);
 }
-
-
-/* =========================================================
-   PRODUCT BODY
-   ========================================================= */
 
 .product-card-body {
 
@@ -771,11 +714,6 @@
     overflow: hidden;
 }
 
-
-/* =========================================================
-   PRICE
-   ========================================================= */
-
 .product-price {
 
     margin-top: auto;
@@ -806,11 +744,6 @@
         rgba(255, 255, 255, 0.42);
 }
 
-
-/* =========================================================
-   CARD FOOTER
-   ========================================================= */
-
 .product-card-footer {
 
     padding:
@@ -819,11 +752,6 @@
     background:
         rgba(45, 27, 61, 0.12);
 }
-
-
-/* =========================================================
-   STOCK
-   ========================================================= */
 
 .stock-row {
 
@@ -853,14 +781,9 @@
 .product-stock-badge {
     background-color: #ffffff !important;
     border: 1px solid rgba(91, 44, 131, 0.24);
-    color: #5b2c83 !important;
+    color: #315170 !important;
     font-weight: 700;
 }
-
-
-/* =========================================================
-   VARIANT SELECTOR
-   ========================================================= */
 
 .variant-label {
 
@@ -913,15 +836,10 @@
 
 .variant-select option {
 
-    background: #2d1b3d;
+    background: #263f58;
 
     color: #ffffff;
 }
-
-
-/* =========================================================
-   PRODUCT BUTTONS
-   ========================================================= */
 
 .product-actions {
 
@@ -952,9 +870,6 @@
     font-weight: 500;
 }
 
-
-/* View */
-
 .product-actions .btn-outline-dark {
 
     color:
@@ -976,9 +891,6 @@
     border-color:
         rgba(255, 255, 255, 0.28);
 }
-
-
-/* Add to Cart */
 
 .product-actions .btn-dark {
 
@@ -1008,11 +920,6 @@
 
     cursor: not-allowed;
 }
-
-
-/* =========================================================
-   PAGINATION
-   ========================================================= */
 
 .product-pagination {
 
@@ -1113,11 +1020,6 @@
     font-weight: 600;
 }
 
-
-/* =========================================================
-   EMPTY PRODUCTS
-   ========================================================= */
-
 .empty-products {
 
     padding:
@@ -1140,11 +1042,6 @@
 
     font-size: 14px;
 }
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
 
 @media (max-width: 991px) {
 
@@ -1349,11 +1246,6 @@
 
 <div class="container products-page">
 
-
-    <!-- =====================================================
-         PAGE HEADER
-         ===================================================== -->
-
     <div class="products-header">
 
         <h2>
@@ -1365,11 +1257,6 @@
         </p>
 
     </div>
-
-
-    <!-- =====================================================
-         SEPARATE SEARCH
-         ===================================================== -->
 
     <form
         method="GET"
@@ -1413,16 +1300,11 @@
     </form>
 
 
-    <!-- =====================================================
-         FILTER & SORT
-         ===================================================== -->
-
     <form
         method="GET"
         class="filter-card"
     >
 
-        <!-- Preserve search when applying filters -->
 
         <input
             type="hidden"
@@ -2083,11 +1965,6 @@
 
 </div>
 
-
-<!-- =========================================================
-     BASE / VARIANT SWITCHING
-     ========================================================= -->
-
 <script>
 
 document.addEventListener(
@@ -2162,17 +2039,8 @@ document.addEventListener(
                     }
 
 
-                    /* =============================================
-                       OPTION TYPE
-                       ============================================= */
-
                     const optionType =
                         selectedOption.dataset.type;
-
-
-                    /* =============================================
-                       VARIANT ID
-                       ============================================= */
 
                     if (optionType === "variant") {
 
@@ -2185,10 +2053,6 @@ document.addEventListener(
 
                     }
 
-
-                    /* =============================================
-                       PRICE
-                       ============================================= */
 
                     const price =
                         selectedOption.dataset.price;
@@ -2228,11 +2092,6 @@ document.addEventListener(
 
                     }
 
-
-                    /* =============================================
-                       IMAGE
-                       ============================================= */
-
                     const selectedImage =
                         selectedOption.dataset.image;
 
@@ -2257,11 +2116,6 @@ document.addEventListener(
                         }
 
                     } else {
-
-                        /*
-                            If selected variant has no image,
-                            use the BASE PRODUCT main image.
-                        */
 
                         const baseOption =
                             select.options[0];
@@ -2309,11 +2163,6 @@ document.addEventListener(
 
                     }
 
-
-                    /* =============================================
-                       STOCK
-                       ============================================= */
-
                     const hasStock =
                         selectedOption.dataset.stock === "1";
 
@@ -2360,17 +2209,7 @@ document.addEventListener(
 
                 }
 
-
-                /* =============================================
-                   INITIAL STATE
-                   ============================================= */
-
                 updateProductSelection();
-
-
-                /* =============================================
-                   CHANGE OPTION
-                   ============================================= */
 
                 select.addEventListener(
                     "change",
@@ -2419,8 +2258,13 @@ document.querySelectorAll(".wishlist-form").forEach((form) => {
                 button.setAttribute("aria-label", "Add product to your wishlist");
                 button.setAttribute("aria-pressed", "false");
             }
+            if (typeof showToast === "function") {
+                showToast(result.in_wishlist ? "Product added to wishlist." : "Product removed from wishlist.", "blue-success");
+            }
         } catch (error) {
-            window.alert(error.message || "Unable to update your wishlist.");
+            if (typeof showToast === "function") {
+                showToast(error.message || "Unable to update your wishlist.", "blue-glass");
+            }
         } finally {
             button.disabled = false;
         }
