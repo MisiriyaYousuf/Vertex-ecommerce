@@ -15,7 +15,7 @@
 .cart-heading {
     font-size: 32px;
     font-weight: 750;
-    color: #ffffff !important;
+    color: #ffffff ;
     margin: 0 0 28px;
     letter-spacing: -0.5px;
 }
@@ -1749,7 +1749,6 @@ document.querySelectorAll(".js-cart-quantity").forEach((form) => {
         const button = form.querySelector("button[type='submit']");
         if (button?.disabled) return;
         if (button) button.disabled = true;
-        let completed = false;
         try {
             const response = await fetch(form.action, {
                 method: "POST",
@@ -1758,8 +1757,6 @@ document.querySelectorAll(".js-cart-quantity").forEach((form) => {
             });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || "Unable to update quantity.");
-            completed = true;
-
             const row = document.querySelector(`[data-cart-id="${result.cart_item_id}"]`);
             if (result.removed) {
                 row?.remove();
@@ -1804,7 +1801,7 @@ document.querySelectorAll(".js-cart-quantity").forEach((form) => {
                 window.alert(message);
             }
         } finally {
-            if (button?.isConnected && !completed) button.disabled = false;
+            if (button?.isConnected) button.disabled = false;
         }
     });
 });
