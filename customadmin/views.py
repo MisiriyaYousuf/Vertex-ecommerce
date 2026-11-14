@@ -1038,10 +1038,6 @@ def edit_product(request):
         if index.strip()
     ]
 
-    # =========================================================
-    # GET CURRENT VARIANTS
-    # =========================================================
-
     current_variants = {
         str(variant.id): variant
         for variant in product.variants.all()
@@ -1053,18 +1049,12 @@ def edit_product(request):
 
     submitted_product_codes = set()
 
-    # =========================================================
-    # PROCESS VARIANTS
-    # =========================================================
-
     for position, index in enumerate(
         variant_indexes,
         start=1
     ):
 
-        # -----------------------------------------------------
-        # EXISTING VARIANT ID
-        # -----------------------------------------------------
+    
 
         variant_id = request.POST.get(
             f"variant_id_{index}",
@@ -1091,9 +1081,6 @@ def edit_product(request):
                     existing_variant.id
                 )
 
-        # -----------------------------------------------------
-        # FIELD VALUES
-        # -----------------------------------------------------
 
         sale_price = request.POST.get(
             f"variant_sale_price_{index}",
@@ -1125,9 +1112,6 @@ def edit_product(request):
             ""
         ).strip()
 
-        # -----------------------------------------------------
-        # ACTIVE
-        # -----------------------------------------------------
 
         active_field = (
             f"variant_is_active_{index}"
@@ -1146,9 +1130,6 @@ def edit_product(request):
             ]
         )
 
-        # -----------------------------------------------------
-        # VARIANT IMAGES
-        # -----------------------------------------------------
 
         existing_id = index[len("existing_"):] if index.startswith("existing_") else None
         variant_images = [
@@ -1166,10 +1147,6 @@ def edit_product(request):
             )
         ]
 
-        # -----------------------------------------------------
-        # VARIANT FORM DATA
-        # -----------------------------------------------------
-
         variant_data = {
             "sale_price": sale_price,
             "discount_price": discount_price,
@@ -1179,10 +1156,6 @@ def edit_product(request):
             "quantity": quantity,
             "is_active": is_active,
         }
-
-        # -----------------------------------------------------
-        # FORM
-        # -----------------------------------------------------
 
         if existing_variant:
 
@@ -1198,10 +1171,6 @@ def edit_product(request):
             )
 
         variant_valid = variant_form.is_valid()
-
-        # -----------------------------------------------------
-        # VARIANT FORM ERRORS
-        # -----------------------------------------------------
 
         if not variant_valid:
 
@@ -1233,9 +1202,6 @@ def edit_product(request):
                         f"{field_label} - {error}"
                     )
 
-        # -----------------------------------------------------
-        # DUPLICATE PRODUCT CODE IN CURRENT SUBMISSION
-        # -----------------------------------------------------
 
         if product_code:
 
@@ -1254,10 +1220,6 @@ def edit_product(request):
                 submitted_product_codes.add(
                     normalized_code
                 )
-
-        # -----------------------------------------------------
-        # VARIANT IMAGE TYPES
-        # -----------------------------------------------------
 
         if existing_variant:
 
@@ -1281,9 +1243,6 @@ def edit_product(request):
                 f"Variant {position} must include Front, Main, Side and Back images."
             )
 
-        # -----------------------------------------------------
-        # IMAGE VALIDATION
-        # -----------------------------------------------------
 
         for image_data in variant_images:
             image = image_data["image"]
@@ -1302,10 +1261,7 @@ def edit_product(request):
                     f"{image.name} must be JPG, PNG or WEBP."
                 )
 
-        # -----------------------------------------------------
-        # STORE
-        # -----------------------------------------------------
-
+    
         validated_variants.append(
             {
                 "index": index,
@@ -1317,9 +1273,6 @@ def edit_product(request):
             }
         )
 
-    # =========================================================
-    # CHECK PRODUCT FORM ERRORS
-    # =========================================================
 
     if not product_valid:
 
@@ -1344,9 +1297,7 @@ def edit_product(request):
                         f"Product {field_label}: {error}"
                     )
 
-    # =========================================================
-    # CROSS-CHECK VARIANT PRODUCT CODES
-    # =========================================================
+    
 
     for item in validated_variants:
 
@@ -1365,9 +1316,7 @@ def edit_product(request):
 
         code = code.strip().upper()
 
-        # -----------------------------------------------------
-        # OTHER VARIANTS
-        # -----------------------------------------------------
+       
 
         existing_variants_query = (
             ProductVariant.objects
@@ -1393,13 +1342,8 @@ def edit_product(request):
                 "by another variant."
             )
 
-    # =========================================================
-    # VALIDATION FAILED
-    # =========================================================
-
     if custom_errors:
 
-        # Remove duplicate error messages
         unique_errors = list(
             dict.fromkeys(
                 custom_errors
@@ -1427,10 +1371,6 @@ def edit_product(request):
 
             product = form.save()
 
-            # =================================================
-            # PRODUCT IMAGES
-            # =================================================
-
             for image_data in new_product_images:
                 image_type = image_data["image_type"]
                 ProductImage.objects.update_or_create(
@@ -1439,9 +1379,6 @@ def edit_product(request):
                     defaults={"image": image_data["image"], "position": image_type_names.index(image_type)},
                 )
 
-            # =================================================
-            # SAVE VARIANTS
-            # =================================================
 
             saved_variant_ids = []
 
@@ -1452,10 +1389,6 @@ def edit_product(request):
                 existing_variant = (
                     item["existing_variant"]
                 )
-
-                # =============================================
-                # UPDATE EXISTING
-                # =============================================
 
                 if existing_variant:
 
@@ -1505,9 +1438,6 @@ def edit_product(request):
 
                     variant.save()
 
-                # =============================================
-                # CREATE NEW
-                # =============================================
 
                 else:
 
@@ -1556,10 +1486,6 @@ def edit_product(request):
                     variant.id
                 )
 
-                # =============================================
-                # VARIANT IMAGES
-                # =============================================
-
                 for image_data in item["images"]:
                     image_type = image_data["image_type"]
                     ProductVariantImage.objects.update_or_create(
@@ -1568,17 +1494,10 @@ def edit_product(request):
                         defaults={"image": image_data["image"], "position": variant_image_type_names.index(image_type)},
                     )
 
-            # =================================================
-            # DELETE REMOVED VARIANTS
-            # =================================================
-
             product.variants.exclude(
                 id__in=saved_variant_ids
             ).delete()
 
-        # =====================================================
-        # SUCCESS
-        # =====================================================
 
         messages.success(
             request,
@@ -1589,9 +1508,6 @@ def edit_product(request):
             "customadmin:list_product"
         )
 
-    # =========================================================
-    # DATABASE / UNEXPECTED ERROR
-    # =========================================================
 
     except Exception as error:
 
@@ -2155,9 +2071,6 @@ def admin_order_detail(request):
 
                     item.display_image = None
 
-        # ---------------------------------------------
-        # BASE PRODUCT ORDER ITEM
-        # ---------------------------------------------
 
         else:
 
@@ -2299,7 +2212,6 @@ def update_order_status(request):
             "customadmin:admin_order_detail"
         )
 
-    # Do not allow changes after final states
     if old_status in ["Cancelled", "Returned"]:
         messages.error(
             request,
@@ -2318,9 +2230,6 @@ def update_order_status(request):
             "customadmin:order_management"
         )
 
-    # -------------------------------------------------
-    # CANCEL ITEM
-    # -------------------------------------------------
 
     if new_status == "Cancelled":
 
@@ -2348,9 +2257,6 @@ def update_order_status(request):
                 f"Cancellation refund for order #{order.pk}",
             )
 
-    # -------------------------------------------------
-    # RETURN ITEM
-    # -------------------------------------------------
 
     elif new_status == "Returned":
 
@@ -2383,10 +2289,6 @@ def update_order_status(request):
             ]
         )
 
-    # -------------------------------------------------
-    # NORMAL STATUS CHANGE
-    # -------------------------------------------------
-
     else:
 
         item.status = new_status
@@ -2395,9 +2297,6 @@ def update_order_status(request):
             update_fields=["status"]
         )
 
-    # -------------------------------------------------
-    # CALCULATE OVERALL ORDER STATUS
-    # -------------------------------------------------
 
     update_status(order)
     mark_fully_refunded(order)
@@ -2422,30 +2321,14 @@ def inventory_management(request):
     search = request.GET.get("search", "").strip()
     stock_filter = request.GET.get("stock", "").strip()
     selected_sort = request.GET.get("sort", "name").strip()
-
-
-    # ==========================================================
-    # BASE PRODUCTS
-    # ==========================================================
-
     inventory_products = Product.objects.filter(
         is_deleted=False,
         is_active=True,
     )
 
-
-    # ==========================================================
-    # BASE PRODUCT STOCK
-    # ==========================================================
-
     base_stock_total = 0
     base_low_stock = 0
     base_out_of_stock = 0
-
-
-    # ==========================================================
-    # VARIANT STOCK
-    # ==========================================================
 
     inventory_variants = ProductVariant.objects.filter(
         product__is_deleted=False,
@@ -2472,10 +2355,7 @@ def inventory_management(request):
     ).count()
 
 
-    # ==========================================================
-    # SUMMARY
-    # ==========================================================
-
+    
     total_products = inventory_products.count()
 
     available_stock = (
@@ -2493,11 +2373,6 @@ def inventory_management(request):
         variant_out_of_stock
     )
 
-
-    # ==========================================================
-    # PRODUCT QUERY
-    # ==========================================================
-
     products = (
         Product.objects
         .filter(
@@ -2509,10 +2384,6 @@ def inventory_management(request):
         )
     )
 
-
-    # ==========================================================
-    # SEARCH CONDITIONS
-    # ==========================================================
 
     base_search = Q()
 
@@ -2530,9 +2401,6 @@ def inventory_management(request):
             | Q(variants__color__icontains=search)
             | Q(variants__size__icontains=search)
         )
-
-
-  
 
     base_stock_condition = Q(pk__in=[])
 
@@ -2572,19 +2440,13 @@ def inventory_management(request):
         )
 
 
-    # ==========================================================
-    # DETERMINE WHICH INVENTORY ROWS SHOULD BE DISPLAYED
-    # ==========================================================
-
     has_filter = bool(search or stock_filter)
 
 
     if has_filter:
 
-        # Base product must match BOTH search and stock filter
         base_match = base_search & base_stock_condition
 
-        # Variant must match BOTH search and stock filter
         variant_match = variant_search & Q(
             variants__is_active=True
         )
@@ -2994,8 +2856,6 @@ def delete_coupon(request):
     try:
         coupon.delete()
     except ProtectedError:
-        # Referral rewards retain a protected reference to their issued coupon.
-        # Deactivate it rather than removing the reward's audit/history record.
         coupon.is_active = False
         coupon.save(update_fields=["is_active", "updated_at"])
         messages.warning(
@@ -3033,7 +2893,6 @@ def wallet_management(request):
             | Q(wallet__user__email__icontains=search_query)
         )
 
-        # Also allow searching by transaction ID.
         if search_query.isdigit():
             search_filter |= Q(id=int(search_query))
 
@@ -3101,7 +2960,6 @@ def wallet_transaction_detail(request, transaction_id):
         "user_id": user.pk,
     }
 
-    # Show the order button only for cancellation and return refunds.
     show_order_button = (
         transaction_type in (
             WalletTransaction.CANCEL_REFUND,
